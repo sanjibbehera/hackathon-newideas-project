@@ -46,21 +46,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
         
-        const avatar = document.createElement('img');
-        avatar.className = 'avatar';
-        avatar.src = type === 'bot' ? '/static/images/bot.png' : '/static/images/user.png';
-        avatar.alt = `${type} avatar`;
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        
-        const textDiv = document.createElement('div');
-        textDiv.className = 'message-text';
-        textDiv.textContent = content;
-        
-        contentDiv.appendChild(textDiv);
-        messageDiv.appendChild(avatar);
-        messageDiv.appendChild(contentDiv);
+        if (type === 'bot') {
+            const avatar = document.createElement('img');
+            avatar.className = 'avatar';
+            avatar.src = '/static/images/bot.png';
+            avatar.alt = 'Bot avatar';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-text';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+        } else {
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-text';
+            contentDiv.textContent = content;
+            
+            const avatar = document.createElement('img');
+            avatar.className = 'avatar';
+            avatar.src = '/static/images/user.png';
+            avatar.alt = 'User avatar';
+            
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(avatar);
+        }
         
         messageContainer.appendChild(messageDiv);
         messageContainer.scrollTop = messageContainer.scrollHeight;

@@ -1,5 +1,29 @@
+import ollama
+from typing import Optional
 from models.models import ChatMessage, MessageType
 from datetime import datetime
+
+def is_iam_related(question: str) -> bool:
+    """Check if question is IAM-related"""
+    iam_keywords = {
+        'iam', 'policy', 'role', 'permission', 
+        'aws security', 'principal', 'resource',
+        'action', 'effect', 'trust policy', 'security'
+    }
+    return any(keyword in question.lower() for keyword in iam_keywords)
+
+def get_llm_response(question: str) -> Optional[str]:
+    if not is_iam_related(question):
+        return ("I'm sorry, I can only assist with AWS IAM questions. "
+                "Would you like help with IAM?")
+    
+    response = ollama.chat(
+        model='iam-expert',
+        messages=[{'role': 'user', 'content': question}]
+    )
+    return response['message']['content']
+
+
 
 def process_message(user_message: str) -> str:
     """
@@ -25,3 +49,4 @@ def process_message(user_message: str) -> str:
     
     else:
         return "I'm here to help with AWS IAM. You can ask me about roles, policies, permissions, or upload documents for analysis. Could you clarify your question?"
+        # return get_llm_response(user_message) or "I couldn't process your request. Please try again."

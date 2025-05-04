@@ -15,14 +15,20 @@
         </div>
         
         <div class="chat-messages" id="messageContainer">
-            <div class="message bot-message">
-                <div class="message-text">Hi! How can I help you?</div>
-            </div>
-            <div class="message bot-message">
-                <div class="message-text">I'm your AWS IAM assistant. I can help you with IAM policies, roles, and permissions.</div>
-            </div>
-            <div class="message bot-message">
-                <div class="message-text">Please write your message and press the Send button...</div>
+            <!-- Grouped initial messages -->
+            <div class="initial-message-group">
+                <img src="/static/images/bot.png" class="avatar" alt="Bot Avatar">
+                <div class="message-group-content">
+                    <div class="message bot-message">
+                        <div class="message-text">Hi there ! How can I help you?</div>
+                    </div>
+                    <div class="message bot-message">
+                        <div class="message-text">I'm your AWS IAM assistant. I can help you with IAM policies, roles, and permissions.</div>
+                    </div>
+                    <div class="message bot-message">
+                        <div class="message-text">Please post your AWS IAM querries and press the Send button...</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -41,7 +47,7 @@
                 <input type="file" id="fileUpload" accept=".doc,.docx,.pdf,.png,.jpg,.jpeg,.txt">
             </div>
             <div class="file-types">
-                <small>DOC, DOCX, PDF, PNG, JPG, TXT</small>
+                <small>Filetypes allowed: DOC, DOCX, PDF, PNG, JPG, TXT (Max 5MB)</small>
             </div>
         </div>
     </div>
