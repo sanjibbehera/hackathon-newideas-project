@@ -46,14 +46,17 @@ body {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    align-self: flex-end;
-    margin-bottom: 10px;
+    /* align-self: flex-end;
+    margin-bottom: 10px; */
+    margin-right: 15px; /* Increased space between avatar and text */
+    flex-shrink: 0; /* Prevent avatar from shrinking */
 }
 
 .message {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     max-width: 85%;
+    align-items: flex-start; /* Align items to the top */
 }
 
 .bot-message {
@@ -67,16 +70,17 @@ body {
 
 .user-message .avatar {
     margin-right: 0;
-    margin-left: 10px;
+    margin-left: 15px;
 }
 
 .message-content {
     background-color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid #e9ecef;
-    max-width: calc(100% - 60px);
+    max-width: calc(100% - 70px);
+    word-wrap: break-word;
 }
 
 /* File upload section adjustments */
@@ -141,9 +145,13 @@ body {
 
 /* Initial message group styling */
 .initial-message-group {
-    display: flex;
-    margin-bottom: 20px;
-    max-width: 85%;
+    /* display: flex; */
+    margin-bottom: 25px;
+    /* max-width: 85%; */
+}
+
+.initial-message-group .avatar {
+    margin-top: 5px; /* Better alignment with first message */
 }
 
 .message-group-content {
