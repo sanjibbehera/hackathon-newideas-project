@@ -43,36 +43,56 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addMessage(content, type) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}-message`;
-        
+
+        // Create the complete message group structure
+        const messageGroup = document.createElement('div');
+        messageGroup.className = `message-group ${type}-message-group dynamic-message`;
+
+        // Create messages container (same as initial messages)
+        const messagesContainer = document.createElement('div');
+        messagesContainer.className = 'messages-container';
+
+        // Create message bubble with proper structure
+        const messageBubble = document.createElement('div');
+        messageBubble.className = `message ${type}-message`;
+
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+
+        const messageText = document.createElement('div');
+        messageText.className = 'message-text';
+        messageText.textContent = content;
+
+        // Add avatar
+        const avatar = document.createElement('img');
+        avatar.className = 'avatar';
+        avatar.src = type === 'bot' ? '/static/images/bot.png' : '/static/images/user.png';
+        avatar.alt = `${type} avatar`;
+
+        // Assemble message - DIFFERENT ORDER FOR USER/BOT
+        messageContent.appendChild(messageText);
+        messageBubble.appendChild(messageContent);
+
         if (type === 'bot') {
-            const avatar = document.createElement('img');
-            avatar.className = 'avatar';
-            avatar.src = '/static/images/bot.png';
-            avatar.alt = 'Bot avatar';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-text';
-            contentDiv.textContent = content;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
+            messageGroup.appendChild(avatar);  // Avatar first for bot
+            messageGroup.appendChild(messagesContainer);
         } else {
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-text';
-            contentDiv.textContent = content;
-            
-            const avatar = document.createElement('img');
-            avatar.className = 'avatar';
-            avatar.src = '/static/images/user.png';
-            avatar.alt = 'User avatar';
-            
-            messageDiv.appendChild(contentDiv);
-            messageDiv.appendChild(avatar);
+            messageGroup.appendChild(messagesContainer);  // Text first for user
+            messageGroup.appendChild(avatar);
         }
+
+        messagesContainer.appendChild(messageBubble);
+
+        // Add timestamp
+        const timestamp = document.createElement('div');
+        timestamp.className = 'message-time';
+        timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        messagesContainer.appendChild(timestamp);
         
-        messageContainer.appendChild(messageDiv);
+        // Final assembly
+        messageContainer.appendChild(messageGroup);
+
+        // Scroll to bottom
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 });

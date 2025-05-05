@@ -40,31 +40,122 @@ body {
     background-color: #f8f9fa;
 }
 
+/* Base Message Styles */
+.message-group {
+    display: flex;
+    margin-bottom: 15px;
+    max-width: 85%;
+    position: relative;
+}
+
+/* Ensure consistent avatar positioning */
+.message-group .avatar {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
 /* Avatar styling */
 .avatar {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    /* align-self: flex-end;
-    margin-bottom: 10px; */
+    /* object-fit: cover; */
     margin-right: 15px; /* Increased space between avatar and text */
+    margin-top: 3px; /* Matches initial messages */
     flex-shrink: 0; /* Prevent avatar from shrinking */
 }
 
+/* Ensure dynamic messages get bubble styling */
+.message-group.dynamic-message .message-content {
+    background-color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    word-wrap: break-word;
+}
+
+/* Bubble styling for dynamic messages */
+.dynamic-message .message-content {
+    background-color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    word-wrap: break-word;
+}
+
+/* Bot message bubble */
+.message-group.dynamic-message.bot-message-group .message-content {
+    background-color: #f8f9fa;
+    border-top-left-radius: 4px;
+}
+
+/* Bot message bubble */
+.dynamic-message.bot-message-group .message-content {
+    background-color: #f8f9fa;
+    border-top-left-radius: 4px;
+}
+
+/* User message bubble */
+.dynamic-message.user-message-group .message-content {
+    background-color: #007bff;
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+/* User message bubble */
+.message-group.dynamic-message.user-message-group .message-content {
+    background-color: #007bff;
+    color: white;
+    border-top-right-radius: 4px;
+}
+
 .message {
+    /* display: flex; */
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Message Containers */
+.messages-container {
     display: flex;
-    margin-bottom: 20px;
-    max-width: 85%;
-    align-items: flex-start; /* Align items to the top */
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+/* Bot Specific Styles */
+.bot-message-group {
+    align-self: flex-start;
 }
 
 .bot-message {
     align-self: flex-start;
 }
 
-.user-message {
+.bot-message .message-content {
+    background-color: #f8f9fa;
+    border-top-left-radius: 4px;
+}
+
+/* User Specific Styles */
+.user-message-group {
     align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.user-message-group .avatar {
+    margin-left: 15px;
+    margin-right: 0;
+}
+
+.user-message-group .messages-container {
+    order: 1; /* Ensures text appears first */
+}
+
+.user-message {
     flex-direction: row-reverse;
 }
 
@@ -73,14 +164,47 @@ body {
     margin-left: 15px;
 }
 
+.user-message .message-content {
+    background-color: #007bff;
+    color: white;
+    margin-left: 0;
+    margin-right: 10px;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 12px;
+}
+
 .message-content {
     background-color: white;
     padding: 12px 16px;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid #e9ecef;
-    max-width: calc(100% - 70px);
     word-wrap: break-word;
+    position: relative;
+}
+
+/* Timestamp styling */
+.message-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 4px;
+    text-align: right;
+}
+
+/* Animation */
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dynamic-message {
+    animation: messageAppear 0.3s ease-out;
 }
 
 /* File upload section adjustments */
@@ -141,17 +265,6 @@ body {
     text-align: right;
     font-size: 0.8rem;
     color: #6c757d;
-}
-
-/* Initial message group styling */
-.initial-message-group {
-    /* display: flex; */
-    margin-bottom: 25px;
-    /* max-width: 85%; */
-}
-
-.initial-message-group .avatar {
-    margin-top: 5px; /* Better alignment with first message */
 }
 
 .message-group-content {

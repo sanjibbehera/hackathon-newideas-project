@@ -27,7 +27,10 @@ async def read_root(request: Request):
 async def chat_endpoint(request: Request, message: str):
     # Process user message and get bot response
     bot_response = process_message(message)
-    return {"response": bot_response}
+    return {
+        "response": bot_response,
+        "timestamp": datetime.now().isoformat()
+    }
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
