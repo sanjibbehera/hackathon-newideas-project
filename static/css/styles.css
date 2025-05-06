@@ -43,9 +43,10 @@ body {
 /* Base Message Styles */
 .message-group {
     display: flex;
-    margin-bottom: 15px;
-    max-width: 85%;
-    position: relative;
+    width: 100%;
+    align-items: flex-start;
+    margin: 15px 0;
+    flex-wrap: wrap;
 }
 
 /* Ensure consistent avatar positioning */
@@ -58,10 +59,8 @@ body {
 .avatar {
     width: 40px;
     height: 40px;
-    /* object-fit: cover; */
-    margin-right: 15px; /* Increased space between avatar and text */
-    margin-top: 3px; /* Matches initial messages */
-    flex-shrink: 0; /* Prevent avatar from shrinking */
+    margin: 0 10px;
+    border-radius: 50%;
 }
 
 /* Ensure dynamic messages get bubble styling */
@@ -111,24 +110,35 @@ body {
 }
 
 .message {
-    /* display: flex; */
-    margin-bottom: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    background-color: #f1f1f1;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    word-wrap: break-word;
 }
 
 /* Message Containers */
 .messages-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex-grow: 1;
+    max-width: 70%;
 }
 
 /* Bot Specific Styles */
 .bot-message-group {
-    align-self: flex-start;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.bot-message-group .avatar {
+    order: 1;
+    margin-right: 10px;
+    margin-left: 0;
+}
+
+.bot-message-group .messages-container {
+    order: 2;
+    align-items: flex-start;
 }
 
 .bot-message {
@@ -136,23 +146,26 @@ body {
 }
 
 .bot-message .message-content {
-    background-color: #f8f9fa;
-    border-top-left-radius: 4px;
+    /* background-color: #f8f9fa;
+    border-top-left-radius: 4px; */
+    background-color: #e1f5fe;
 }
 
 /* User Specific Styles */
 .user-message-group {
-    align-self: flex-end;
-    flex-direction: row-reverse;
+    flex-direction: row;
+    justify-content: flex-end;
 }
 
 .user-message-group .avatar {
-    margin-left: 15px;
+    order: 2; /* Move avatar to end (right side) */
+    margin-left: 10px;
     margin-right: 0;
 }
 
 .user-message-group .messages-container {
-    order: 1; /* Ensures text appears first */
+    order: 1; /* Move message content before avatar */
+    align-items: flex-end;
 }
 
 .user-message {
@@ -165,30 +178,25 @@ body {
 }
 
 .user-message .message-content {
-    background-color: #007bff;
-    color: white;
-    margin-left: 0;
-    margin-right: 10px;
+    background-color: #d1ffd6;
+    text-align: left; /* Keep text left-aligned in bubble */
+    margin-right: 10px; /* Space between bubble and avatar */
     border-top-right-radius: 4px;
-    border-top-left-radius: 12px;
+    border-bottom-right-radius: 15px;
+    border-top-left-radius: 15px;
 }
 
 .message-content {
-    background-color: white;
-    padding: 12px 16px;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e9ecef;
-    word-wrap: break-word;
-    position: relative;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 /* Timestamp styling */
 .message-time {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-top: 4px;
-    text-align: right;
+    font-size: 12px;
+    color: #777;
+    margin-top: 2px;
+    align-self: flex-end;
 }
 
 /* Animation */
@@ -232,8 +240,10 @@ body {
 }
 
 .message-text {
+    /* line-height: 1.4;
+    color: #333; */
+    font-size: 14px;
     line-height: 1.4;
-    color: #333;
 }
 
 .chat-input {
