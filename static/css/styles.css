@@ -146,8 +146,6 @@ body {
 }
 
 .bot-message .message-content {
-    /* background-color: #f8f9fa;
-    border-top-left-radius: 4px; */
     background-color: #e1f5fe;
 }
 
@@ -193,9 +191,10 @@ body {
 
 /* Timestamp styling */
 .message-time {
-    font-size: 12px;
     color: #777;
     margin-top: 2px;
+    font-size: 12px !important; /* Force readable size */
+    font-family: monospace; /* For consistent width */
     align-self: flex-end;
 }
 

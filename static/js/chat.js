@@ -83,10 +83,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         messagesContainer.appendChild(messageBubble);
 
+
         // Add timestamp
         const timestamp = document.createElement('div');
         timestamp.className = 'message-time';
-        timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // Create custom formatted date string
+        const now = new Date();
+        const day = now.getDate();
+        const month = now.toLocaleString('default', { month: 'short' });
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        timestamp.textContent = `${day} ${month} ${year} ${hours}:${minutes}`;
         messagesContainer.appendChild(timestamp);
         
         // Final assembly
