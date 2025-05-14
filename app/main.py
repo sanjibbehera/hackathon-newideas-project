@@ -20,8 +20,8 @@ templates = Jinja2Templates(directory="templates")
 ALLOWED_EXTENSIONS = {'.doc', '.docx', '.pdf', '.png', '.jpg', '.jpeg', '.txt'}
 
 @app.get("/health")
-async def health_check():
-    return {"status": "ok", "message": "Chatbot is ready"}
+def health_check():
+    return {"status": "healthy", "message": "Chatbot is ready"}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
