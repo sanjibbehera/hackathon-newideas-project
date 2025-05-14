@@ -1,0 +1,39 @@
+name: FastAPI CI/CD (Python 3.12)
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest httpx uvicorn  # Explicitly include uvicorn
+
+    - name: Run tests (optional)
+      run: |
+        pytest tests/  # Replace with your test directory
+
+    - name: Start FastAPI server
+      run: |
+        uvicorn main:app --host 0.0.0.0 --port 8000 &  # Run in background
+        sleep 10  # Increased wait time for reliability
+
+    - name: Verify server reachability
+      run: |
+        # Check if port 8000 is responsive
+        curl -sSf http://localhost:8000/docs > /dev/null || (echo "Server failed to start!" && exit 1)
+        echo "✅ FastAPI server is running on port 8000!"
