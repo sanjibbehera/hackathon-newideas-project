@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))  # Add project root to path
+
 import pytest
 from httpx import AsyncClient
 from app.main import app
