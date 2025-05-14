@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from main import app  # Replace `main` with your app's module name
+from app.main import app
 
 @pytest.mark.asyncio
 async def test_health_check():
@@ -13,8 +13,8 @@ async def test_health_check():
 async def test_chatbot_response():
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.post(
-            "/chat",  # Replace with your chatbot endpoint
+            "/chat",  # Replace with your actual endpoint
             json={"message": "Hello"}
         )
     assert response.status_code == 200
-    assert "response" in response.json()  # Validate chatbot reply structure
+    assert "response" in response.json()

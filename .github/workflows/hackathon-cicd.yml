@@ -21,19 +21,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest httpx uvicorn  # Explicitly include uvicorn
+        pip install pytest httpx pytest-asyncio
 
-    - name: Run tests (optional)
+    - name: Run tests
       run: |
-        pytest tests/  # Replace with your test directory
+        pytest tests/  -v
 
-    - name: Start FastAPI server
+    - name: Start server and verify reachability
       run: |
-        uvicorn main:app --host 0.0.0.0 --port 8000 &  # Run in background
-        sleep 10  # Increased wait time for reliability
-
-    - name: Verify server reachability
-      run: |
-        # Check if port 8000 is responsive
-        curl -sSf http://localhost:8000/docs > /dev/null || (echo "Server failed to start!" && exit 1)
-        echo "✅ FastAPI server is running on port 8000!"
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &  # Updated path
+        sleep 10
+        curl -sSf http://localhost:8000/health || exit 1
