@@ -6,19 +6,23 @@ import pytest
 from httpx import AsyncClient
 from app.main import app
 
+# Async test client fixture
+@pytest.fixture
+async def async_client():
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client
+
 @pytest.mark.asyncio
-async def test_health_check():
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        response = await ac.get("/health")
+async def test_health_check(async_client):
+    response = await async_client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "message": "Chatbot is ready"}
 
 @pytest.mark.asyncio
-async def test_chatbot_response():
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        response = await ac.post(
-            "/chat",  # Replace with your actual endpoint
-            json={"message": "Hello"}
-        )
+async def test_chatbot_response(async_client):
+    response = await async_client.post(
+        "/chat",
+        json={"message": "Hello"}
+    )
     assert response.status_code == 200
     assert "response" in response.json()
