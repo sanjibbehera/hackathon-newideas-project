@@ -75,6 +75,11 @@ hackathon-newideas-project/
 └── scripts/                    # Utility scripts
 ```
 
+## 📸 Screenshots
+
+### Chatbot Frontend
+![Chatbot Interface](./images/chatbot_frontend_screenshot.png)
+
 ## Contributing
 1. Fork the repository
 2. Create a new branch (git checkout -b feature/your-feature)
