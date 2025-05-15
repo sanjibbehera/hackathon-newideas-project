@@ -253,6 +253,23 @@ body {
 
 .input-group {
     margin-bottom: 10px;
+    gap: 8px; /* Adds space between input and button */
+}
+
+#userInput {
+    flex: 1; /* Ensures input takes available space */
+}
+
+#sendButton {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    white-space: nowrap; /* Prevents button text wrapping */
+}
+
+#sendButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
 }
 
 .file-upload-container {
