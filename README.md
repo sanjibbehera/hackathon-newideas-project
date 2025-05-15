@@ -69,10 +69,19 @@ hackathon-newideas-project/
 │   ├── policies/               # Policy examples
 │   └── common_questions.json   # Common questions
 ├── ollama/                     # Ollama configuration
-│   └── Modelfile               # Model definition
+│   ├── Modelfile               # Model definition
+│   └── setup_ollama.sh         # Ollama setup
 ├── static/                     # Frontend assets
+│   ├── css/                    # CSS Files
+│   ├── images/                 # Images Files
+│   └── js                      # Javascript Files
 ├── templates/                  # HTML templates
-└── scripts/                    # Utility scripts
+├── scripts/                    # Utility scripts
+│   └── train_model.sh          # Model training
+├── tests/                      # Tests (Pytest)
+├── requirements.txt            # Python dependencies
+├── pytest.ini                  # Pytest config
+└── README.md                   # Project docs
 ```
 
 ## 📸 Screenshots
