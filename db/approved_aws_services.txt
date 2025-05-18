@@ -1,0 +1,30 @@
+Amazon EC2;EC2;ec2
+AWS Lambda;Lambda;lambda
+Amazon S3;S3;s3
+Amazon EBS;EBS;
+Amazon FSx;FSx;fsx
+Amazon RDS;RDS;rds
+Amazon DynamoDB;DynamoDB;dynamodb
+Amazon Aurora;Aurora
+Amazon Redshift;Redshift
+Amazon VPC;VPC;vpc
+Amazon Route 53;Route53;route53
+Elastic Load Balancing;ELB;elasticloadbalancing
+Amazon Athena;Athena;athena
+Amazon Redshift;Redshift;redshift
+Amazon SQS;SQS;sqs
+Amazon SNS;SNS;sns
+AWS Step Functions;Step Functions;stepfunctions
+Amazon EventBridge;EventBridge;eventbridge
+Amazon SageMaker;Sagemaker;sagemaker
+AWS IAM;IAM;iam
+AWS Key Management Service (KMS);KMS;kms
+AWS CloudTrail;CloudTrail;cloudtrail
+AWS CloudFormation;CloudFormation;cloudformation
+AWS CloudWatch;CloudWatch;cloudwatch
+Amazon SES;SES;ses
+AWS Backup;Backup;backup
+Amazon MQ;MQ;mq
+Amazon Elastic Kubernetes Service (EKS);EKS;eks
+Amazon Elastic Container Registry (ECR);ECR;ecr
+Amazon Elastic Container Service (ECS);ECS;ecs
