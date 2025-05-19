@@ -1,7 +1,7 @@
 Amazon EC2;EC2;ec2
 AWS Lambda;Lambda;lambda
 Amazon S3;S3;s3
-Amazon EBS;EBS;
+Amazon EBS;EBS;ebs
 Amazon FSx;FSx;fsx
 Amazon RDS;RDS;rds
 Amazon DynamoDB;DynamoDB;dynamodb

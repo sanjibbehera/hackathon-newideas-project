@@ -1,0 +1,599 @@
+{
+  "EKSIAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/eks-admin is not authorized to perform: eks:CreateCluster on resource: arn:aws:eks:us-west-2:123456789012:cluster/my-cluster",
+      "remediation_steps": [
+        "1. Attach the `AmazonEKSClusterPolicy` managed policy to the IAM user/role",
+        "2. For custom policies, ensure these permissions exist:",
+        "   - `eks:CreateCluster`",
+        "   - `eks:DescribeCluster`",
+        "   - `iam:CreateServiceLinkedRole`",
+        "3. Check for deny rules in Service Control Policies (SCPs)",
+        "4. Verify AWS region is enabled for EKS"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterException",
+      "error_message": "Role arn:aws:iam::123456789012:role/eks-cluster-role is invalid: The trust relationship defined for the role does not allow the principal eks.amazonaws.com to assume it.",
+      "remediation_steps": [
+        "1. Update the role trust relationship to include:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Principal\": { \"Service\": \"eks.amazonaws.com\" },",
+        "       \"Action\": \"sts:AssumeRole\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Verify the IAM user has `iam:PassRole` permission",
+        "3. Check for typos in the role ARN",
+        "4. Recreate the role if necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ResourceInUseException",
+      "error_message": "Cluster my-cluster already exists in active state",
+      "remediation_steps": [
+        "1. List existing clusters: `aws eks list-clusters`",
+        "2. Delete the cluster if no longer needed: `aws eks delete-cluster --name my-cluster`",
+        "3. Wait for complete deletion (check with `aws eks describe-cluster --name my-cluster`)",
+        "4. Choose a different cluster name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/delete-cluster.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedAvailabilityZoneException",
+      "error_message": "The requested availability zone is not supported in this region",
+      "remediation_steps": [
+        "1. List available AZs: `aws ec2 describe-availability-zones --region us-west-2`",
+        "2. Update EKS cluster config with valid AZs",
+        "3. Check EKS regional service availability",
+        "4. Consider using auto-selected subnets"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceLimitExceeded",
+      "error_message": "The following resource limits were exceeded: Maximum number of clusters per account (100)",
+      "remediation_steps": [
+        "1. Delete unused clusters: `aws eks delete-cluster --name old-cluster`",
+        "2. Request limit increase via AWS Support",
+        "3. Use AWS Organizations for multi-account strategy",
+        "4. Consider cluster consolidation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/service-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterUnreachable",
+      "error_message": "Cluster my-cluster is unreachable: Check your network configuration and ensure the control plane security group allows connections",
+      "remediation_steps": [
+        "1. Verify VPC peering connections (if applicable)",
+        "2. Check security group rules for the EKS control plane",
+        "3. Ensure worker nodes can communicate with the API endpoint",
+        "4. Review VPC flow logs for blocked traffic"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#troubleshoot-unreachable",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "NodeCreationFailure",
+      "error_message": "Unable to create worker nodes: The provided role does not have sufficient EC2 permissions",
+      "remediation_steps": [
+        "1. Attach the `AmazonEKSWorkerNodePolicy` to node role",
+        "2. Add these required permissions:",
+        "   - `ec2:DescribeInstances`",
+        "   - `ec2:DescribeTags`",
+        "   - `ec2:CreateLaunchTemplate`",
+        "3. Verify role trust relationship allows EC2 to assume it",
+        "4. Check SCPs for explicit denies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/worker_node_IAM_role.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PodSecurityPolicyForbidden",
+      "error_message": "User \"system:serviceaccount:default:my-sa\" cannot create pods in the namespace \"default\"",
+      "remediation_steps": [
+        "1. Create appropriate RBAC role binding:",
+        "   ```yaml",
+        "   apiVersion: rbac.authorization.k8s.io/v1",
+        "   kind: RoleBinding",
+        "   metadata: { name: my-sa-psp }",
+        "   subjects: [{ kind: ServiceAccount, name: my-sa }]",
+        "   roleRef: { kind: ClusterRole, name: eks:podsecuritypolicy:privileged, apiGroup: rbac.authorization.k8s.io }",
+        "   ```",
+        "2. Update the PodSecurityPolicy admission controller",
+        "3. Check IAM mappings in aws-auth ConfigMap",
+        "4. Verify service account annotations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/pod-security-policy.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRequestException",
+      "error_message": "The provided subnet configuration is invalid: Subnets must be in at least two different AZs",
+      "remediation_steps": [
+        "1. Verify subnet AZ distribution: `aws ec2 describe-subnets --subnet-ids subnet-123456`",
+        "2. Select subnets from different AZs",
+        "3. Ensure subnets have proper tags:",
+        "   - `kubernetes.io/cluster/my-cluster: shared`",
+        "4. Check VPC CIDR block conflicts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "UnauthorizedOperation",
+      "error_message": "You are not authorized to perform this operation. The IAM principal is not mapped to a Kubernetes user",
+      "remediation_steps": [
+        "1. Update the aws-auth ConfigMap:",
+        "   ```yaml",
+        "   mapUsers: |",
+        "     - userarn: arn:aws:iam::123456789012:user/eks-user",
+        "       username: eks-user",
+        "       groups: [\"system:masters\"]",
+        "   ```",
+        "2. Apply with: `kubectl apply -f aws-auth.yaml`",
+        "3. Verify IAM entity ARN is correct",
+        "4. Check for typos in the ConfigMap"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EncryptionKeyAccessDenied",
+      "error_message": "The KMS key policy does not allow the EKS service principal to use the key for encryption",
+      "remediation_steps": [
+        "1. Update KMS key policy to include:",
+        "   ```json",
+        "   {",
+        "     \"Sid\": \"Allow EKS to use the key\",",
+        "     \"Effect\": \"Allow\",",
+        "     \"Principal\": { \"Service\": \"eks.amazonaws.com\" },",
+        "     \"Action\": [",
+        "       \"kms:Encrypt\",",
+        "       \"kms:Decrypt\",",
+        "       \"kms:ReEncrypt*\",",
+        "       \"kms:GenerateDataKey*\",",
+        "       \"kms:DescribeKey\"",
+        "     ],",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "2. Verify the EKS cluster role has kms:DescribeKey permission",
+        "3. Check for SCP restrictions on KMS"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/encryption.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "PodEvictionFailure",
+      "error_message": "Cannot evict pod as it would violate the pod's disruption budget",
+      "remediation_steps": [
+        "1. Check PodDisruptionBudget: `kubectl get pdb`",
+        "2. Temporarily scale up deployment before maintenance",
+        "3. Review critical pod labels/annotations",
+        "4. Force delete if absolutely necessary (not recommended)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/updating-k8s-versions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NodeNotReady",
+      "error_message": "Node ip-10-0-1-5.ec2.internal is not ready: Node status Unknown",
+      "remediation_steps": [
+        "1. Check node instance status in EC2 console",
+        "2. Review kubelet logs: `journalctl -u kubelet`",
+        "3. Verify IAM role permissions for worker nodes",
+        "4. Ensure CNI plugin is properly installed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#worker-node-connectivity",
+      "severity": "High"
+    },
+    {
+      "error_code": "ImagePullBackOff",
+      "error_message": "Back-off pulling image \"123456789012.dkr.ecr.us-west-2.amazonaws.com/my-app:latest\"",
+      "remediation_steps": [
+        "1. Verify ECR repository exists and image tag is correct",
+        "2. Ensure worker node IAM role has:",
+        "   - `ecr:GetAuthorizationToken`",
+        "   - `ecr:BatchCheckLayerAvailability`",
+        "   - `ecr:GetDownloadUrlForLayer`",
+        "   - `ecr:BatchGetImage`",
+        "3. Check network connectivity to ECR endpoints",
+        "4. Manually pull image to test: `docker pull 123456789012.dkr.ecr.us-west-2.amazonaws.com/my-app:latest`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#pod-image-pull",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OIDCProviderNotFound",
+      "error_message": "Unable to find OIDC provider for cluster my-cluster",
+      "remediation_steps": [
+        "1. Verify cluster has OIDC issuer URL: `aws eks describe-cluster --name my-cluster --query \"cluster.identity.oidc.issuer\"`",
+        "2. Create IAM OIDC provider:",
+        "   ```bash",
+        "   eksctl utils associate-iam-oidc-provider --cluster my-cluster --approve",
+        "   ```",
+        "3. Check IAM permissions to create identity providers",
+        "4. Manually create provider via IAM console if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EndpointConnectionError",
+      "error_message": "Could not connect to the endpoint URL: \"https://eks.us-west-2.amazonaws.com/\"",
+      "remediation_steps": [
+        "1. Verify AWS CLI is configured with correct region",
+        "2. Check network connectivity to EKS API endpoints",
+        "3. Ensure no VPC endpoint policies are blocking access",
+        "4. Test with AWS Console as alternative"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterEndpointAccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/readonly-user is not authorized to perform: eks:DescribeCluster",
+      "remediation_steps": [
+        "1. Attach `AmazonEKSViewPolicy` for read-only access",
+        "2. For custom policies, ensure these permissions exist:",
+        "   - `eks:DescribeCluster`",
+        "   - `eks:ListClusters`",
+        "3. Verify no SCPs are blocking these actions",
+        "4. Check resource-level permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/security_iam_id-based-policy-examples.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "FargateProfileCreationFailure",
+      "error_message": "Failed to create Fargate profile: The IAM role arn:aws:iam::123456789012:role/eks-fargate-role does not have the required permissions",
+      "remediation_steps": [
+        "1. Attach the `AmazonEKSFargatePodExecutionRolePolicy`",
+        "2. Verify role trust relationship allows:",
+        "   ```json",
+        "   \"Principal\": { \"Service\": [\"eks-fargate-pods.amazonaws.com\"] }",
+        "   ```",
+        "3. Check for permission boundaries limiting the role",
+        "4. Ensure role exists before profile creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/fargate-getting-started.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ManagedNodeGroupFailure",
+      "error_message": "Failed to create managed node group: The node instance role does not have the required EC2 permissions",
+      "remediation_steps": [
+        "1. Attach these managed policies to the node role:",
+        "   - `AmazonEKSWorkerNodePolicy`",
+        "   - `AmazonEC2ContainerRegistryReadOnly`",
+        "   - `AmazonEKS_CNI_Policy`",
+        "2. Verify role trust relationship allows EC2 to assume it",
+        "3. Check SCPs for explicit denies",
+        "4. Recreate node group after fixing permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NetworkInterfaceLimitExceeded",
+      "error_message": "Failed to launch EC2 instances: The maximum number of network interfaces has been reached for this instance type",
+      "remediation_steps": [
+        "1. Terminate unused EC2 instances",
+        "2. Request VPC ENI limit increase",
+        "3. Use fewer pods per node (reduce `--max-pods`)",
+        "4. Switch to instance types with higher ENI limits"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SecurityGroupNotFound",
+      "error_message": "The security group 'sg-123456' does not exist in VPC 'vpc-abcdef'",
+      "remediation_steps": [
+        "1. Verify security group exists: `aws ec2 describe-security-groups --group-ids sg-123456`",
+        "2. Check VPC ID matches cluster VPC",
+        "3. Ensure IAM permissions include `ec2:DescribeSecurityGroups`",
+        "4. Create new security group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterLoggingDisabled",
+      "error_message": "Unable to enable control plane logging: The IAM role does not have permissions to create CloudWatch Logs",
+      "remediation_steps": [
+        "1. Add these permissions to the cluster role:",
+        "   - `logs:CreateLogGroup`",
+        "   - `logs:DescribeLogGroups`",
+        "   - `logs:CreateLogStream`",
+        "   - `logs:DescribeLogStreams`",
+        "   - `logs:PutLogEvents`",
+        "2. Enable logging via:",
+        "   ```bash",
+        "   aws eks update-cluster-config --name my-cluster --logging '{\"clusterLogging\":[{\"types\":[\"api\",\"audit\"],\"enabled\":true}]}'",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EKSAddonConflict",
+      "error_message": "Cannot install addon vpc-cni because it conflicts with existing resources",
+      "remediation_steps": [
+        "1. Check existing CNI installation: `kubectl get daemonset -n kube-system aws-node`",
+        "2. Remove old CNI: `kubectl delete -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.6/aws-k8s-cni.yaml`",
+        "3. Install via EKS addon:",
+        "   ```bash",
+        "   aws eks create-addon --cluster-name my-cluster --addon-name vpc-cni",
+        "   ```",
+        "4. Verify IAM permissions for addon management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidKubeconfig",
+      "error_message": "Unable to connect to the server: getting credentials: exec: executable aws failed with exit code 255",
+      "remediation_steps": [
+        "1. Update AWS CLI: `pip install --upgrade awscli`",
+        "2. Refresh kubeconfig: `aws eks update-kubeconfig --name my-cluster`",
+        "3. Verify IAM permissions include `eks:DescribeCluster`",
+        "4. Check AWS_PROFILE environment variable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IRSAConfigurationError",
+      "error_message": "Failed to assume role with IRSA: The requested Security Token Service (STS) operation failed",
+      "remediation_steps": [
+        "1. Verify OIDC provider is configured for cluster",
+        "2. Check service account annotation matches IAM role ARN",
+        "3. Ensure trust relationship includes:",
+        "   ```json",
+        "   \"Condition\": {",
+        "     \"StringEquals\": {",
+        "       \"oidc.eks.us-west-2.amazonaws.com/id/EXAMPLEDC:sub\": \"system:serviceaccount:default:my-sa\"",
+        "     }",
+        "   }",
+        "   ```",
+        "4. Test with `aws sts assume-role-with-web-identity`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-technical-overview.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NodeTerminationError",
+      "error_message": "Failed to gracefully terminate node: Timeout waiting for pods to terminate",
+      "remediation_steps": [
+        "1. Check for pods with terminationGracePeriodSeconds set too high",
+        "2. Review PodDisruptionBudgets blocking eviction",
+        "3. Force terminate if needed: `aws ec2 terminate-instances --instance-ids i-123456`",
+        "4. Verify node can reach Kubernetes API during shutdown"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EBSVolumeAttachmentError",
+      "error_message": "Failed to attach EBS volume: The volume is already attached to another instance",
+      "remediation_steps": [
+        "1. Detach volume from old instance: `aws ec2 detach-volume --volume-id vol-123456`",
+        "2. Check PersistentVolume reclaim policy",
+        "3. Verify node IAM role has `ec2:AttachVolume` permission",
+        "4. Use EBS CSI driver for dynamic provisioning"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ALBControllerFailure",
+      "error_message": "Failed to create Ingress: The IAM role does not have permission to create ALB resources",
+      "remediation_steps": [
+        "1. Attach the `AWSLoadBalancerControllerIAMPolicy` to the controller role",
+        "2. Verify IRSA configuration for controller service account",
+        "3. Check for tag restrictions on target groups",
+        "4. Review VPC permissions for ELB creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterAutoscalerError",
+      "error_message": "Failed to scale node group: The IAM role does not have permission to modify Auto Scaling groups",
+      "remediation_steps": [
+        "1. Add these permissions to the autoscaler role:",
+        "   - `autoscaling:DescribeAutoScalingGroups`",
+        "   - `autoscaling:SetDesiredCapacity`",
+        "   - `autoscaling:TerminateInstanceInAutoScalingGroup`",
+        "2. Verify IRSA annotations match the role ARN",
+        "3. Check for SCP restrictions on autoscaling"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EFSVolumeMountError",
+      "error_message": "Failed to mount EFS volume: The node role does not have permission to access the EFS file system",
+      "remediation_steps": [
+        "1. Add these permissions to the node role:",
+        "   - `elasticfilesystem:ClientMount`",
+        "   - `elasticfilesystem:ClientWrite` (if RW needed)",
+        "2. Verify EFS security group allows node traffic",
+        "3. Check EFS access point IAM settings",
+        "4. Ensure EFS is in same VPC as cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ExternalDNSFailure",
+      "error_message": "Failed to update Route53 record: The IAM role does not have permission to change resource record sets",
+      "remediation_steps": [
+        "1. Attach this policy to the ExternalDNS role:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": [\"route53:ChangeResourceRecordSets\"],",
+        "     \"Resource\": [\"arn:aws:route53:::hostedzone/*\"]",
+        "   }",
+        "   ```",
+        "2. Verify IRSA configuration",
+        "3. Check for public/private zone mismatches",
+        "4. Review hosted zone permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/external-dns.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KMSDecryptionFailure",
+      "error_message": "Failed to decrypt Kubernetes secret: The node role does not have kms:Decrypt permission",
+      "remediation_steps": [
+        "1. Add `kms:Decrypt` to the node role permissions",
+        "2. Verify KMS key policy allows the role to use the key",
+        "3. Check for cross-account key access issues",
+        "4. Review EKS encryption configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "APIServerEndpointAccessDenied",
+      "error_message": "Unable to connect to cluster endpoint: The security group does not allow inbound traffic from your IP",
+      "remediation_steps": [
+        "1. Modify cluster security group to allow your IP:",
+        "   ```bash",
+        "   aws ec2 authorize-security-group-ingress --group-id sg-123456 --protocol tcp --port 443 --cidr $(curl -s ifconfig.me)/32",
+        "   ```",
+        "2. Or enable private access and use VPN/bastion",
+        "3. Check VPC routing tables",
+        "4. Verify network ACLs aren't blocking traffic"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NodeDrainFailure",
+      "error_message": "Cannot drain node: Unauthorized to access nodes",
+      "remediation_steps": [
+        "1. Verify IAM user is mapped to Kubernetes RBAC group with:",
+        "   - `nodes/update`",
+        "   - `pods/evict` permissions",
+        "2. Check aws-auth ConfigMap mappings",
+        "3. Use `--bypass-pdb` flag if critical",
+        "4. Review Kubernetes RBAC roles"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/node-drain.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EKSConnectorError",
+      "error_message": "Failed to register external cluster: The IAM role does not have eks:RegisterCluster permission",
+      "remediation_steps": [
+        "1. Add `eks:RegisterCluster` to the IAM policy",
+        "2. Verify role trust relationship allows:",
+        "   ```json",
+        "   \"Principal\": { \"Service\": \"eks-connector.amazonaws.com\" }",
+        "   ```",
+        "3. Check for SCP restrictions",
+        "4. Ensure AWS Connector app is installed on target cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/eks-connector.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "VPCCNIError",
+      "error_message": "Failed to allocate IP address: The node role does not have ec2:AssignPrivateIpAddresses permission",
+      "remediation_steps": [
+        "1. Attach the `AmazonEKS_CNI_Policy` to node role",
+        "2. For custom policies, ensure these exist:",
+        "   - `ec2:AssignPrivateIpAddresses`",
+        "   - `ec2:AttachNetworkInterface`",
+        "   - `ec2:CreateNetworkInterface`",
+        "3. Check ENI limits in VPC",
+        "4. Verify subnet has available IPs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ClusterUpgradeFailure",
+      "error_message": "Failed to upgrade cluster: The IAM role does not have eks:UpdateClusterVersion permission",
+      "remediation_steps": [
+        "1. Add `eks:UpdateClusterVersion` to cluster role",
+        "2. Verify no SCPs are blocking the action",
+        "3. Check for pending node updates first",
+        "4. Review upgrade prerequisites"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EKSAddonPermissionError",
+      "error_message": "Failed to install EBS CSI driver addon: The IAM role does not have iam:CreateServiceLinkedRole permission",
+      "remediation_steps": [
+        "1. Add `iam:CreateServiceLinkedRole` to cluster role",
+        "2. Pre-create the SLR:",
+        "   ```bash",
+        "   aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com",
+        "   ```",
+        "3. Verify no SCPs block SLR creation",
+        "4. Check for existing SLRs in IAM console"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NodeGroupUpdateFailure",
+      "error_message": "Failed to update node group: The IAM role does not have eks:UpdateNodegroupConfig permission",
+      "remediation_steps": [
+        "1. Add `eks:UpdateNodegroupConfig` to IAM policy",
+        "2. Verify node role can be assumed by EKS",
+        "3. Check for conflicting updates in progress",
+        "4. Review node group scaling configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/update-managed-node-group.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PodExecutionRoleError",
+      "error_message": "Failed to start Fargate pod: The pod execution role does not have logs:CreateLogStream permission",
+      "remediation_steps": [
+        "1. Attach the `AmazonEKSFargatePodExecutionRolePolicy`",
+        "2. Add these custom permissions if needed:",
+        "   - `logs:CreateLogStream`",
+        "   - `logs:CreateLogGroup`",
+        "   - `logs:PutLogEvents`",
+        "3. Verify role trust relationship",
+        "4. Check for permission boundaries"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/pod-execution-role.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EKSClusterDeletionFailure",
+      "error_message": "Failed to delete cluster: The IAM role does not have eks:DeleteCluster permission",
+      "remediation_steps": [
+        "1. Add `eks:DeleteCluster` to IAM policy",
+        "2. Manually delete node groups first",
+        "3. Check for remaining Kubernetes resources",
+        "4. Verify no SCPs block deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eks/latest/userguide/delete-cluster.html",
+      "severity": "Medium"
+    }
+  ]
+}

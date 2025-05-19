@@ -1,0 +1,680 @@
+{
+  "RDSIAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/dba is not authorized to perform: rds:CreateDBInstance on resource: arn:aws:rds:us-east-1:123456789012:db:*",
+      "remediation_steps": [
+        "1. Attach the `AmazonRDSFullAccess` managed policy to the IAM user/role",
+        "2. For least privilege, create a custom policy with:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"rds:CreateDBInstance\",",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "3. Verify no Service Control Policies (SCPs) are blocking the action",
+        "4. Check for permission boundaries limiting the user"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "The IAM role arn:aws:iam::123456789012:role/rds-monitoring-role cannot be assumed by RDS",
+      "remediation_steps": [
+        "1. Update the role's trust relationship to include:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Principal\": { \"Service\": \"monitoring.rds.amazonaws.com\" },",
+        "       \"Action\": \"sts:AssumeRole\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Attach the `AmazonRDSEnhancedMonitoringRole` policy",
+        "3. Verify the IAM user has `iam:PassRole` permission",
+        "4. Check for typos in the role ARN"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "DBInstanceAlreadyExists",
+      "error_message": "DB instance already exists with identifier my-db-instance",
+      "remediation_steps": [
+        "1. List existing instances: `aws rds describe-db-instances`",
+        "2. Delete if unused: `aws rds delete-db-instance --db-instance-identifier my-db-instance`",
+        "3. Wait for deletion (check with `aws rds describe-db-instances`)",
+        "4. Choose a unique DB identifier"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientDBInstanceCapacity",
+      "error_message": "Insufficient DB instance capacity for the requested instance class",
+      "remediation_steps": [
+        "1. Retry with a different instance class",
+        "2. Request capacity increase via AWS Support",
+        "3. Check AWS Service Health Dashboard for regional issues",
+        "4. Consider Multi-AZ deployment for better capacity allocation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "StorageQuotaExceeded",
+      "error_message": "The requested storage size exceeds the maximum allowed for the engine",
+      "remediation_steps": [
+        "1. Check engine-specific limits: `aws rds describe-db-engine-versions`",
+        "2. Reduce requested storage size",
+        "3. Request quota increase via Service Quotas console",
+        "4. Consider archiving old data to S3"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DBSubnetGroupNotFoundFault",
+      "error_message": "DB subnet group my-subnet-group not found",
+      "remediation_steps": [
+        "1. List existing subnet groups: `aws rds describe-db-subnet-groups`",
+        "2. Verify subnet group exists in same region as RDS instance",
+        "3. Create new subnet group if needed:",
+        "   ```bash",
+        "   aws rds create-db-subnet-group \\",
+        "     --db-subnet-group-name my-subnet-group \\",
+        "     --db-subnet-group-description \"My subnet group\" \\",
+        "     --subnet-ids subnet-123456 subnet-789012",
+        "   ```",
+        "4. Check IAM permissions for `rds:DescribeDBSubnetGroups`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidVPCNetworkStateFault",
+      "error_message": "The DB subnet group doesn't cover enough Availability Zones",
+      "remediation_steps": [
+        "1. Verify subnet group has subnets in at least 2 AZs",
+        "2. Add more subnets to the group:",
+        "   ```bash",
+        "   aws rds modify-db-subnet-group \\",
+        "     --db-subnet-group-name my-subnet-group \\",
+        "     --subnet-ids subnet-123456 subnet-789012 subnet-345678",
+        "   ```",
+        "3. Check VPC routing tables",
+        "4. Ensure subnets have proper route to NAT gateway"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSKeyNotAccessible",
+      "error_message": "The KMS key arn:aws:kms:us-east-1:123456789012:key/abcd1234 is not accessible",
+      "remediation_steps": [
+        "1. Verify key policy allows RDS service to use the key:",
+        "   ```json",
+        "   {",
+        "     \"Sid\": \"Allow RDS to use the key\",",
+        "     \"Effect\": \"Allow\",",
+        "     \"Principal\": { \"Service\": \"rds.amazonaws.com\" },",
+        "     \"Action\": [",
+        "       \"kms:Encrypt\",",
+        "       \"kms:Decrypt\",",
+        "       \"kms:ReEncrypt*\",",
+        "       \"kms:GenerateDataKey*\",",
+        "       \"kms:DescribeKey\"",
+        "     ],",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "2. Check IAM role has `kms:DescribeKey` permission",
+        "3. Verify key isn't disabled or scheduled for deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "DBSecurityGroupNotFound",
+      "error_message": "Security group sg-123456 not found or you don't have ec2:DescribeSecurityGroups permission",
+      "remediation_steps": [
+        "1. Verify security group exists: `aws ec2 describe-security-groups --group-ids sg-123456`",
+        "2. Add `ec2:DescribeSecurityGroups` to IAM policy",
+        "3. Check security group is in same VPC as RDS instance",
+        "4. Create new security group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.RDSSecurityGroups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "OptionGroupNotFoundFault",
+      "error_message": "Option group my-option-group not found",
+      "remediation_steps": [
+        "1. List existing option groups: `aws rds describe-option-groups`",
+        "2. Create new option group if needed:",
+        "   ```bash",
+        "   aws rds create-option-group \\",
+        "     --option-group-name my-option-group \\",
+        "     --engine-name mysql \\",
+        "     --major-engine-version 8.0 \\",
+        "     --option-group-description \"MySQL 8.0 option group\"",
+        "   ```",
+        "3. Verify IAM permissions for `rds:DescribeOptionGroups`",
+        "4. Check for typos in option group name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DBParameterGroupNotFound",
+      "error_message": "DB parameter group my-parameter-group not found",
+      "remediation_steps": [
+        "1. List existing parameter groups: `aws rds describe-db-parameter-groups`",
+        "2. Create new parameter group if needed:",
+        "   ```bash",
+        "   aws rds create-db-parameter-group \\",
+        "     --db-parameter-group-name my-parameter-group \\",
+        "     --db-parameter-group-family mysql8.0 \\",
+        "     --description \"MySQL 8.0 parameter group\"",
+        "   ```",
+        "3. Verify IAM permissions for `rds:DescribeDBParameterGroups`",
+        "4. Check region matches between parameter group and DB instance"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidDBClusterStateFault",
+      "error_message": "Cannot modify the DB cluster because it is in the state: backing-up",
+      "remediation_steps": [
+        "1. Wait for backup to complete: `aws rds describe-db-clusters --db-cluster-identifier my-cluster`",
+        "2. Schedule modifications during maintenance windows",
+        "3. Check for other pending operations",
+        "4. Force failover if urgent (for Multi-AZ)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.BackingUpAndRestoringAmazonRDSInstances.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SnapshotQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of snapshots allowed for your account",
+      "remediation_steps": [
+        "1. Delete old snapshots: `aws rds delete-db-snapshot --db-snapshot-identifier old-snapshot`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Implement snapshot lifecycle automation",
+        "4. Consider sharing snapshots to other accounts to reduce count"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthorizationNotFound",
+      "error_message": "No authorization token could be found for the specified IAM user",
+      "remediation_steps": [
+        "1. Enable IAM database authentication:",
+        "   ```bash",
+        "   aws rds modify-db-instance \\",
+        "     --db-instance-identifier my-db-instance \\",
+        "     --enable-iam-database-authentication \\",
+        "     --apply-immediately",
+        "   ```",
+        "2. Create database user mapped to IAM:",
+        "   ```sql",
+        "   CREATE USER 'iam_user' IDENTIFIED WITH AWSAUTHENTICATION AS 'RDS';",
+        "   GRANT ALL ON `%`.* TO 'iam_user'@'%';",
+        "   ```",
+        "3. Generate auth token:",
+        "   ```bash",
+        "   aws rds generate-db-auth-token \\",
+        "     --hostname my-db-instance.123456789012.us-east-1.rds.amazonaws.com \\",
+        "     --port 3306 \\",
+        "     --username iam_user",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBClusterQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of DB clusters allowed for your account",
+      "remediation_steps": [
+        "1. Delete unused clusters: `aws rds delete-db-cluster --db-cluster-identifier old-cluster`",
+        "2. Request quota increase via AWS Support",
+        "3. Consider consolidating workloads",
+        "4. Use AWS Organizations for multi-account strategy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InstanceQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of DB instances allowed for your account",
+      "remediation_steps": [
+        "1. Delete unused instances: `aws rds delete-db-instance --db-instance-identifier old-instance`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Consider using larger instance types",
+        "4. Implement instance sharing patterns"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidDBInstanceState",
+      "error_message": "The DB instance isn't in an available state",
+      "remediation_steps": [
+        "1. Check instance status: `aws rds describe-db-instances --db-instance-identifier my-db-instance`",
+        "2. Wait for operations to complete (backup, modification, etc.)",
+        "3. Reboot if stuck: `aws rds reboot-db-instance --db-instance-identifier my-db-instance`",
+        "4. Check for storage full or maintenance events"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.DBInstance.Status.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "StorageTypeNotSupported",
+      "error_message": "The storage type 'standard' isn't supported for the DB engine 'mysql' version '8.0'",
+      "remediation_steps": [
+        "1. List supported storage types: `aws rds describe-orderable-db-instance-options --engine mysql --engine-version 8.0`",
+        "2. Use gp3, io1, or aurora storage types",
+        "3. Check for regional limitations",
+        "4. Upgrade engine version if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSubnet",
+      "error_message": "The requested subnet is invalid. Subnets must be in at least two different AZs",
+      "remediation_steps": [
+        "1. Verify subnet AZ distribution: `aws ec2 describe-subnets --subnet-ids subnet-123456`",
+        "2. Select subnets from different AZs",
+        "3. Ensure subnets have proper route tables",
+        "4. Check VPC CIDR block conflicts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBClusterRoleAlreadyExists",
+      "error_message": "The IAM role arn:aws:iam::123456789012:role/rds-monitoring-role is already associated with the DB cluster",
+      "remediation_steps": [
+        "1. List associated roles: `aws rds describe-db-clusters --db-cluster-identifier my-cluster`",
+        "2. Remove duplicate association:",
+        "   ```bash",
+        "   aws rds remove-role-from-db-cluster \\",
+        "     --db-cluster-identifier my-cluster \\",
+        "     --role-arn arn:aws:iam::123456789012:role/rds-monitoring-role",
+        "   ```",
+        "3. Verify role isn't used by other features",
+        "4. Re-add with correct feature name if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "DBClusterRoleQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of IAM roles allowed for a DB cluster",
+      "remediation_steps": [
+        "1. Remove unused roles:",
+        "   ```bash",
+        "   aws rds remove-role-from-db-cluster \\",
+        "     --db-cluster-identifier my-cluster \\",
+        "     --role-arn arn:aws:iam::123456789012:role/unused-role",
+        "   ```",
+        "2. Consolidate IAM roles with multiple permissions",
+        "3. Check AWS documentation for current limits",
+        "4. Consider feature consolidation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidDBClusterEndpointState",
+      "error_message": "The custom endpoint isn't in an available state",
+      "remediation_steps": [
+        "1. Check endpoint status: `aws rds describe-db-cluster-endpoints --db-cluster-identifier my-cluster`",
+        "2. Wait for modifications to complete",
+        "3. Delete and recreate endpoint if stuck:",
+        "   ```bash",
+        "   aws rds delete-db-cluster-endpoint \\",
+        "     --db-cluster-endpoint-identifier my-endpoint",
+        "   ```",
+        "4. Verify IAM permissions for endpoint management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SNSNoAuthorization",
+      "error_message": "You do not have permission to publish to the SNS topic arn:aws:sns:us-east-1:123456789012:rds-events",
+      "remediation_steps": [
+        "1. Add `sns:Publish` permission to RDS service role:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"sns:Publish\",",
+        "     \"Resource\": \"arn:aws:sns:us-east-1:123456789012:rds-events\"",
+        "   }",
+        "   ```",
+        "2. Verify SNS topic policy allows RDS to publish",
+        "3. Check for SCP restrictions on SNS",
+        "4. Create new topic if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EventSubscriptionQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of event subscriptions allowed for your account",
+      "remediation_steps": [
+        "1. Delete old subscriptions:",
+        "   ```bash",
+        "   aws rds delete-event-subscription \\",
+        "     --subscription-name old-subscription",
+        "   ```",
+        "2. Request quota increase via AWS Support",
+        "3. Consolidate subscriptions with broader filters",
+        "4. Consider using CloudWatch Events instead"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SubscriptionAlreadyExist",
+      "error_message": "An event notification subscription already exists for the source identifier",
+      "remediation_steps": [
+        "1. List existing subscriptions: `aws rds describe-event-subscriptions`",
+        "2. Modify existing subscription instead:",
+        "   ```bash",
+        "   aws rds modify-event-subscription \\",
+        "     --subscription-name my-subscription \\",
+        "     --enabled",
+        "   ```",
+        "3. Delete and recreate if needed",
+        "4. Verify IAM permissions for subscription management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SourceNotFound",
+      "error_message": "The source identifier you requested doesn't exist",
+      "remediation_steps": [
+        "1. Verify DB instance/cluster exists: `aws rds describe-db-instances`",
+        "2. Check for typos in source identifier",
+        "3. Ensure correct region is specified",
+        "4. Verify IAM permissions to describe resources"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRestoreFault",
+      "error_message": "Cannot restore from backup: The backup doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. List available backups: `aws rds describe-db-snapshots`",
+        "2. Verify IAM permissions for `rds:DescribeDBSnapshots`",
+        "3. Check cross-account permissions if using shared snapshots",
+        "4. Ensure snapshot is in same region as target instance"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PointInTimeRestoreNotEnabled",
+      "error_message": "Point-in-time restore isn't enabled for the DB instance",
+      "remediation_steps": [
+        "1. Enable backup retention:",
+        "   ```bash",
+        "   aws rds modify-db-instance \\",
+        "     --db-instance-identifier my-db-instance \\",
+        "     --backup-retention-period 7 \\",
+        "     --apply-immediately",
+        "   ```",
+        "2. Wait for first backup to complete",
+        "3. Verify IAM permissions for `rds:ModifyDBInstance`",
+        "4. Consider enabling automated backups during creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DBClusterSnapshotNotFoundFault",
+      "error_message": "DB cluster snapshot my-snapshot not found",
+      "remediation_steps": [
+        "1. List available snapshots: `aws rds describe-db-cluster-snapshots`",
+        "2. Verify snapshot exists in same region",
+        "3. Check IAM permissions for `rds:DescribeDBClusterSnapshots`",
+        "4. If shared, verify source account has granted access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SharedSnapshotQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of manual snapshots that can be shared",
+      "remediation_steps": [
+        "1. Delete old shared snapshots:",
+        "   ```bash",
+        "   aws rds delete-db-cluster-snapshot \\",
+        "     --db-cluster-snapshot-identifier old-snapshot",
+        "   ```",
+        "2. Request quota increase via AWS Support",
+        "3. Consider using automated shared snapshots",
+        "4. Implement snapshot rotation policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthorizationAlreadyExists",
+      "error_message": "The authorization to share the snapshot already exists",
+      "remediation_steps": [
+        "1. List existing authorizations:",
+        "   ```bash",
+        "   aws rds describe-db-snapshot-attributes \\",
+        "     --db-snapshot-identifier my-snapshot",
+        "   ```",
+        "2. Modify existing authorization instead",
+        "3. Verify target account ID is correct",
+        "4. Check for duplicate API calls"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "CertificateNotFound",
+      "error_message": "The certificate identifier rds-ca-2019 doesn't exist",
+      "remediation_steps": [
+        "1. List available certificates: `aws rds describe-certificates`",
+        "2. Use default certificate if applicable",
+        "3. Rotate certificate if needed:",
+        "   ```bash",
+        "   aws rds modify-db-instance \\",
+        "     --db-instance-identifier my-db-instance \\",
+        "     --ca-certificate-identifier rds-ca-2019 \\",
+        "     --apply-immediately",
+        "   ```",
+        "4. Verify IAM permissions for certificate management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DomainNotFoundFault",
+      "error_message": "The Active Directory domain d-1234567890 doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. Verify directory exists: `aws ds describe-directories`",
+        "2. Check IAM permissions for `ds:DescribeDirectories`",
+        "3. Ensure VPC peering is configured between RDS and Directory Service",
+        "4. Verify domain join permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_SQLServerWinAuth.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidDBClusterSnapshotState",
+      "error_message": "The DB cluster snapshot isn't available for restore",
+      "remediation_steps": [
+        "1. Check snapshot status: `aws rds describe-db-cluster-snapshots --db-cluster-snapshot-identifier my-snapshot`",
+        "2. Wait for snapshot to complete if in progress",
+        "3. Verify snapshot isn't shared from another account",
+        "4. Check for encryption key access issues"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidOptionGroupState",
+      "error_message": "The option group is in use and cannot be deleted",
+      "remediation_steps": [
+        "1. List instances using the option group: `aws rds describe-db-instances --query \"DBInstances[?OptionGroupName=='my-option-group'].DBInstanceIdentifier\"`",
+        "2. Modify instances to use different option group first",
+        "3. Wait for modifications to complete",
+        "4. Retry deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterCombination",
+      "error_message": "The parameter MasterUserPassword cannot be used with the parameter RestoreFromSnapshot",
+      "remediation_steps": [
+        "1. Remove conflicting parameters from API call",
+        "2. Reset password after restore if needed:",
+        "   ```bash",
+        "   aws rds modify-db-instance \\",
+        "     --db-instance-identifier my-db-instance \\",
+        "     --master-user-password new-password \\",
+        "     --apply-immediately",
+        "   ```",
+        "3. Verify IAM permissions for password reset",
+        "4. Check AWS CLI/SDK version for parameter validation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidS3BucketFault",
+      "error_message": "The S3 bucket my-bucket doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. Verify bucket exists: `aws s3 ls s3://my-bucket`",
+        "2. Add these permissions to RDS role:",
+        "   - `s3:GetObject`",
+        "   - `s3:ListBucket`",
+        "   - `s3:PutObject` (for SQL Server native backup/restore)",
+        "3. Check bucket policy allows RDS service access",
+        "4. Verify bucket is in same region as RDS instance"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/oracle-s3-integration.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "OptionGroupNotFoundFault",
+      "error_message": "The option group my-option-group doesn't exist",
+      "remediation_steps": [
+        "1. List available option groups: `aws rds describe-option-groups`",
+        "2. Create new option group if needed:",
+        "   ```bash",
+        "   aws rds create-option-group \\",
+        "     --option-group-name my-option-group \\",
+        "     --engine-name sqlserver-se \\",
+        "     --major-engine-version 15.00 \\",
+        "     --option-group-description \"SQL Server Option Group\"",
+        "   ```",
+        "3. Verify IAM permissions for option group management",
+        "4. Check for typos in option group name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ProvisionedIopsNotAvailableInAZ",
+      "error_message": "Provisioned IOPS aren't available in the selected AZ",
+      "remediation_steps": [
+        "1. List available AZs for IOPS: `aws rds describe-orderable-db-instance-options --engine mysql --storage-type io1`",
+        "2. Select different AZ for DB instance",
+        "3. Use Multi-AZ deployment for better AZ coverage",
+        "4. Consider gp3 storage which includes baseline IOPS"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedDBInstanceAlreadyExists",
+      "error_message": "The reserved DB instance already exists",
+      "remediation_steps": [
+        "1. List existing reservations: `aws rds describe-reserved-db-instances`",
+        "2. Verify reservation isn't already applied",
+        "3. Check for duplicate API calls",
+        "4. Wait for reservation to become active"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReservedDBInstanceQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of reserved DB instances allowed for your account",
+      "remediation_steps": [
+        "1. Delete unused reservations: `aws rds delete-reserved-db-instance --reserved-db-instance-id my-reservation`",
+        "2. Request quota increase via AWS Support",
+        "3. Consider larger instance sizes to reduce count",
+        "4. Use On-Demand instances until quota increased"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedDBInstancesOfferingNotFound",
+      "error_message": "The specified reserved DB instance offering doesn't exist",
+      "remediation_steps": [
+        "1. List available offerings: `aws rds describe-reserved-db-instances-offerings`",
+        "2. Verify offering ID is correct",
+        "3. Check region matches between offering and DB instance",
+        "4. Consider different term length or payment option"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SourceDatabaseNotSupported",
+      "error_message": "The source database engine isn't supported for the specified DB engine version",
+      "remediation_steps": [
+        "1. Check supported source engines: `aws rds describe-db-engine-versions --engine mysql --engine-version 8.0`",
+        "2. Upgrade source database version first",
+        "3. Use database dump/restore instead of native upgrade",
+        "4. Verify IAM permissions for engine version checks"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.MajorVersion.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "StorageQuotaExceeded",
+      "error_message": "The requested storage size exceeds your quota",
+      "remediation_steps": [
+        "1. Check current usage: `aws service-quotas get-service-quota --service-code rds --quota-code L-12345678`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Reduce requested storage size",
+        "4. Consider archiving old data to S3"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SubscriptionCategoryNotFound",
+      "error_message": "The event notification category isn't supported",
+      "remediation_steps": [
+        "1. List supported categories: `aws rds describe-event-categories`",
+        "2. Use valid categories like \"availability\", \"backup\", \"configuration change\"",
+        "3. Verify IAM permissions for event management",
+        "4. Check AWS CLI/SDK version for new categories"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
+      "severity": "Low"
+    }
+  ]
+}

@@ -1,0 +1,586 @@
+{
+  "DynamoDBIAMErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "User: arn:aws:iam::123456789012:user/app-user is not authorized to perform: dynamodb:PutItem on resource: arn:aws:dynamodb:us-east-1:123456789012:table/Orders",
+      "remediation_steps": [
+        "1. Add `dynamodb:PutItem` permission to the IAM policy:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"dynamodb:PutItem\",",
+        "     \"Resource\": \"arn:aws:dynamodb:us-east-1:123456789012:table/Orders\"",
+        "   }",
+        "   ```",
+        "2. Verify no explicit denies in SCPs or permission boundaries",
+        "3. Check for condition keys that might restrict access",
+        "4. Test permissions with AWS Policy Simulator"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/access-control-identity-based.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "Requested resource not found: Table: Orders not found",
+      "remediation_steps": [
+        "1. Verify table exists: `aws dynamodb list-tables`",
+        "2. Check for typos in table name",
+        "3. Ensure region matches between request and table",
+        "4. Verify IAM permissions include `dynamodb:ListTables`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_ListTables.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ProvisionedThroughputExceededException",
+      "error_message": "The level of configured provisioned throughput for the table was exceeded",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your application code",
+        "2. Increase provisioned capacity:",
+        "   ```bash",
+        "   aws dynamodb update-table \\",
+        "     --table-name Orders \\",
+        "     --provisioned-throughput ReadCapacityUnits=100,WriteCapacityUnits=100",
+        "   ```",
+        "3. Use DynamoDB Auto Scaling",
+        "4. Consider using on-demand capacity mode"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ProvisionedThroughput.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ConditionalCheckFailedException",
+      "error_message": "The conditional request failed",
+      "remediation_steps": [
+        "1. Verify condition expressions in your request",
+        "2. Check item state with `aws dynamodb get-item` before update",
+        "3. Review IAM permissions for `dynamodb:GetItem`",
+        "4. Implement retry logic for concurrent modifications"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "One or more parameter values were invalid: Type mismatch for key id expected: S actual: N",
+      "remediation_steps": [
+        "1. Verify data types match table schema: `aws dynamodb describe-table --table-name Orders`",
+        "2. Check for string/number type mismatches",
+        "3. Use DynamoDB DocumentClient for automatic type conversion",
+        "4. Review error details for specific field validation failures"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TransactionConflictException",
+      "error_message": "Transaction with ID ABC123 is already completed",
+      "remediation_steps": [
+        "1. Verify transaction status before retrying",
+        "2. Implement idempotency keys for transaction requests",
+        "3. Check IAM permissions for `dynamodb:DescribeTransaction`",
+        "4. Increase transaction timeout if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ItemCollectionSizeLimitExceededException",
+      "error_message": "Item collection size limit exceeded for table Orders and index CustomerOrdersIndex",
+      "remediation_steps": [
+        "1. Review item collection size: `aws dynamodb describe-table --table-name Orders`",
+        "2. Archive old items to S3 using DynamoDB Streams",
+        "3. Redesign data model to avoid hot partitions",
+        "4. Consider using Time to Live (TTL) for automatic expiration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-partition-data",
+      "severity": "High"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "Subscriber limit exceeded: Only 2500 tables can be created per account per region",
+      "remediation_steps": [
+        "1. Delete unused tables: `aws dynamodb delete-table --table-name OldTable`",
+        "2. Request limit increase via AWS Support",
+        "3. Consider multi-tenant table design",
+        "4. Use AWS Organizations for multi-account strategy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceInUseException",
+      "error_message": "Table already exists: Orders",
+      "remediation_steps": [
+        "1. Verify table status: `aws dynamodb describe-table --table-name Orders`",
+        "2. Wait for deletion if table is being deleted",
+        "3. Choose a different table name",
+        "4. Check for concurrent table creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_CreateTable.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BackupInUseException",
+      "error_message": "Backup with arn:aws:dynamodb:us-east-1:123456789012:table/Orders/backup/01581881453321-12345678 already exists",
+      "remediation_steps": [
+        "1. List existing backups: `aws dynamodb list-backups --table-name Orders`",
+        "2. Delete old backup if unused:",
+        "   ```bash",
+        "   aws dynamodb delete-backup \\",
+        "     --backup-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders/backup/01581881453321-12345678",
+        "   ```",
+        "3. Use a different backup name",
+        "4. Verify IAM permissions for backup management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BackupRestore.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ContinuousBackupsUnavailableException",
+      "error_message": "Continuous backups are not enabled on the table Orders",
+      "remediation_steps": [
+        "1. Enable PITR (Point-in-Time Recovery):",
+        "   ```bash",
+        "   aws dynamodb update-continuous-backups \\",
+        "     --table-name Orders \\",
+        "     --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true",
+        "   ```",
+        "2. Wait for backup to become active",
+        "3. Verify IAM permissions include `dynamodb:UpdateContinuousBackups`",
+        "4. Consider enabling during table creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "GlobalTableAlreadyExistsException",
+      "error_message": "Global table with name Orders already exists in region us-west-2",
+      "remediation_steps": [
+        "1. List existing global tables: `aws dynamodb list-global-tables`",
+        "2. Delete conflicting global table if unused",
+        "3. Choose a different table name",
+        "4. Verify IAM permissions for global table management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/globaltables.tutorial.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "IndexNotFoundException",
+      "error_message": "Index CustomerOrdersIndex not found for table Orders",
+      "remediation_steps": [
+        "1. Verify index exists: `aws dynamodb describe-table --table-name Orders`",
+        "2. Check for typos in index name",
+        "3. Create index if needed:",
+        "   ```bash",
+        "   aws dynamodb update-table \\",
+        "     --table-name Orders \\",
+        "     --attribute-definitions AttributeName=CustomerID,AttributeType=S \\",
+        "     --global-secondary-index-updates \\",
+        "     \"[{\"Create\":{\"IndexName\":\"CustomerOrdersIndex\",\"KeySchema\":[{\"AttributeName\":\"CustomerID\",\"KeyType\":\"HASH\"}],\"Projection\":{\"ProjectionType\":\"ALL\"},\"ProvisionedThroughput\":{\"ReadCapacityUnits\":5,\"WriteCapacityUnits\":5}}]\"",
+        "   ```",
+        "4. Verify IAM permissions for index management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReplicaAlreadyExistsException",
+      "error_message": "Replica already exists in region us-west-2 for global table Orders",
+      "remediation_steps": [
+        "1. List existing replicas: `aws dynamodb describe-global-table --global-table-name Orders`",
+        "2. Remove duplicate replica if needed",
+        "3. Verify IAM permissions for global table management",
+        "4. Check for concurrent update operations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/globaltables.tutorial.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TableInUseException",
+      "error_message": "Table Orders is being created or deleted",
+      "remediation_steps": [
+        "1. Check table status: `aws dynamodb describe-table --table-name Orders`",
+        "2. Wait for operation to complete",
+        "3. Verify no concurrent operations are running",
+        "4. Check CloudTrail logs for initiating user/role"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_DescribeTable.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PointInTimeRecoveryUnavailableException",
+      "error_message": "Point-in-time recovery is not enabled for the table Orders",
+      "remediation_steps": [
+        "1. Enable PITR:",
+        "   ```bash",
+        "   aws dynamodb update-continuous-backups \\",
+        "     --table-name Orders \\",
+        "     --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true",
+        "   ```",
+        "2. Wait for backup to become active",
+        "3. Verify IAM permissions include `dynamodb:UpdateContinuousBackups`",
+        "4. Consider enabling during table creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TransactionCanceledException",
+      "error_message": "Transaction cancelled, please refer cancellation reasons for specific reasons",
+      "remediation_steps": [
+        "1. Check cancellation reasons in response metadata",
+        "2. Implement conditional checks for transaction items",
+        "3. Verify IAM permissions for all transaction operations",
+        "4. Reduce transaction size if exceeding limits"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IdempotentParameterMismatchException",
+      "error_message": "Request token does not match parameters of previous request",
+      "remediation_steps": [
+        "1. Verify request parameters match initial idempotent request",
+        "2. Generate new client token if parameters changed",
+        "3. Implement consistent parameter handling",
+        "4. Check for concurrent modification of parameters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ExportConflictException",
+      "error_message": "Export job already exists for table Orders",
+      "remediation_steps": [
+        "1. List existing exports: `aws dynamodb list-exports`",
+        "2. Wait for existing export to complete",
+        "3. Use a different export name",
+        "4. Verify IAM permissions for export management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataExport.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ExportNotFoundException",
+      "error_message": "Export job with arn:aws:dynamodb:us-east-1:123456789012:table/Orders/export/01581881453321-12345678 not found",
+      "remediation_steps": [
+        "1. Verify export ARN is correct",
+        "2. Check export status: `aws dynamodb describe-export --export-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders/export/01581881453321-12345678`",
+        "3. Verify IAM permissions include `dynamodb:DescribeExport`",
+        "4. Check if export was automatically deleted after expiration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataExport.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidExportTimeException",
+      "error_message": "Export time is not within the point-in-time recovery window",
+      "remediation_steps": [
+        "1. Verify PITR is enabled: `aws dynamodb describe-continuous-backups --table-name Orders`",
+        "2. Choose export time within retention period (max 35 days)",
+        "3. Check system clock skew if using local timestamps",
+        "4. Use latest restorable time if unsure"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TableNotFoundException",
+      "error_message": "Cannot do operations on a non-existent table",
+      "remediation_steps": [
+        "1. Verify table exists: `aws dynamodb list-tables`",
+        "2. Check for typos in table name",
+        "3. Ensure region matches between request and table",
+        "4. Verify IAM permissions include `dynamodb:ListTables`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_ListTables.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "BackupNotFoundException",
+      "error_message": "Backup with arn:aws:dynamodb:us-east-1:123456789012:table/Orders/backup/01581881453321-12345678 not found",
+      "remediation_steps": [
+        "1. List available backups: `aws dynamodb list-backups --table-name Orders`",
+        "2. Verify backup ARN is correct",
+        "3. Check if backup was automatically deleted after expiration",
+        "4. Verify IAM permissions include `dynamodb:ListBackups`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BackupRestore.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KMSAccessDeniedException",
+      "error_message": "The ciphertext references a key that doesn't exist or you don't have access to",
+      "remediation_steps": [
+        "1. Verify KMS key exists: `aws kms describe-key --key-id alias/aws/dynamodb`",
+        "2. Update key policy to allow DynamoDB service:",
+        "   ```json",
+        "   {",
+        "     \"Sid\": \"Allow DynamoDB\",",
+        "     \"Effect\": \"Allow\",",
+        "     \"Principal\": { \"Service\": \"dynamodb.amazonaws.com\" },",
+        "     \"Action\": [",
+        "       \"kms:Encrypt\",",
+        "       \"kms:Decrypt\",",
+        "       \"kms:ReEncrypt*\",",
+        "       \"kms:GenerateDataKey*\",",
+        "       \"kms:DescribeKey\"",
+        "     ],",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "3. Check for SCPs blocking KMS access",
+        "4. Verify IAM role has `kms:Decrypt` permission"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KMSDisabledException",
+      "error_message": "The key used to encrypt the table is disabled",
+      "remediation_steps": [
+        "1. Enable the KMS key: `aws kms enable-key --key-id alias/aws/dynamodb`",
+        "2. Update table to use a different active key",
+        "3. Check key rotation policy",
+        "4. Temporarily disable encryption if urgent (not recommended)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/enabling-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KMSInvalidStateException",
+      "error_message": "The key used to encrypt the table is pending deletion",
+      "remediation_steps": [
+        "1. Cancel key deletion: `aws kms cancel-key-deletion --key-id alias/aws/dynamodb`",
+        "2. Update table to use a different key",
+        "3. Check CloudTrail logs for who scheduled deletion",
+        "4. Implement key management lifecycle policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/deleting-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KMSNotFoundException",
+      "error_message": "The key used to encrypt the table doesn't exist",
+      "remediation_steps": [
+        "1. Verify key ARN is correct",
+        "2. Create new KMS key if needed",
+        "3. Update table encryption settings:",
+        "   ```bash",
+        "   aws dynamodb update-table \\",
+        "     --table-name Orders \\",
+        "     --sse-specification Enabled=true,SSEType=KMS,KMSMasterKeyId=alias/aws/dynamodb",
+        "   ```",
+        "4. Verify IAM permissions for KMS key management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KMSOptInRequired",
+      "error_message": "The AWS account must be opted in to AWS KMS",
+      "remediation_steps": [
+        "1. Enable KMS for the AWS account",
+        "2. Use default DynamoDB encryption key (alias/aws/dynamodb)",
+        "3. Verify no SCPs block KMS usage",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSThrottlingException",
+      "error_message": "The request was denied due to request throttling by KMS",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your application",
+        "2. Reduce frequency of KMS requests",
+        "3. Use data key caching where possible",
+        "4. Request KMS quota increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRestoreTimeException",
+      "error_message": "Restore time is not within the point-in-time recovery window",
+      "remediation_steps": [
+        "1. Verify PITR is enabled: `aws dynamodb describe-continuous-backups --table-name Orders`",
+        "2. Choose restore time within retention period (max 35 days)",
+        "3. Use latest restorable time if unsure:",
+        "   ```bash",
+        "   aws dynamodb describe-continuous-backups --table-name Orders --query \"ContinuousBackupsDescription.PointInTimeRecoveryDescription.LatestRestorableDateTime\"",
+        "   ```",
+        "4. Check system clock skew if using local timestamps"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RestoreInProgressException",
+      "error_message": "Cannot create restore when another restore is in progress",
+      "remediation_steps": [
+        "1. Check restore status: `aws dynamodb describe-restore --restore-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders/restore/01581881453321-12345678`",
+        "2. Wait for existing restore to complete",
+        "3. Verify no concurrent restore operations",
+        "4. Check CloudTrail logs for initiating user/role"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RestoreNotFoundException",
+      "error_message": "Restore with arn:aws:dynamodb:us-east-1:123456789012:table/Orders/restore/01581881453321-12345678 not found",
+      "remediation_steps": [
+        "1. Verify restore ARN is correct",
+        "2. List available restores: `aws dynamodb list-restores`",
+        "3. Check if restore was automatically deleted after completion",
+        "4. Verify IAM permissions include `dynamodb:ListRestores`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SSEEnabledException",
+      "error_message": "Cannot modify encryption settings when SSE is already enabled",
+      "remediation_steps": [
+        "1. Verify current encryption settings: `aws dynamodb describe-table --table-name Orders --query \"Table.SSEDescription\"`",
+        "2. Create new table with desired encryption if changes needed",
+        "3. Migrate data using DMS or backup/restore",
+        "4. Verify IAM permissions for table creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TagAccessDeniedException",
+      "error_message": "You don't have permissions to access the tags on this resource",
+      "remediation_steps": [
+        "1. Add `dynamodb:ListTagsOfResource` and `dynamodb:TagResource` to IAM policy",
+        "2. Verify resource ARN is correct",
+        "3. Check for explicit denies in SCPs",
+        "4. Use resource-based policies if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TagLimitExceededException",
+      "error_message": "Tag limit of 50 per resource was exceeded",
+      "remediation_steps": [
+        "1. List current tags: `aws dynamodb list-tags-of-resource --resource-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders`",
+        "2. Remove unused tags:",
+        "   ```bash",
+        "   aws dynamodb untag-resource \\",
+        "     --resource-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders \\",
+        "     --tag-keys OldTag1 OldTag2",
+        "   ```",
+        "3. Consolidate tags using key-value pairs",
+        "4. Verify IAM permissions for tag management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TagPolicyException",
+      "error_message": "Tag policy validation failed",
+      "remediation_steps": [
+        "1. Verify tag keys and values meet requirements",
+        "2. Check for reserved AWS prefixes (aws:, AWS:, etc.)",
+        "3. Ensure tag values are less than 256 characters",
+        "4. Review organization-wide tag policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TimeToLiveDisabledException",
+      "error_message": "Time to live is disabled for the table Orders",
+      "remediation_steps": [
+        "1. Enable TTL:",
+        "   ```bash",
+        "   aws dynamodb update-time-to-live \\",
+        "     --table-name Orders \\",
+        "     --time-to-live-specification Enabled=true,AttributeName=ttl",
+        "   ```",
+        "2. Verify attribute exists and is Number type",
+        "3. Wait for TTL to become active",
+        "4. Verify IAM permissions include `dynamodb:UpdateTimeToLive`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TimeToLiveInvalidParameterException",
+      "error_message": "The TTL attribute 'expire_at' is not a Number type",
+      "remediation_steps": [
+        "1. Verify attribute type: `aws dynamodb describe-table --table-name Orders --query \"Table.AttributeDefinitions\"`",
+        "2. Update attribute to Number type if needed",
+        "3. Choose different attribute for TTL",
+        "4. Verify data is in Unix epoch time format"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TransactionInProgressException",
+      "error_message": "Transaction with ID ABC123 is already in progress",
+      "remediation_steps": [
+        "1. Wait for existing transaction to complete",
+        "2. Implement transaction timeouts in application code",
+        "3. Verify no duplicate transaction requests",
+        "4. Check for long-running transactions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnknownOperationException",
+      "error_message": "The requested operation is not recognized by the service",
+      "remediation_steps": [
+        "1. Verify API action name is correct",
+        "2. Check AWS CLI/SDK version compatibility",
+        "3. Review recent API updates for new operations",
+        "4. Verify IAM permissions include the correct action"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DuplicateItemException",
+      "error_message": "Conditional check failed: Item with primary key already exists",
+      "remediation_steps": [
+        "1. Use conditional write with `ConditionExpression\": \"attribute_not_exists(id)\"`",
+        "2. Check for duplicate insert operations",
+        "3. Implement idempotency keys for write operations",
+        "4. Verify application logic for duplicate detection"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ImportConflictException",
+      "error_message": "Import job already exists for table Orders",
+      "remediation_steps": [
+        "1. List existing imports: `aws dynamodb list-imports`",
+        "2. Wait for existing import to complete",
+        "3. Use a different import name",
+        "4. Verify IAM permissions for import management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataImport.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ImportNotFoundException",
+      "error_message": "Import job with arn:aws:dynamodb:us-east-1:123456789012:table/Orders/import/01581881453321-12345678 not found",
+      "remediation_steps": [
+        "1. Verify import ARN is correct",
+        "2. Check import status: `aws dynamodb describe-import --import-arn arn:aws:dynamodb:us-east-1:123456789012:table/Orders/import/01581881453321-12345678`",
+        "3. Verify IAM permissions include `dynamodb:DescribeImport`",
+        "4. Check if import was automatically deleted after completion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataImport.html",
+      "severity": "Medium"
+    }
+  ]
+}

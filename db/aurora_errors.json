@@ -1,0 +1,732 @@
+{
+  "AuroraIAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/dba is not authorized to perform: rds:CreateDBCluster on resource: arn:aws:rds:us-east-1:123456789012:cluster:*",
+      "remediation_steps": [
+        "1. Attach the `AmazonRDSFullAccess` managed policy or create a custom policy with:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"rds:CreateDBCluster\",",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "2. Verify no Service Control Policies (SCPs) are blocking the action",
+        "3. Check for permission boundaries limiting the user",
+        "4. Test permissions with AWS Policy Simulator"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "IAM role arn:aws:iam::123456789012:role/aurora-monitoring-role cannot be assumed by RDS",
+      "remediation_steps": [
+        "1. Update the role's trust policy to include:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Principal\": { \"Service\": \"monitoring.rds.amazonaws.com\" },",
+        "       \"Action\": \"sts:AssumeRole\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Attach the `AmazonRDSEnhancedMonitoringRole` policy",
+        "3. Verify the IAM user has `iam:PassRole` permission",
+        "4. Check for typos in the role ARN"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Monitoring.OS.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "DBClusterAlreadyExists",
+      "error_message": "DB cluster already exists with identifier my-aurora-cluster",
+      "remediation_steps": [
+        "1. List existing clusters: `aws rds describe-db-clusters`",
+        "2. Delete if unused: `aws rds delete-db-cluster --db-cluster-identifier my-aurora-cluster --skip-final-snapshot`",
+        "3. Wait for deletion (check with `aws rds describe-db-clusters`)",
+        "4. Choose a unique cluster identifier"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_DeleteCluster.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientDBClusterCapacity",
+      "error_message": "Insufficient DB cluster capacity for the requested instance class",
+      "remediation_steps": [
+        "1. Retry with a different instance class",
+        "2. Request capacity increase via AWS Support",
+        "3. Check AWS Service Health Dashboard for regional issues",
+        "4. Consider Serverless v2 for automatic scaling"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "StorageQuotaExceeded",
+      "error_message": "The requested storage size exceeds the maximum allowed for Aurora (128 TiB)",
+      "remediation_steps": [
+        "1. Reduce requested storage size",
+        "2. Enable Aurora Storage Auto-Scaling",
+        "3. Archive old data to Aurora Backtrack or S3",
+        "4. Consider sharding strategy for very large datasets"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBSubnetGroupNotFound",
+      "error_message": "DB subnet group my-aurora-subnet-group not found",
+      "remediation_steps": [
+        "1. List existing subnet groups: `aws rds describe-db-subnet-groups`",
+        "2. Create new subnet group if needed:",
+        "   ```bash",
+        "   aws rds create-db-subnet-group \\",
+        "     --db-subnet-group-name my-aurora-subnet-group \\",
+        "     --db-subnet-group-description \"Aurora subnet group\" \\",
+        "     --subnet-ids subnet-123456 subnet-789012",
+        "   ```",
+        "3. Verify subnets are in different AZs",
+        "4. Check IAM permissions for subnet group management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidVPCNetworkState",
+      "error_message": "The DB subnet group doesn't cover enough Availability Zones (minimum 2 required)",
+      "remediation_steps": [
+        "1. Add subnets from additional AZs to the subnet group",
+        "2. Verify VPC has proper route tables and NAT configuration",
+        "3. Ensure subnets are tagged correctly for Aurora:",
+        "   ```bash",
+        "   aws ec2 create-tags \\",
+        "     --resources subnet-123456 \\",
+        "     --tags Key=aws:cloudformation:stack-name,Value=aurora-cluster",
+        "   ```",
+        "4. Check IAM permissions for VPC modifications"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSKeyNotAccessible",
+      "error_message": "The KMS key arn:aws:kms:us-east-1:123456789012:key/abcd1234 is not accessible to Aurora",
+      "remediation_steps": [
+        "1. Update KMS key policy to allow Aurora service:",
+        "   ```json",
+        "   {",
+        "     \"Sid\": \"Allow Aurora to use the key\",",
+        "     \"Effect\": \"Allow\",",
+        "     \"Principal\": { \"Service\": \"rds.amazonaws.com\" },",
+        "     \"Action\": [",
+        "       \"kms:Encrypt\",",
+        "       \"kms:Decrypt\",",
+        "       \"kms:ReEncrypt*\",",
+        "       \"kms:GenerateDataKey*\",",
+        "       \"kms:DescribeKey\"",
+        "     ],",
+        "     \"Resource\": \"*\"",
+        "   }",
+        "   ```",
+        "2. Verify IAM role has `kms:DescribeKey` permission",
+        "3. Check for SCP restrictions on KMS",
+        "4. Use default AWS-managed key if acceptable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Overview.Encryption.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "DBSecurityGroupNotFound",
+      "error_message": "Security group sg-123456 not found or you don't have ec2:DescribeSecurityGroups permission",
+      "remediation_steps": [
+        "1. Verify security group exists: `aws ec2 describe-security-groups --group-ids sg-123456`",
+        "2. Add `ec2:DescribeSecurityGroups` to IAM policy",
+        "3. Create new security group if needed",
+        "4. Verify security group is in same VPC as Aurora cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Overview.RDSSecurityGroups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBClusterParameterGroupNotFound",
+      "error_message": "DB cluster parameter group aurora-pg not found",
+      "remediation_steps": [
+        "1. List available parameter groups: `aws rds describe-db-cluster-parameter-groups`",
+        "2. Create new parameter group if needed:",
+        "   ```bash",
+        "   aws rds create-db-cluster-parameter-group \\",
+        "     --db-cluster-parameter-group-name aurora-pg \\",
+        "     --db-parameter-group-family aurora-mysql5.7 \\",
+        "     --description \"Aurora MySQL 5.7 parameter group\"",
+        "   ```",
+        "3. Verify IAM permissions for parameter group management",
+        "4. Check for typos in parameter group name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidDBClusterState",
+      "error_message": "Cannot modify the DB cluster because it is in the state: backing-up",
+      "remediation_steps": [
+        "1. Check cluster status: `aws rds describe-db-clusters --db-cluster-identifier my-aurora-cluster`",
+        "2. Wait for backup to complete",
+        "3. Schedule modifications during maintenance windows",
+        "4. Check for other pending operations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Backups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SnapshotQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of snapshots allowed for your account",
+      "remediation_steps": [
+        "1. Delete old snapshots: `aws rds delete-db-cluster-snapshot --db-cluster-snapshot-identifier old-snapshot`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Implement snapshot lifecycle automation",
+        "4. Consider sharing snapshots to other accounts to reduce count"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthorizationNotFound",
+      "error_message": "No authorization token could be found for the specified IAM user",
+      "remediation_steps": [
+        "1. Enable IAM database authentication:",
+        "   ```bash",
+        "   aws rds modify-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --enable-iam-database-authentication \\",
+        "     --apply-immediately",
+        "   ```",
+        "2. Create database user mapped to IAM:",
+        "   ```sql",
+        "   CREATE USER 'iam_user' IDENTIFIED WITH AWSAUTHENTICATION AS 'RDS';",
+        "   GRANT ALL ON `%`.* TO 'iam_user'@'%';",
+        "   ```",
+        "3. Generate auth token:",
+        "   ```bash",
+        "   aws rds generate-db-auth-token \\",
+        "     --hostname my-aurora-cluster.cluster-123456789012.us-east-1.rds.amazonaws.com \\",
+        "     --port 3306 \\",
+        "     --username iam_user",
+        "   ```",
+        "4. Verify IAM policy allows `rds-db:connect`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/UsingWithRDS.IAMDBAuth.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBClusterQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of DB clusters allowed for your account (40)",
+      "remediation_steps": [
+        "1. Delete unused clusters: `aws rds delete-db-cluster --db-cluster-identifier old-cluster --skip-final-snapshot`",
+        "2. Request quota increase via AWS Support",
+        "3. Consider multi-tenant cluster designs",
+        "4. Use AWS Organizations for multi-account strategy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InstanceQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of DB instances allowed for your account",
+      "remediation_steps": [
+        "1. Delete unused instances: `aws rds delete-db-instance --db-instance-identifier old-instance --skip-final-snapshot`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Consider using larger instance types",
+        "4. Implement instance sharing patterns"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidDBInstanceState",
+      "error_message": "The DB instance isn't in an available state (current state: modifying)",
+      "remediation_steps": [
+        "1. Check instance status: `aws rds describe-db-instances --db-instance-identifier my-aurora-instance`",
+        "2. Wait for modification to complete",
+        "3. Reboot if stuck: `aws rds reboot-db-instance --db-instance-identifier my-aurora-instance`",
+        "4. Check for storage full or maintenance events"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Overview.DBInstance.Status.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "StorageTypeNotSupported",
+      "error_message": "The storage type 'standard' isn't supported for Aurora",
+      "remediation_steps": [
+        "1. Aurora only supports clustered volume storage",
+        "2. Verify no storage type parameter is specified",
+        "3. Check AWS CLI/SDK version compatibility",
+        "4. Review Aurora storage architecture documentation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSubnet",
+      "error_message": "The requested subnet is invalid. Subnets must be in at least two different AZs for Aurora clusters",
+      "remediation_steps": [
+        "1. Verify subnet AZ distribution: `aws ec2 describe-subnets --subnet-ids subnet-123456`",
+        "2. Select subnets from different AZs",
+        "3. Ensure subnets have proper route tables",
+        "4. Check VPC CIDR block conflicts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DBClusterRoleAlreadyExists",
+      "error_message": "The IAM role arn:aws:iam::123456789012:role/aurora-monitoring-role is already associated with the DB cluster",
+      "remediation_steps": [
+        "1. List associated roles: `aws rds describe-db-clusters --db-cluster-identifier my-aurora-cluster`",
+        "2. Remove duplicate association:",
+        "   ```bash",
+        "   aws rds remove-role-from-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --role-arn arn:aws:iam::123456789012:role/aurora-monitoring-role",
+        "   ```",
+        "3. Verify role isn't used by other features",
+        "4. Re-add with correct feature name if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/UsingWithRDS.IAMDBAuth.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "DBClusterRoleQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of IAM roles allowed for a DB cluster (5)",
+      "remediation_steps": [
+        "1. Remove unused roles:",
+        "   ```bash",
+        "   aws rds remove-role-from-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --role-arn arn:aws:iam::123456789012:role/unused-role",
+        "   ```",
+        "2. Consolidate IAM roles with multiple permissions",
+        "3. Check AWS documentation for current limits",
+        "4. Consider feature consolidation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_Limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidDBClusterEndpointState",
+      "error_message": "The custom endpoint isn't in an available state",
+      "remediation_steps": [
+        "1. Check endpoint status: `aws rds describe-db-cluster-endpoints --db-cluster-identifier my-aurora-cluster`",
+        "2. Wait for modifications to complete",
+        "3. Delete and recreate endpoint if stuck:",
+        "   ```bash",
+        "   aws rds delete-db-cluster-endpoint \\",
+        "     --db-cluster-endpoint-identifier my-endpoint",
+        "   ```",
+        "4. Verify IAM permissions for endpoint management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterEndpointAccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/readonly-user is not authorized to perform: rds:DescribeDBClusters",
+      "remediation_steps": [
+        "1. Attach `AmazonRDSReadOnlyAccess` for read-only access",
+        "2. For custom policies, ensure these permissions exist:",
+        "   - `rds:DescribeDBClusters`",
+        "   - `rds:ListTagsForResource`",
+        "3. Verify no SCPs are blocking these actions",
+        "4. Check resource-level permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/security-iam_id-based-policy-examples.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SNSNoAuthorization",
+      "error_message": "You do not have permission to publish to the SNS topic arn:aws:sns:us-east-1:123456789012:aurora-events",
+      "remediation_steps": [
+        "1. Add `sns:Publish` permission to RDS service role:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"sns:Publish\",",
+        "     \"Resource\": \"arn:aws:sns:us-east-1:123456789012:aurora-events\"",
+        "   }",
+        "   ```",
+        "2. Verify SNS topic policy allows RDS to publish",
+        "3. Check for SCP restrictions on SNS",
+        "4. Create new topic if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Events.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EventSubscriptionQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of event subscriptions allowed for your account (20)",
+      "remediation_steps": [
+        "1. Delete old subscriptions:",
+        "   ```bash",
+        "   aws rds delete-event-subscription \\",
+        "     --subscription-name old-subscription",
+        "   ```",
+        "2. Request quota increase via AWS Support",
+        "3. Consolidate subscriptions with broader filters",
+        "4. Consider using CloudWatch Events instead"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Events.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SubscriptionAlreadyExist",
+      "error_message": "An event notification subscription already exists for the source identifier",
+      "remediation_steps": [
+        "1. List existing subscriptions: `aws rds describe-event-subscriptions`",
+        "2. Modify existing subscription instead:",
+        "   ```bash",
+        "   aws rds modify-event-subscription \\",
+        "     --subscription-name my-subscription \\",
+        "     --enabled",
+        "   ```",
+        "3. Delete and recreate if needed",
+        "4. Verify IAM permissions for subscription management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Events.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SourceNotFound",
+      "error_message": "The source identifier you requested doesn't exist",
+      "remediation_steps": [
+        "1. Verify DB instance/cluster exists: `aws rds describe-db-instances`",
+        "2. Check for typos in source identifier",
+        "3. Ensure correct region is specified",
+        "4. Verify IAM permissions to describe resources"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Events.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRestoreFault",
+      "error_message": "Cannot restore from backup: The backup doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. List available backups: `aws rds describe-db-cluster-snapshots`",
+        "2. Verify IAM permissions for `rds:DescribeDBClusterSnapshots`",
+        "3. Check cross-account permissions if using shared snapshots",
+        "4. Ensure snapshot is in same region as target cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PointInTimeRestoreNotEnabled",
+      "error_message": "Point-in-time restore isn't enabled for the DB cluster",
+      "remediation_steps": [
+        "1. Enable backup retention:",
+        "   ```bash",
+        "   aws rds modify-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --backup-retention-period 7 \\",
+        "     --apply-immediately",
+        "   ```",
+        "2. Wait for first backup to complete",
+        "3. Verify IAM permissions for `rds:ModifyDBCluster`",
+        "4. Consider enabling during cluster creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PIT.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DBClusterSnapshotNotFoundFault",
+      "error_message": "DB cluster snapshot my-snapshot not found",
+      "remediation_steps": [
+        "1. List available snapshots: `aws rds describe-db-cluster-snapshots`",
+        "2. Verify snapshot exists in same region",
+        "3. Check IAM permissions for `rds:DescribeDBClusterSnapshots`",
+        "4. If shared, verify source account has granted access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SharedSnapshotQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of manual snapshots that can be shared (20)",
+      "remediation_steps": [
+        "1. Delete old shared snapshots:",
+        "   ```bash",
+        "   aws rds delete-db-cluster-snapshot \\",
+        "     --db-cluster-snapshot-identifier old-snapshot",
+        "   ```",
+        "2. Request quota increase via AWS Support",
+        "3. Consider using automated shared snapshots",
+        "4. Implement snapshot rotation policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthorizationAlreadyExists",
+      "error_message": "The authorization to share the snapshot already exists",
+      "remediation_steps": [
+        "1. List existing authorizations:",
+        "   ```bash",
+        "   aws rds describe-db-cluster-snapshot-attributes \\",
+        "     --db-cluster-snapshot-identifier my-snapshot",
+        "   ```",
+        "2. Modify existing authorization instead",
+        "3. Verify target account ID is correct",
+        "4. Check for duplicate API calls"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_ShareSnapshot.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "CertificateNotFound",
+      "error_message": "The certificate identifier rds-ca-2019 doesn't exist",
+      "remediation_steps": [
+        "1. List available certificates: `aws rds describe-certificates`",
+        "2. Use default certificate if applicable",
+        "3. Rotate certificate if needed:",
+        "   ```bash",
+        "   aws rds modify-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --ca-certificate-identifier rds-ca-2019 \\",
+        "     --apply-immediately",
+        "   ```",
+        "4. Verify IAM permissions for certificate management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/UsingWithRDS.SSL.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DomainNotFoundFault",
+      "error_message": "The Active Directory domain d-1234567890 doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. Verify directory exists: `aws ds describe-directories`",
+        "2. Check IAM permissions for `ds:DescribeDirectories`",
+        "3. Ensure VPC peering is configured between Aurora and Directory Service",
+        "4. Verify domain join permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_SQLServerWinAuth.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidDBClusterSnapshotState",
+      "error_message": "The DB cluster snapshot isn't available for restore",
+      "remediation_steps": [
+        "1. Check snapshot status: `aws rds describe-db-cluster-snapshots --db-cluster-snapshot-identifier my-snapshot`",
+        "2. Wait for snapshot to complete if in progress",
+        "3. Verify snapshot isn't shared from another account",
+        "4. Check for encryption key access issues"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidOptionGroupState",
+      "error_message": "The option group is in use and cannot be deleted",
+      "remediation_steps": [
+        "1. List instances using the option group: `aws rds describe-db-instances --query \"DBInstances[?OptionGroupName=='my-option-group'].DBInstanceIdentifier\"`",
+        "2. Modify instances to use different option group first",
+        "3. Wait for modifications to complete",
+        "4. Retry deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithOptionGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterCombination",
+      "error_message": "The parameter MasterUserPassword cannot be used with the parameter RestoreFromSnapshot",
+      "remediation_steps": [
+        "1. Remove conflicting parameters from API call",
+        "2. Reset password after restore if needed:",
+        "   ```bash",
+        "   aws rds modify-db-instance \\",
+        "     --db-instance-identifier my-aurora-instance \\",
+        "     --master-user-password new-password \\",
+        "     --apply-immediately",
+        "   ```",
+        "3. Verify IAM permissions for password reset",
+        "4. Check AWS CLI/SDK version for parameter validation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_RestoreFromSnapshot.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidS3BucketFault",
+      "error_message": "The S3 bucket my-bucket doesn't exist or you don't have permissions to access it",
+      "remediation_steps": [
+        "1. Verify bucket exists: `aws s3 ls s3://my-bucket`",
+        "2. Add these permissions to Aurora role:",
+        "   - `s3:GetObject`",
+        "   - `s3:ListBucket`",
+        "   - `s3:PutObject` (for SQL Server native backup/restore)",
+        "3. Check bucket policy allows Aurora service access",
+        "4. Verify bucket is in same region as Aurora cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/oracle-s3-integration.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "OptionGroupNotFoundFault",
+      "error_message": "The option group my-option-group doesn't exist",
+      "remediation_steps": [
+        "1. List available option groups: `aws rds describe-option-groups`",
+        "2. Create new option group if needed:",
+        "   ```bash",
+        "   aws rds create-option-group \\",
+        "     --option-group-name my-option-group \\",
+        "     --engine-name aurora-mysql \\",
+        "     --major-engine-version 5.7 \\",
+        "     --option-group-description \"Aurora MySQL 5.7 option group\"",
+        "   ```",
+        "3. Verify IAM permissions for option group management",
+        "4. Check for typos in option group name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithOptionGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedDBInstanceAlreadyExists",
+      "error_message": "The reserved DB instance already exists",
+      "remediation_steps": [
+        "1. List existing reservations: `aws rds describe-reserved-db-instances`",
+        "2. Verify reservation isn't already applied",
+        "3. Check for duplicate API calls",
+        "4. Wait for reservation to become active"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReservedDBInstanceQuotaExceeded",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of reserved DB instances allowed for your account",
+      "remediation_steps": [
+        "1. Delete unused reservations: `aws rds delete-reserved-db-instance --reserved-db-instance-id my-reservation`",
+        "2. Request quota increase via AWS Support",
+        "3. Consider larger instance sizes to reduce count",
+        "4. Use On-Demand instances until quota increased"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedDBInstancesOfferingNotFound",
+      "error_message": "The specified reserved DB instance offering doesn't exist",
+      "remediation_steps": [
+        "1. List available offerings: `aws rds describe-reserved-db-instances-offerings`",
+        "2. Verify offering ID is correct",
+        "3. Check region matches between offering and DB instance",
+        "4. Consider different term length or payment option"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithReservedDBInstances.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SourceDatabaseNotSupported",
+      "error_message": "The source database engine isn't supported for the specified DB engine version",
+      "remediation_steps": [
+        "1. Check supported source engines: `aws rds describe-db-engine-versions --engine aurora-mysql --engine-version 5.7`",
+        "2. Upgrade source database version first",
+        "3. Use database dump/restore instead of native upgrade",
+        "4. Verify IAM permissions for engine version checks"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_UpgradeDBInstance.MajorVersion.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "StorageQuotaExceeded",
+      "error_message": "The requested storage size exceeds your quota",
+      "remediation_steps": [
+        "1. Check current usage: `aws service-quotas get-service-quota --service-code rds --quota-code L-12345678`",
+        "2. Request quota increase via Service Quotas console",
+        "3. Reduce requested storage size",
+        "4. Consider archiving old data to S3"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_Limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SubscriptionCategoryNotFound",
+      "error_message": "The event notification category isn't supported",
+      "remediation_steps": [
+        "1. List supported categories: `aws rds describe-event-categories`",
+        "2. Use valid categories like \"availability\", \"backup\", \"configuration change\"",
+        "3. Verify IAM permissions for event management",
+        "4. Check AWS CLI/SDK version for new categories"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Events.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "BacktrackNotEnabled",
+      "error_message": "Backtrack is not enabled for the DB cluster",
+      "remediation_steps": [
+        "1. Enable backtrack:",
+        "   ```bash",
+        "   aws rds enable-backtrack \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --backtrack-window 24",
+        "   ```",
+        "2. Wait for backtrack to become active",
+        "3. Verify IAM permissions include `rds:EnableBacktrack`",
+        "4. Check for engine version compatibility"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidBacktrackIdentifier",
+      "error_message": "The specified backtrack identifier is invalid",
+      "remediation_steps": [
+        "1. List valid backtrack identifiers:",
+        "   ```bash",
+        "   aws rds describe-db-cluster-backtracks \\",
+        "     --db-cluster-identifier my-aurora-cluster",
+        "   ```",
+        "2. Verify backtrack ID format and existence",
+        "3. Check IAM permissions for backtrack operations",
+        "4. Use latest restorable time if unsure"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BacktrackWindowExceeded",
+      "error_message": "The requested backtrack time is outside the backtrack window (maximum 72 hours)",
+      "remediation_steps": [
+        "1. Increase backtrack window:",
+        "   ```bash",
+        "   aws rds modify-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --backtrack-window 72",
+        "   ```",
+        "2. Choose a time within current window",
+        "3. Verify IAM permissions for cluster modification",
+        "4. Consider traditional restore for older points in time"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServerlessV2ScalingConfigurationFailure",
+      "error_message": "Invalid serverless v2 scaling configuration: ACU range must be between 0.5 and 128",
+      "remediation_steps": [
+        "1. Verify ACU values are within limits",
+        "2. Check for conflicting capacity settings",
+        "3. Update configuration:",
+        "   ```bash",
+        "   aws rds modify-db-cluster \\",
+        "     --db-cluster-identifier my-aurora-cluster \\",
+        "     --serverless-v2-scaling-configuration MinCapacity=1,MaxCapacity=8",
+        "   ```",
+        "4. Verify IAM permissions for cluster modification"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html",
+      "severity": "Medium"
+    }
+  ]
+}

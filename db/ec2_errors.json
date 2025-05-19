@@ -1,0 +1,244 @@
+{
+  "EC2Errors": [
+    {
+      "error_code": "UnauthorizedOperation",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: ec2:RunInstances because no identity-based policy allows the ec2:RunInstances action",
+      "remediation_steps": [
+        "Check attached IAM policies using: `aws iam list-attached-user-policies --user-name example`",
+        "Add minimum required permissions: `ec2:RunInstances`, `ec2:Describe*`",
+        "Test permissions with IAM Policy Simulator",
+        "Verify no SCPs are blocking the action at the OU/account level"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AuthFailure",
+      "error_message": "The provided credentials do not have permission to create the service-linked role for EC2 Spot Instances",
+      "remediation_steps": [
+        "Ensure IAM entity has: `iam:CreateServiceLinkedRole`",
+        "Pre-create the role: `aws iam create-service-linked-role --aws-service-name spot.amazonaws.com`",
+        "Check for explicit denies in permission boundaries",
+        "Verify cross-account role assumptions (if applicable)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-requests.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientInstanceCapacity",
+      "error_message": "There is insufficient capacity for the requested instance type (m5.2xlarge) in the selected Availability Zone (us-east-1a)",
+      "remediation_steps": [
+        "Retry in different AZ: `aws ec2 describe-availability-zones`",
+        "Request alternative instance types (e.g., m5.xlarge)",
+        "Use Capacity Reservations for critical workloads",
+        "Submit limit increase case via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/troubleshooting-launch.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "VolumeInUse",
+      "error_message": "The volume 'vol-123456' is already attached to an instance",
+      "remediation_steps": [
+        "Identify attached instance: `aws ec2 describe-volumes --volume-ids vol-123456`",
+        "Gracefully detach: `aws ec2 detach-volume --volume-id vol-123456`",
+        "For terminated instances: `aws ec2 detach-volume --volume-id vol-123456 --force`",
+        "Wait for state=available before reattaching"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-detaching-volume.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidSubnetID.NotFound",
+      "error_message": "The subnet ID 'subnet-123456' does not exist in the specified Availability Zone",
+      "remediation_steps": [
+        "List valid subnets: `aws ec2 describe-subnets --filters Name=vpc-id,Values=vpc-123456`",
+        "Verify cross-region/account access",
+        "Check CloudFormation/Terraform outputs for correct subnet mapping",
+        "Validate VPC peering connections if using shared subnets"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InstanceLimitExceeded",
+      "error_message": "The maximum number of instances allowed for your AWS account (20) has been reached in the us-east-1 region",
+      "remediation_steps": [
+        "Terminate unused instances: `aws ec2 terminate-instances --instance-ids i-123456`",
+        "Request limit increase via Service Quotas console",
+        "Use smaller instance types or consolidate workloads",
+        "Consider AWS Organizations for multi-account strategy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidAMIID.NotFound",
+      "error_message": "The image ID 'ami-123456' does not exist in this region",
+      "remediation_steps": [
+        "List available AMIs: `aws ec2 describe-images --owners self amazon`",
+        "Copy AMI to target region: `aws ec2 copy-image --source-region us-west-1 --source-image-id ami-123456`",
+        "Verify AMI sharing if using cross-account",
+        "Check AWS Marketplace subscription status"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RequestLimitExceeded",
+      "error_message": "The request was denied due to AWS API request throttling. Wait and retry your request",
+      "remediation_steps": [
+        "Implement exponential backoff in your code",
+        "Reduce API call frequency using caching",
+        "Use describe* APIs with filters instead of multiple calls",
+        "Request increased API limits via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/throttling.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "UnsupportedOperation",
+      "error_message": "The instance 'i-123456' does not support the requested operation (e.g., EBS optimization)",
+      "remediation_steps": [
+        "Check instance type capabilities: `aws ec2 describe-instance-types --instance-types m5.large`",
+        "Modify instance attributes: `aws ec2 modify-instance-attribute --instance-id i-123456 --ebs-optimized`",
+        "Stop/Change to supported instance type if required",
+        "Verify virtualization type (HVM vs PV)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-optimized.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DependencyViolation",
+      "error_message": "The volume 'vol-123456' cannot be detached while the instance is in the 'stopping' state",
+      "remediation_steps": [
+        "Wait for instance to fully stop (check with `aws ec2 describe-instances`)",
+        "Force detach if urgent: `aws ec2 detach-volume --volume-id vol-123456 --force`",
+        "Reboot instance first if possible",
+        "Check for kernel-level disk activity before detaching"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-detaching-volume.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidParameterCombination",
+      "error_message": "The parameter 'SubnetId' cannot be used with the parameter 'NetworkInterfaces'",
+      "remediation_steps": [
+        "Use either SubnetId OR NetworkInterfaces, not both",
+        "For advanced networking, specify all ENI details in NetworkInterfaces",
+        "Verify launch template/config consistency",
+        "Check for conflicting parameters in Auto Scaling Groups"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/errors-overview.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidGroup.NotFound",
+      "error_message": "The security group ID 'sg-123456' does not exist in the default VPC",
+      "remediation_steps": [
+        "List available SGs: `aws ec2 describe-security-groups`",
+        "Verify VPC ID: `aws ec2 describe-vpcs`",
+        "Check cross-region references",
+        "Recreate security group if deleted recently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AddressLimitExceeded",
+      "error_message": "The maximum number of Elastic IP addresses has been reached for your AWS account in this region",
+      "remediation_steps": [
+        "Release unused EIPs: `aws ec2 release-address --allocation-id eipalloc-123456`",
+        "Request quota increase via Service Quotas",
+        "Use NAT Gateway instead of instance-attached EIPs",
+        "Consider AWS PrivateLink for internal services"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidKeyPair.NotFound",
+      "error_message": "The key pair 'my-keypair' does not exist in this region",
+      "remediation_steps": [
+        "List available keys: `aws ec2 describe-key-pairs`",
+        "Import key to correct region: `aws ec2 import-key-pair --key-name my-keypair --public-key-material file://key.pub`",
+        "Verify key pair exists in correct AWS account",
+        "For Windows instances, check password retrieval method"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SnapshotCreationPerVolumeRateExceeded",
+      "error_message": "You have exceeded the maximum number of snapshots (5) that can be created simultaneously from a single volume",
+      "remediation_steps": [
+        "Wait for existing snapshots to complete",
+        "Implement snapshot scheduling instead of bulk creation",
+        "Use AWS Backup for managed snapshot lifecycle",
+        "Request limit increase if business-critical"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modifying-snapshot-permissions.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "SpotInstanceRequestLimitExceeded",
+      "error_message": "The maximum number of Spot Instance requests (20) has been reached for your account in this region",
+      "remediation_steps": [
+        "Cancel unused requests: `aws ec2 cancel-spot-instance-requests --spot-instance-request-ids sir-123456`",
+        "Use Spot Fleets to manage capacity pools",
+        "Request limit increase via AWS Support",
+        "Consolidate workloads using larger instance types"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-requests.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSpotFleetRequestConfig",
+      "error_message": "The Spot Fleet request configuration is invalid: Invalid allocation strategy",
+      "remediation_steps": [
+        "Validate allocation strategy: lowestPrice/diversified/capacityOptimized",
+        "Check IAM permissions for spot-fleet-request",
+        "Verify instance type/subnet combinations",
+        "Use AWS-provided sample configurations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-requests.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PasswordNotAvailable",
+      "error_message": "The instance password is not available yet. Please wait 5 minutes after launch",
+      "remediation_steps": [
+        "Wait 5-10 minutes after instance launch",
+        "Verify EC2Connect agent is running (Windows)",
+        "Check system log for password generation status",
+        "Use AWS Session Manager for SSH/RDP alternative"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/connecting_to_windows_instance.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "MetadataError",
+      "error_message": "Failed to retrieve instance metadata from IMDSv2. Enable IMDSv2 in your launch template",
+      "remediation_steps": [
+        "Modify instance metadata options: `aws ec2 modify-instance-metadata-options --instance-id i-123456 --http-tokens required`",
+        "Update launch templates to enforce IMDSv2",
+        "Test with: `curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`",
+        "Check security group rules for metadata service access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidInstanceAttribute",
+      "error_message": "The instance attribute 'disableApiTermination' cannot be modified for instances in the 'terminated' state",
+      "remediation_steps": [
+        "Check instance state: `aws ec2 describe-instances --instance-ids i-123456`",
+        "Modify attributes before termination",
+        "Use AWS Config to enforce termination protection",
+        "For terminated instances, relaunch with correct attributes"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html",
+      "severity": "Low"
+    }
+  ]
+}

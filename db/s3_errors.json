@@ -1,0 +1,316 @@
+{
+  "S3IAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "Access Denied: User: arn:aws:iam::123456789012:user/example is not authorized to perform: s3:GetObject on resource: arn:aws:s3:::example-bucket/private-file.txt",
+      "remediation_steps": [
+        "1. Verify the IAM policy attached to the user/role has `s3:GetObject` permission",
+        "2. Check resource-level permissions (bucket policy/ACLs)",
+        "3. Ensure no explicit denies in SCPs or permission boundaries",
+        "4. Test permissions with: `aws s3 cp s3://example-bucket/private-file.txt ./ --dryrun`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-access-control.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidAccessKeyId",
+      "error_message": "The AWS Access Key Id you provided does not exist in our records",
+      "remediation_steps": [
+        "1. Regenerate IAM user access keys in AWS Console",
+        "2. Update credentials in AWS CLI/SDK: `aws configure`",
+        "3. Verify temporary credentials haven't expired (for STS/Roles)",
+        "4. Check for typos in the access key ID"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "SignatureDoesNotMatch",
+      "error_message": "The request signature we calculated does not match the signature you provided. Check your AWS Secret Access Key and signing method",
+      "remediation_steps": [
+        "1. Verify the secret key matches the access key",
+        "2. Check for trailing spaces in credentials",
+        "3. Ensure correct AWS region is configured",
+        "4. For temporary credentials, refresh STS tokens"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NoSuchBucketPolicy",
+      "error_message": "The bucket policy does not exist for the specified bucket",
+      "remediation_steps": [
+        "1. Verify bucket exists: `aws s3 ls s3://example-bucket`",
+        "2. Apply new policy: `aws s3api put-bucket-policy --bucket example-bucket --policy file://policy.json`",
+        "3. Check for typos in bucket name",
+        "4. Confirm you have `s3:PutBucketPolicy` permission"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MalformedPolicy",
+      "error_message": "Policy document should not specify a principal for bucket policies",
+      "remediation_steps": [
+        "1. Remove the 'Principal' field from bucket policy JSON",
+        "2. Validate policy syntax: `aws iam validate-policy --policy-document file://policy.json`",
+        "3. Use IAM policies instead for user-specific permissions",
+        "4. Check for hidden characters in policy document"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AccessControlListNotSupported",
+      "error_message": "The bucket does not allow ACLs. Use bucket policies or IAM policies instead",
+      "remediation_steps": [
+        "1. Disable ACLs: `aws s3api put-bucket-ownership-controls --bucket example-bucket --ownership-controls Rules=[{ObjectOwnership='BucketOwnerEnforced'}]`",
+        "2. Migrate permissions to bucket policies",
+        "3. Verify S3 Block Public Access settings",
+        "4. Update IAM policies for granular control"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidToken",
+      "error_message": "The provided token is malformed or otherwise invalid",
+      "remediation_steps": [
+        "1. Refresh temporary credentials (STS/Session tokens)",
+        "2. Check token expiration time",
+        "3. Verify AssumeRole permissions for cross-account access",
+        "4. Regenerate tokens with correct duration (max 36h for IAM roles)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AllAccessDisabled",
+      "error_message": "All access to this bucket has been disabled by the bucket owner",
+      "remediation_steps": [
+        "1. Check S3 Block Public Access settings",
+        "2. Verify bucket policy doesn't have explicit denies",
+        "3. Contact bucket owner to review permissions",
+        "4. Use VPC Endpoint policies if accessing from private network"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AuthorizationHeaderMalformed",
+      "error_message": "The authorization header is malformed; the region 'us-west-1' is wrong; expecting 'eu-west-1'",
+      "remediation_steps": [
+        "1. Configure correct region: `aws configure set region eu-west-1`",
+        "2. Use AWS_DEFAULT_REGION environment variable",
+        "3. For cross-region access, use correct endpoint: `s3.eu-west-1.amazonaws.com`",
+        "4. Enable `s3:us-east-1` global endpoint if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CrossLocationLoggingProhibitted",
+      "error_message": "Cross-location logging not allowed. Buckets in different regions cannot log to each other",
+      "remediation_steps": [
+        "1. Create log bucket in same region as source bucket",
+        "2. Disable logging: `aws s3api put-bucket-logging --bucket example-bucket --logging-configuration {}`",
+        "3. Use AWS Organizations to centralize logs across regions",
+        "4. Consider S3 Replication for cross-region logging"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "BucketAlreadyExists",
+      "error_message": "The requested bucket name is not available. The bucket namespace is shared by all users of the system",
+      "remediation_steps": [
+        "1. Choose a globally unique bucket name (add random suffix)",
+        "2. Check for deleted buckets (names are reserved for 90 days)",
+        "3. Use bucket naming guidelines: lowercase, no underscores",
+        "4. Try different AWS region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "BucketAlreadyOwnedByYou",
+      "error_message": "Your previous request to create the named bucket succeeded and you already own it",
+      "remediation_steps": [
+        "1. List your buckets: `aws s3 ls`",
+        "2. Verify bucket ownership: `aws s3api get-bucket-ownership-controls --bucket example-bucket`",
+        "3. Use existing bucket instead of creating new one",
+        "4. Check for duplicate automation scripts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidBucketState",
+      "error_message": "The bucket you tried to delete is not empty. You must delete all versions in the bucket",
+      "remediation_steps": [
+        "1. Enable versioning: `aws s3api put-bucket-versioning --bucket example-bucket --versioning-configuration Status=Enabled`",
+        "2. Empty bucket: `aws s3 rm s3://example-bucket --recursive`",
+        "3. Use S3 Batch Operations for large deletions",
+        "4. Check for incomplete multi-part uploads"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidPartOrder",
+      "error_message": "The list of parts was not in ascending order. Parts must be ordered by part number",
+      "remediation_steps": [
+        "1. Use AWS SDKs for multi-part uploads (handles ordering automatically)",
+        "2. Verify part numbers in CompleteMultipartUpload request",
+        "3. Check for network issues during upload",
+        "4. Retry with new upload ID"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KeyTooLong",
+      "error_message": "The specified key is too long. Object keys can be up to 1024 bytes",
+      "remediation_steps": [
+        "1. Shorten object key/path names",
+        "2. Use folder prefixes instead of long names",
+        "3. Check for URL-encoded characters increasing length",
+        "4. Consider S3 inventory for bulk renaming"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "NoSuchBucket",
+      "error_message": "The specified bucket does not exist or you don't have permission to access it",
+      "remediation_steps": [
+        "1. Verify bucket name spelling",
+        "2. Check bucket region: `aws s3api get-bucket-location --bucket example-bucket`",
+        "3. List available buckets: `aws s3 ls`",
+        "4. Verify IAM permissions: `s3:ListAllMyBuckets`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NoSuchKey",
+      "error_message": "The specified key does not exist or you don't have permission to access it",
+      "remediation_steps": [
+        "1. Verify object key/path is correct",
+        "2. Check for versioned/deleted objects",
+        "3. List objects: `aws s3 ls s3://example-bucket/path/ --recursive`",
+        "4. Verify `s3:GetObject` permission includes the key prefix"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OperationAborted",
+      "error_message": "A conflicting conditional operation is currently in progress against this resource",
+      "remediation_steps": [
+        "1. Wait a few minutes and retry",
+        "2. Check for parallel updates (bucket policies, ACLs, etc.)",
+        "3. Use S3 event notifications to track changes",
+        "4. Implement retry logic with exponential backoff"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PermanentRedirect",
+      "error_message": "The bucket you are attempting to access must be addressed using the specified endpoint",
+      "remediation_steps": [
+        "1. Use correct regional endpoint: `s3.eu-west-1.amazonaws.com`",
+        "2. Enable `s3:us-east-1` global endpoint if needed",
+        "3. Update SDK configuration with correct region",
+        "4. Check DNS resolution for bucket virtual hosting"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PreconditionFailed",
+      "error_message": "At least one of the preconditions you specified did not hold",
+      "remediation_steps": [
+        "1. Verify If-Match/If-None-Match header values",
+        "2. Check object ETag before conditional operations",
+        "3. Disable conditional headers if not required",
+        "4. Retry with fresh object metadata"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "Redirect",
+      "error_message": "Temporary redirect. Bucket is in a different region",
+      "remediation_steps": [
+        "1. Use correct regional endpoint",
+        "2. Configure AWS CLI default region",
+        "3. Enable auto-redirect in SDK configurations",
+        "4. Update application logic to handle redirects"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Redirects.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "RestoreAlreadyInProgress",
+      "error_message": "Object restore is already in progress",
+      "remediation_steps": [
+        "1. Wait for existing restore to complete",
+        "2. Check restore status: `aws s3api head-object --bucket example-bucket --key file.txt`",
+        "3. Modify restore tier (Expedited/Standard/Bulk)",
+        "4. Verify S3 Lifecycle rules aren't conflicting"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ServiceUnavailable",
+      "error_message": "Reduce your request rate. 503 Slow Down",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce request frequency (use batch operations)",
+        "3. Check for misbehaving applications",
+        "4. Request S3 request rate limit increase"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/request-rate-perf-considerations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TokenRefreshRequired",
+      "error_message": "The provided token must be refreshed",
+      "remediation_steps": [
+        "1. Refresh temporary credentials (STS/Session tokens)",
+        "2. Check token expiration time",
+        "3. Verify AssumeRole permissions",
+        "4. Use longer session duration (up to 36h)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidObjectState",
+      "error_message": "The operation is not valid for the object's storage class",
+      "remediation_steps": [
+        "1. Restore object from Glacier: `aws s3api restore-object --bucket example-bucket --key file.txt --restore-request Days=7`",
+        "2. Change storage class: `aws s3 cp s3://example-bucket/file.txt s3://example-bucket/file.txt --storage-class STANDARD`",
+        "3. Check S3 Lifecycle configuration",
+        "4. Verify `s3:RestoreObject` permission"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "XAmzContentSHA256Mismatch",
+      "error_message": "The provided 'x-amz-content-sha256' header does not match what was computed",
+      "remediation_steps": [
+        "1. Verify file wasn't modified during transfer",
+        "2. Disable chunked encoding if not needed",
+        "3. Use AWS SDKs which handle signing automatically",
+        "4. Check for network corruption during upload"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html",
+      "severity": "Medium"
+    }
+  ]
+}

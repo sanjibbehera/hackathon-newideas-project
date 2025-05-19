@@ -1,0 +1,655 @@
+{
+  "IAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: iam:CreateUser on resource: arn:aws:iam::123456789012:user/*",
+      "remediation_steps": [
+        "1. Attach IAM policy with iam:CreateUser permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"iam:CreateUser\",",
+        "       \"Resource\": \"*\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidClientTokenId",
+      "error_message": "The security token included in the request is invalid",
+      "remediation_steps": [
+        "1. Regenerate AWS credentials (access key/secret key)",
+        "2. Verify credentials are properly configured in AWS CLI/SDK",
+        "3. Check for expired temporary credentials (STS tokens)",
+        "4. Ensure correct AWS region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_expired-credentials",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "MalformedPolicyDocument",
+      "error_message": "Policy document should not specify a principal",
+      "remediation_steps": [
+        "1. Remove 'Principal' field from the policy document",
+        "2. Validate policy syntax:",
+        "   ```bash",
+        "   aws iam validate-policy --policy-document file://policy.json",
+        "   ```",
+        "3. Use correct JSON formatting",
+        "4. Check for hidden characters in policy document"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EntityAlreadyExists",
+      "error_message": "User with name test-user already exists",
+      "remediation_steps": [
+        "1. List existing users: `aws iam list-users`",
+        "2. Delete duplicate if unused: `aws iam delete-user --user-name test-user`",
+        "3. Choose a unique username",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_entity-already-exists",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NoSuchEntity",
+      "error_message": "The user with name non-existent-user cannot be found",
+      "remediation_steps": [
+        "1. Verify user exists: `aws iam get-user --user-name target-user`",
+        "2. Check for typos in username",
+        "3. List all users: `aws iam list-users`",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_no-such-entity",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DeleteConflict",
+      "error_message": "Cannot delete entity still being used as a principal in a resource policy",
+      "remediation_steps": [
+        "1. Find dependent resources:",
+        "   ```bash",
+        "   aws iam list-entities-for-policy --policy-arn arn:aws:iam::123456789012:policy/example-policy",
+        "   ```",
+        "2. Remove policy attachments first:",
+        "   ```bash",
+        "   aws iam detach-user-policy --user-name test-user --policy-arn arn:aws:iam::123456789012:policy/example-policy",
+        "   ```",
+        "3. Check for inline policies",
+        "4. Verify no service-linked roles depend on this entity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_delete-conflict",
+      "severity": "High"
+    },
+    {
+      "error_code": "LimitExceeded",
+      "error_message": "Maximum number of managed policies attached to entity (10) exceeded",
+      "remediation_steps": [
+        "1. List attached policies:",
+        "   ```bash",
+        "   aws iam list-attached-user-policies --user-name test-user",
+        "   ```",
+        "2. Remove unused policies:",
+        "   ```bash",
+        "   aws iam detach-user-policy --user-name test-user --policy-arn arn:aws:iam::aws:policy/old-policy",
+        "   ```",
+        "3. Combine permissions into fewer policies",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MalformedCertificate",
+      "error_message": "The X.509 certificate is malformed or expired",
+      "remediation_steps": [
+        "1. Verify certificate format (PEM encoded)",
+        "2. Check certificate expiration date",
+        "3. Re-upload certificate:",
+        "   ```bash",
+        "   aws iam upload-server-certificate --server-certificate-name my-cert --certificate-body file://cert.pem --private-key file://key.pem",
+        "   ```",
+        "4. Ensure certificate chain is complete if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PasswordPolicyViolation",
+      "error_message": "Password does not conform to the account password policy",
+      "remediation_steps": [
+        "1. View password policy:",
+        "   ```bash",
+        "   aws iam get-account-password-policy",
+        "   ```",
+        "2. Ensure password meets complexity requirements",
+        "3. Check minimum password length",
+        "4. Avoid recently used passwords"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "PolicyEvaluation",
+      "error_message": "An error occurred (PolicyEvaluation) when calling the AssumeRole operation: The requested resource could not be evaluated by IAM",
+      "remediation_steps": [
+        "1. Verify resource ARN format is correct",
+        "2. Check for typos in policy documents",
+        "3. Validate policy syntax with IAM policy simulator",
+        "4. Ensure all referenced resources exist"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_policies.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PolicyNotAttachable",
+      "error_message": "The policy arn:aws:iam::aws:policy/AdministratorAccess is not attachable to this entity",
+      "remediation_steps": [
+        "1. Check policy type (AWS managed vs customer managed)",
+        "2. Verify policy attachment restrictions",
+        "3. Create customer managed policy with similar permissions",
+        "4. Check for service control policy (SCP) restrictions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceFailure",
+      "error_message": "IAM service is currently unavailable",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry with exponential backoff",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if outage persists"
+      ],
+      "aws_doc_link": "https://health.aws.amazon.com/",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "UnmodifiableEntity",
+      "error_message": "The AWS managed policy cannot be modified",
+      "remediation_steps": [
+        "1. Create customer managed policy version instead",
+        "2. Clone AWS managed policy and modify the copy:",
+        "   ```bash",
+        "   aws iam create-policy --policy-name my-custom-policy --policy-document file://policy.json",
+        "   ```",
+        "3. Attach custom policy to target entities",
+        "4. Detach original AWS managed policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage-attach-detach.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DuplicateSSHPublicKey",
+      "error_message": "The SSH public key is already associated with the IAM user",
+      "remediation_steps": [
+        "1. List existing SSH keys:",
+        "   ```bash",
+        "   aws iam list-ssh-public-keys --user-name test-user",
+        "   ```",
+        "2. Upload with unique key ID:",
+        "   ```bash",
+        "   aws iam upload-ssh-public-key --user-name test-user --ssh-public-key-body \"$(cat ~/.ssh/id_rsa.pub)\"",
+        "   ```",
+        "3. Delete duplicate key if needed",
+        "4. Verify key fingerprint uniqueness"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidAuthenticationCode",
+      "error_message": "The authentication code provided is not valid",
+      "remediation_steps": [
+        "1. Verify MFA device time synchronization",
+        "2. Generate new MFA token",
+        "3. Check for leading/trailing spaces in code",
+        "4. Re-sync MFA device if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sync.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KeyPairMismatch",
+      "error_message": "The private key does not match the public key",
+      "remediation_steps": [
+        "1. Regenerate key pair",
+        "2. Verify correct key pair is being used",
+        "3. Check for file corruption",
+        "4. Re-upload public key to IAM"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CredentialReportExpired",
+      "error_message": "The credential report has expired. Generate a new one",
+      "remediation_steps": [
+        "1. Generate new credential report:",
+        "   ```bash",
+        "   aws iam generate-credential-report",
+        "   ```",
+        "2. Wait for report generation (check status with `aws iam get-credential-report`)",
+        "3. Download report within 4 hours of generation",
+        "4. Automate report generation if needed frequently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReportInProgress",
+      "error_message": "A credential report generation is already in progress",
+      "remediation_steps": [
+        "1. Wait for current report generation to complete",
+        "2. Check status: `aws iam get-credential-report`",
+        "3. Avoid concurrent report requests",
+        "4. Implement retry logic in automation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReportNotPresent",
+      "error_message": "Credential report has not been generated. Generate a new one",
+      "remediation_steps": [
+        "1. Initiate report generation:",
+        "   ```bash",
+        "   aws iam generate-credential-report",
+        "   ```",
+        "2. Wait 10-15 seconds before checking status",
+        "3. Verify IAM permissions include `iam:GenerateCredentialReport`",
+        "4. Check for service disruptions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ConcurrentModification",
+      "error_message": "Unable to complete request due to concurrent modification",
+      "remediation_steps": [
+        "1. Wait a few minutes and retry",
+        "2. Check for parallel IAM operations",
+        "3. Implement optimistic concurrency control",
+        "4. Verify no automation is making conflicting changes"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidInput",
+      "error_message": "The request was rejected because an invalid or out-of-range value was supplied",
+      "remediation_steps": [
+        "1. Verify all parameters are within documented limits",
+        "2. Check for special characters in names/descriptions",
+        "3. Validate JSON policy document syntax",
+        "4. Review API documentation for parameter requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/APIReference/CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidPublicKey",
+      "error_message": "The public key is malformed or otherwise invalid",
+      "remediation_steps": [
+        "1. Verify key format (PEM encoded X.509)",
+        "2. Check for line breaks in key file",
+        "3. Regenerate key pair if needed",
+        "4. Ensure correct key algorithm (RSA supported)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidUserType",
+      "error_message": "The request was rejected because the type of user is invalid",
+      "remediation_steps": [
+        "1. Verify user exists in IAM (not AWS root account)",
+        "2. Check for federation/SAML user mismatches",
+        "3. Use correct API for user type (IAM vs SSO)",
+        "4. Review user creation history"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NotSupportedService",
+      "error_message": "The specified service does not support temporary credentials",
+      "remediation_steps": [
+        "1. Verify service supports IAM roles",
+        "2. Check for regional service availability",
+        "3. Use long-term credentials if necessary",
+        "4. Review service documentation for IAM integration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-services-that-work-with-iam.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PolicyParsing",
+      "error_message": "Syntax errors in policy",
+      "remediation_steps": [
+        "1. Validate policy JSON syntax",
+        "2. Check for unescaped special characters",
+        "3. Use IAM Policy Validator:",
+        "   ```bash",
+        "   aws iam validate-policy --policy-document file://policy.json",
+        "   ```",
+        "4. Test with minimal policy and add statements incrementally"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html#access_policies-json",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceNotSupported",
+      "error_message": "The specified service does not support service-linked roles",
+      "remediation_steps": [
+        "1. Verify service supports service-linked roles",
+        "2. Check for typos in service principal",
+        "3. Review service documentation for SLR requirements",
+        "4. Use regular IAM role if SLR not available"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "Throttling",
+      "error_message": "Rate exceeded for iam:CreateUser",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of API calls",
+        "3. Batch operations where possible",
+        "4. Request limit increase via AWS Support if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnrecognizedPublicKeyEncoding",
+      "error_message": "The encoding of the public key is not recognized",
+      "remediation_steps": [
+        "1. Verify key is in PEM format",
+        "2. Check for file corruption",
+        "3. Re-generate SSH key pair if needed",
+        "4. Ensure correct key algorithm (RSA/ECDSA)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_ssh-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MinPasswordLengthExceeded",
+      "error_message": "The password is shorter than the minimum length required by the password policy",
+      "remediation_steps": [
+        "1. Check account password policy:",
+        "   ```bash",
+        "   aws iam get-account-password-policy",
+        "   ```",
+        "2. Create longer password meeting complexity requirements",
+        "3. Update password policy if needed:",
+        "   ```bash",
+        "   aws iam update-account-password-policy --minimum-password-length 10",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "PasswordTooLong",
+      "error_message": "The password exceeds the maximum length allowed (128 characters)",
+      "remediation_steps": [
+        "1. Shorten password to 128 characters or less",
+        "2. Check for unintended concatenation",
+        "3. Verify password generation process",
+        "4. Consider using AWS Secrets Manager for long credentials"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "PermissionsBoundaryViolation",
+      "error_message": "The permissions boundary does not allow the specified action",
+      "remediation_steps": [
+        "1. Review permissions boundary policy:",
+        "   ```bash",
+        "   aws iam get-policy --policy-arn arn:aws:iam::123456789012:policy/boundary-policy",
+        "   aws iam get-policy-version --policy-arn arn:aws:iam::123456789012:policy/boundary-policy --version-id v1",
+        "   ```",
+        "2. Update boundary policy to allow required actions",
+        "3. Verify boundary is attached to correct IAM entity",
+        "4. Check for explicit denies in boundary policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ServiceLastAccessed",
+      "error_message": "Unable to generate service last accessed data",
+      "remediation_steps": [
+        "1. Wait and retry the request",
+        "2. Check IAM permissions include `iam:GenerateServiceLastAccessedDetails`",
+        "3. Verify no concurrent requests for same entity",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_access-advisor.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TagPolicyViolation",
+      "error_message": "The tag does not comply with the tag policy",
+      "remediation_steps": [
+        "1. Review organization tag policies:",
+        "   ```bash",
+        "   aws organizations describe-policy --policy-id p-1234567890",
+        "   ```",
+        "2. Correct tag key/value format",
+        "3. Check for prohibited tag names (aws:, AWS: etc.)",
+        "4. Verify IAM permissions for tag modifications"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_tags.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnmodifiablePolicy",
+      "error_message": "The policy version cannot be modified",
+      "remediation_steps": [
+        "1. Create new policy version:",
+        "   ```bash",
+        "   aws iam create-policy-version --policy-arn arn:aws:iam::123456789012:policy/example-policy --policy-document file://new-policy.json --set-as-default",
+        "   ```",
+        "2. Delete old versions if at 5 version limit",
+        "3. Check if policy is AWS managed (cannot modify)",
+        "4. Verify IAM permissions for policy management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage-versioned.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidIdentityToken",
+      "error_message": "The web identity token could not be validated",
+      "remediation_steps": [
+        "1. Verify token issuer (Google, Facebook, Amazon, etc.)",
+        "2. Check token expiration time",
+        "3. Ensure correct audience claim in token",
+        "4. Re-authenticate with identity provider"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_oidc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IDPCommunicationError",
+      "error_message": "Error communicating with the identity provider",
+      "remediation_steps": [
+        "1. Verify identity provider is available",
+        "2. Check network connectivity to provider",
+        "3. Validate provider metadata URL",
+        "4. Review IAM identity provider configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_saml.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IDPRejectedClaim",
+      "error_message": "The identity provider rejected the authentication request",
+      "remediation_steps": [
+        "1. Verify SAML assertions match IAM trust policy",
+        "2. Check for required attributes in SAML response",
+        "3. Validate clock skew between systems",
+        "4. Review identity provider logs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_saml.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MalformedPolicyDocument",
+      "error_message": "AssumeRole policy may only specify STS as principal",
+      "remediation_steps": [
+        "1. Correct trust policy to use \"Service\": \"sts.amazonaws.com\"",
+        "2. Validate policy:",
+        "   ```bash",
+        "   aws iam validate-policy --policy-document file://trust-policy.json",
+        "   ```",
+        "3. Check for incorrect principal formats",
+        "4. Review IAM role trust policy requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MaxCredentialAgeExceeded",
+      "error_message": "The credential has expired and must be replaced",
+      "remediation_steps": [
+        "1. Rotate access keys:",
+        "   ```bash",
+        "   aws iam create-access-key --user-name test-user",
+        "   aws iam delete-access-key --user-name test-user --access-key-id OLDKEYID",
+        "   ```",
+        "2. Update applications with new credentials",
+        "3. Set up credential rotation automation",
+        "4. Consider temporary credentials instead"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MFADeviceNotFound",
+      "error_message": "The specified MFA device cannot be found",
+      "remediation_steps": [
+        "1. List MFA devices:",
+        "   ```bash",
+        "   aws iam list-mfa-devices --user-name test-user",
+        "   ```",
+        "2. Verify device serial number is correct",
+        "3. Deactivate and re-enable MFA device",
+        "4. Check for IAM permissions to manage MFA"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OpenIDConnectProviderAlreadyExists",
+      "error_message": "An OpenID Connect provider with this URL already exists",
+      "remediation_steps": [
+        "1. List existing OIDC providers:",
+        "   ```bash",
+        "   aws iam list-open-id-connect-providers",
+        "   ```",
+        "2. Use existing provider if possible",
+        "3. Delete duplicate if needed:",
+        "   ```bash",
+        "   aws iam delete-open-id-connect-provider --open-id-connect-provider-arn arn:aws:iam::123456789012:oidc-provider/example.com",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PolicyVersionLimitExceeded",
+      "error_message": "The maximum number of policy versions (5) has been reached",
+      "remediation_steps": [
+        "1. List policy versions:",
+        "   ```bash",
+        "   aws iam list-policy-versions --policy-arn arn:aws:iam::123456789012:policy/example-policy",
+        "   ```",
+        "2. Delete oldest non-default version:",
+        "   ```bash",
+        "   aws iam delete-policy-version --policy-arn arn:aws:iam::123456789012:policy/example-policy --version-id v1",
+        "   ```",
+        "3. Create new version",
+        "4. Consider condensing policy changes into fewer versions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage-versioned.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RoleUsageLimitExceeded",
+      "error_message": "The role session limit (100) has been reached",
+      "remediation_steps": [
+        "1. Terminate old sessions:",
+        "   ```bash",
+        "   aws iam list-role-sessions --role-name test-role",
+        "   ```",
+        "2. Increase session limit via AWS Support",
+        "3. Reduce session duration",
+        "4. Implement session recycling in applications"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SAMLProviderAlreadyExists",
+      "error_message": "A SAML provider with this name already exists",
+      "remediation_steps": [
+        "1. List existing SAML providers:",
+        "   ```bash",
+        "   aws iam list-saml-providers",
+        "   ```",
+        "2. Use existing provider if possible",
+        "3. Delete duplicate if needed:",
+        "   ```bash",
+        "   aws iam delete-saml-provider --saml-provider-arn arn:aws:iam::123456789012:saml-provider/example",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServerCertificateExpired",
+      "error_message": "The server certificate has expired",
+      "remediation_steps": [
+        "1. Upload new certificate:",
+        "   ```bash",
+        "   aws iam upload-server-certificate --server-certificate-name new-cert --certificate-body file://cert.pem --private-key file://key.pem",
+        "   ```",
+        "2. Update services using the certificate",
+        "3. Delete expired certificate",
+        "4. Set up certificate rotation automation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ServiceLinkedRoleCreationNotAllowed",
+      "error_message": "The service-linked role cannot be created because it already exists",
+      "remediation_steps": [
+        "1. Check for existing role:",
+        "   ```bash",
+        "   aws iam get-role --role-name AWSServiceRoleForService",
+        "   ```",
+        "2. Use existing role instead",
+        "3. Delete and recreate if needed (service permitting)",
+        "4. Verify IAM permissions for role management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/using-service-linked-roles.html",
+      "severity": "Medium"
+    }
+  ]
+}

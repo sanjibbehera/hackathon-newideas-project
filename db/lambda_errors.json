@@ -1,0 +1,374 @@
+{
+  "LambdaIAMErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "User: arn:aws:iam::123456789012:user/developer is not authorized to perform: lambda:InvokeFunction on resource: arn:aws:lambda:us-east-1:123456789012:function:my-function",
+      "remediation_steps": [
+        "1. Add `lambda:InvokeFunction` permission to the IAM policy:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Action\": \"lambda:InvokeFunction\",",
+        "     \"Resource\": \"arn:aws:lambda:*:123456789012:function:my-function\"",
+        "   }",
+        "   ```",
+        "2. Verify resource-level permissions in the Lambda function policy",
+        "3. Check for explicit denies in SCPs or permission boundaries",
+        "4. Test permissions with AWS CLI: `aws lambda invoke --function-name my-function response.json`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/access-control-identity-based.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterValueException",
+      "error_message": "The role defined for the function cannot be assumed by Lambda",
+      "remediation_steps": [
+        "1. Verify the IAM role exists: `aws iam get-role --role-name lambda-execution-role`",
+        "2. Ensure the role has a trust policy allowing Lambda to assume it:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Principal\": { \"Service\": \"lambda.amazonaws.com\" },",
+        "       \"Action\": \"sts:AssumeRole\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "3. Check for typos in the role ARN",
+        "4. Verify the IAM user has `iam:PassRole` permission"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ResourceConflictException",
+      "error_message": "The operation cannot be performed at this time. An update is in progress for resource: arn:aws:lambda:us-east-1:123456789012:function:my-function",
+      "remediation_steps": [
+        "1. Wait for the current update operation to complete",
+        "2. Check update status: `aws lambda get-function --function-name my-function`",
+        "3. Implement retry logic with exponential backoff",
+        "4. Verify no concurrent deployments are running (CI/CD pipelines, etc.)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "Function not found: arn:aws:lambda:us-east-1:123456789012:function:non-existent-function",
+      "remediation_steps": [
+        "1. Verify function name and region: `aws lambda list-functions`",
+        "2. Check for typos in the function ARN",
+        "3. Ensure you have `lambda:ListFunctions` permission",
+        "4. If deleted, wait 15-30 minutes before recreating with same name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-common.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ServiceException",
+      "error_message": "The AWS Lambda service encountered an internal error",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Status Page for regional outages",
+        "3. Verify IAM permissions haven't changed recently",
+        "4. Try in a different AWS region if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/API_CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PolicyLengthExceededException",
+      "error_message": "The final policy size (20480) is bigger than the limit (20480)",
+      "remediation_steps": [
+        "1. Reduce policy size by combining statements with similar permissions",
+        "2. Use wildcards in resource ARNs where safe",
+        "3. Split into multiple managed policies",
+        "4. Consider using permission boundaries"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyRequestsException",
+      "error_message": "Rate exceeded for operation PutFunctionConcurrency",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of API calls",
+        "3. Request limit increase via AWS Support",
+        "4. Use AWS Lambda Powertools for Python/Node.js to handle throttling"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/limits.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "EC2AccessDeniedException",
+      "error_message": "Lambda was unable to create an ENI in the VPC because of insufficient permissions",
+      "remediation_steps": [
+        "1. Add these permissions to the Lambda execution role:",
+        "   - `ec2:CreateNetworkInterface`",
+        "   - `ec2:DescribeNetworkInterfaces`",
+        "   - `ec2:DeleteNetworkInterface`",
+        "2. Verify VPC configuration has proper subnet/security group permissions",
+        "3. Check for SCPs blocking EC2 actions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ENILimitReachedException",
+      "error_message": "The request could not be completed because you have reached the limit for network interfaces in your VPC",
+      "remediation_steps": [
+        "1. Delete unused ENIs: `aws ec2 describe-network-interfaces --filters Name=status,Values=available`",
+        "2. Request VPC ENI limit increase",
+        "3. Reduce Lambda concurrency or use fewer VPC-connected functions",
+        "4. Consider using shared VPCs or smaller subnets"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidRequestContentException",
+      "error_message": "Could not parse request body into json: Unexpected character ('<' (code 60))",
+      "remediation_steps": [
+        "1. Verify the event payload is valid JSON",
+        "2. Check API Gateway mapping templates if using proxy integration",
+        "3. Ensure Content-Type header is set to application/json",
+        "4. Test with simple payload: `{\"key\":\"value\"}`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "UnsupportedMediaTypeException",
+      "error_message": "Unsupported Media Type: application/xml",
+      "remediation_steps": [
+        "1. Set Accept and Content-Type headers to application/json",
+        "2. Configure API Gateway to transform requests to JSON",
+        "3. Update client code to send JSON payloads",
+        "4. Add input parsing logic in Lambda function"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "RequestTooLargeException",
+      "error_message": "Request must be smaller than 6291456 bytes for the InvokeFunction operation",
+      "remediation_steps": [
+        "1. Compress payloads larger than 6MB",
+        "2. Use S3 for large data transfers (put object first, then pass S3 key to Lambda)",
+        "3. Implement chunking for very large payloads",
+        "4. Consider Step Functions for workflow processing"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRuntimeException",
+      "error_message": "The runtime parameter value 'python3.7' is no longer supported",
+      "remediation_steps": [
+        "1. Update to supported runtime: `aws lambda update-function-configuration --function-name my-function --runtime python3.9`",
+        "2. Check runtime compatibility with your code",
+        "3. Review Lambda runtime support policy",
+        "4. Test with new runtime in staging first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidZipFileException",
+      "error_message": "Could not unzip uploaded file. Please check your file, then try to upload again",
+      "remediation_steps": [
+        "1. Verify ZIP file structure has the handler file at root level",
+        "2. Recreate deployment package: `zip -r function.zip .`",
+        "3. Check for symlinks or special characters in filenames",
+        "4. Use AWS SAM or CDK for automated packaging"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/python-package.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KMSAccessDeniedException",
+      "error_message": "Lambda was unable to decrypt the environment variables because KMS access was denied",
+      "remediation_steps": [
+        "1. Add these permissions to the Lambda execution role:",
+        "   - `kms:Decrypt`",
+        "   - `kms:DescribeKey`",
+        "2. Verify the KMS key policy allows the role to use the key",
+        "3. Check for SCPs blocking KMS actions",
+        "4. Re-encrypt variables after fixing permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSDisabledException",
+      "error_message": "The KMS key used to encrypt the environment variables is disabled",
+      "remediation_steps": [
+        "1. Enable the KMS key: `aws kms enable-key --key-id alias/my-key`",
+        "2. Update Lambda to use a different active key",
+        "3. Check key rotation policy",
+        "4. Temporarily remove encrypted variables if urgent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/enabling-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KMSInvalidStateException",
+      "error_message": "The KMS key used to encrypt the environment variables is pending deletion",
+      "remediation_steps": [
+        "1. Cancel key deletion: `aws kms cancel-key-deletion --key-id alias/my-key`",
+        "2. Update Lambda to use a different key",
+        "3. Check CloudTrail logs for who scheduled deletion",
+        "4. Implement key management lifecycle policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/deleting-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "SubnetIPAddressLimitReachedException",
+      "error_message": "The specified subnet does not have enough free IP addresses",
+      "remediation_steps": [
+        "1. Add more IP space to the subnet (larger CIDR block)",
+        "2. Reduce Lambda concurrency settings",
+        "3. Distribute functions across multiple subnets",
+        "4. Request VPC quota increase"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EFSMountFailureException",
+      "error_message": "Lambda could not mount the configured EFS file system due to permission or configuration issues",
+      "remediation_steps": [
+        "1. Verify the Lambda role has:",
+        "   - `elasticfilesystem:ClientMount`",
+        "   - `elasticfilesystem:ClientWrite` (if needed)",
+        "2. Check EFS network accessibility from Lambda VPC",
+        "3. Validate EFS security group allows Lambda ENIs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-filesystem.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EFSMountTimeoutException",
+      "error_message": "Lambda could not establish connection to EFS within the timeout period",
+      "remediation_steps": [
+        "1. Check EFS mount target status in the same AZ as Lambda",
+        "2. Verify security group rules allow NFS traffic (port 2049)",
+        "3. Reduce Lambda initialization code if cold start is too long",
+        "4. Consider provisioned concurrency for time-sensitive mounts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-filesystem.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EFSIOException",
+      "error_message": "Lambda encountered an IO error while accessing EFS",
+      "remediation_steps": [
+        "1. Check EFS file system status",
+        "2. Verify IAM permissions on the EFS access point",
+        "3. Test with smaller files to isolate performance issues",
+        "4. Monitor EFS burst credits"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-filesystem.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "FunctionNotReady",
+      "error_message": "The function is not ready for invocation yet. Please wait and try again",
+      "remediation_steps": [
+        "1. Wait 30-60 seconds after function creation/update",
+        "2. Check function state: `aws lambda get-function --function-name my-function`",
+        "3. Verify no conflicting updates are in progress",
+        "4. Implement retry logic in calling application"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/functions-states.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "RecursiveInvocationException",
+      "error_message": "Lambda detected recursive invocation for function: arn:aws:lambda:us-east-1:123456789012:function:my-function",
+      "remediation_steps": [
+        "1. Review function logic for self-invocation",
+        "2. Add termination condition to recursive calls",
+        "3. Use Step Functions for workflow orchestration",
+        "4. Set reserved concurrency to 0 to stop recursion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ReservedFunctionConcurrentInvocationLimitExceeded",
+      "error_message": "Operation cannot be performed at this time because the reserved concurrency limit has been reached",
+      "remediation_steps": [
+        "1. Increase reserved concurrency: `aws lambda put-function-concurrency --function-name my-function --reserved-concurrent-executions 100`",
+        "2. Optimize function duration to process more requests",
+        "3. Implement request queuing with SQS",
+        "4. Distribute load across multiple functions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CodeStorageExceededException",
+      "error_message": "You have exceeded your maximum total code size per account",
+      "remediation_steps": [
+        "1. Delete unused functions: `aws lambda delete-function --function-name old-function`",
+        "2. Request quota increase via AWS Support",
+        "3. Reduce deployment package size (exclude unused files)",
+        "4. Use Lambda Layers for shared dependencies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CodeVerificationFailedException",
+      "error_message": "The provided code failed signature verification",
+      "remediation_steps": [
+        "1. Re-upload the deployment package",
+        "2. Verify code hasn't been tampered with",
+        "3. Check for ZIP file corruption",
+        "4. Disable code signing if not required"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-codesigning.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSecurityGroupIDException",
+      "error_message": "The security group ID 'sg-123456' does not exist or you don't have permission to access it",
+      "remediation_steps": [
+        "1. Verify security group exists: `aws ec2 describe-security-groups --group-ids sg-123456`",
+        "2. Check VPC configuration matches Lambda settings",
+        "3. Ensure IAM permissions include `ec2:DescribeSecurityGroups`",
+        "4. Update Lambda VPC config with correct SG ID"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSubnetIDException",
+      "error_message": "The subnet ID 'subnet-123456' does not exist or you don't have permission to access it",
+      "remediation_steps": [
+        "1. Verify subnet exists: `aws ec2 describe-subnets --subnet-ids subnet-123456`",
+        "2. Check subnet is in same VPC as security groups",
+        "3. Ensure IAM permissions include `ec2:DescribeSubnets`",
+        "4. Update Lambda VPC config with correct subnet ID"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PreconditionFailedException",
+      "error_message": "The RevisionId provided does not match the latest RevisionId for the function",
+      "remediation_steps": [
+        "1. Get latest revision: `aws lambda get-function --function-name my-function`",
+        "2. Update your request with current revision ID",
+        "3. Implement optimistic concurrency control",
+        "4. Retry operation after fetching latest state"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-versions.html",
+      "severity": "Medium"
+    }
+  ]
+}

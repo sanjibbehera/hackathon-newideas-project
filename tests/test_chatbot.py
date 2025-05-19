@@ -3,8 +3,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))  # Add project root to path
 
 import pytest
-from app.main import app
+# tests/test.py
 from fastapi.testclient import TestClient
+from app.main import app  # Import the FastAPI app instance
 
 client = TestClient(app)
 
