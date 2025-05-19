@@ -2,22 +2,14 @@ from typing import Optional, List
 from ollama import AsyncClient
 from app.services.aws_error_service import AWSErrorService
 import re
+from app.services.approved_aws_services import APPROVED_SERVICES, is_service_approved, get_approved_services_list
 
-class ChatService:
-    APPROVED_SERVICES = {
-        "IAM": "Identity and Access Management",
-        "EC2": "Elastic Compute Cloud",
-        "S3": "Simple Storage Service",
-        "Lambda": "AWS Lambda",
-        "RDS": "Relational Database Service",
-        "Aurora": "Aurora Database",
-        "EKS": "Elastic Kubernetes Service",
-        "DynamoDB": "DynamoDB"
-    }
+class ChatService:    
 
     def __init__(self):
         self.ollama = AsyncClient()
         self.rag = AWSErrorService()
+        self.approved_services = APPROVED_SERVICES
 
     async def process_message(self, user_input: str, conversation: List[dict]) -> str:
         # Check conversation history for existing service context
@@ -58,7 +50,7 @@ class ChatService:
             return f"Hello again! You're currently discussing {current_service} issues. What's your question?"
         return (
             "Hello! I'm your AWS support assistant specializing in these services:\n"
-            + "\n".join([f"- {k} ({v})" for k, v in self.APPROVED_SERVICES.items()]) + 
+            + "\n".join(get_approved_services_list()) + 
             "\n\nWhich service are you having trouble with?"
         )
 
@@ -80,7 +72,7 @@ class ChatService:
 
     def _get_unapproved_service_response(self, service: str) -> str:
         return (
-            f"I specialize only in these AWS services: {', '.join(self.APPROVED_SERVICES)}\n"
+            f"I specialize only in these AWS services: {', '.join(get_approved_services_list())}\n"
             f"I can't assist with {service} issues. Would you like help with one of "
             "the approved services instead?"
         )

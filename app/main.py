@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -13,9 +15,18 @@ from ollama import Client
 import re
 from typing import Optional, Set
 from .routes import aws_errors
+from .services.approved_aws_services import is_service_approved, APPROVED_SERVICES
 
 app = FastAPI()
 app.include_router(aws_errors.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Configure static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -30,26 +41,7 @@ async def init_rag():
     except Exception as e:
         print(f"⚠️ RAG initialization failed: {e}")
 
-def load_approved_services(file_path: str = "db/approved_aws_services.txt") -> Set[str]:
-    """Load approved AWS services from file and return all valid service names"""
-    approved_services = set()
-    
-    try:
-        with open(file_path, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue
-                
-                # Extract all service name variants (split by semicolon)
-                variants = [v.strip() for v in line.split(';') if v.strip()]
-                approved_services.update(variants)
-                
-    except FileNotFoundError:
-        print(f"Warning: Approved services file {file_path} not found. Using default set.")
-        approved_services = {"ec2", "s3", "lambda", "iam"}  # Fallback
-    
-    return approved_services
+APPROVED_SERVICES = APPROVED_SERVICES
 
 # Initialize Ollama client
 ollama_client = Client(host='http://localhost:11434')
@@ -58,7 +50,6 @@ ollama_client = Client(host='http://localhost:11434')
 ALLOWED_EXTENSIONS = {'.doc', '.docx', '.pdf', '.png', '.jpg', '.jpeg', '.txt'}
 
 # List of approved services (could also load from a file)
-APPROVED_SERVICES = load_approved_services()
 APPROVAL_LINK = "https://your-company.com/aws-service-approval"
 
 # Add this helper function
@@ -74,19 +65,31 @@ def is_iam_related(message: str) -> bool:
 def contains_unapproved_service(message: str) -> Optional[str]:
     """
     Check if message mentions unapproved AWS services by comparing against
-    the loaded APPROVED_SERVICES set.
+    the approved services list.
     Returns the first unapproved service found, or None if all are approved.
     """
-    # Enhanced AWS service pattern
-    aws_service_pattern = r'''
-        \b(?:Amazon\s+|AWS\s+)?  # Optional prefix
-        (?:                       # Service names:
-            [A-Za-z][\w-]*        # Start with letter
-            (?:\s+[A-Za-z][\w-]*)* # Additional words
-            |                     # OR
-            [A-Z]{2,}             # All-caps acronyms
-        )\b
-    '''
+
+    # First check for exact matches (case insensitive)
+    words = re.findall(r'\b[A-Za-z][A-Za-z0-9-]*\b', message)
+    for word in words:
+        if len(word) > 2:  # Ignore short words
+            if word.upper() in [s.upper() for s in APPROVED_SERVICES.keys()]:
+                return None
+            if word.upper() in ["AWS", "AMAZON"]:
+                continue
+            # Check for service patterns like "AWS Redshift"
+            if (f"aws {word}".upper() in [f"aws {s}".upper() for s in APPROVED_SERVICES.keys()] or
+                f"amazon {word}".upper() in [f"amazon {s}".upper() for s in APPROVED_SERVICES.keys()]):
+                return None
+            
+    # Then do the more complex pattern matching
+    aws_service_pattern = r'\b(?:Amazon\s+|AWS\s+)?([A-Z][A-Za-z0-9-]+)\b'
+    matches = re.finditer(aws_service_pattern, message, re.IGNORECASE)
+    
+    for match in matches:
+        service = match.group(1)  # Get just the service name part
+        if not is_service_approved(service):
+            return f"AWS {service}" if service.upper() != service else service
     
     # Common false positives to exclude
     false_positives = {
@@ -94,12 +97,10 @@ def contains_unapproved_service(message: str) -> Optional[str]:
         'server', 'service', 'account', 'user', 'access'
     }
     
-    # Get lowercase versions of all approved services for comparison
-    approved_lower = {s.lower() for s in APPROVED_SERVICES}
+    # Find all potential AWS service mentions in the message
+    potential_services = re.finditer(aws_service_pattern, message, re.IGNORECASE | re.VERBOSE)
     
-    matches = re.finditer(aws_service_pattern, message, re.IGNORECASE | re.VERBOSE)
-    
-    for match in matches:
+    for match in potential_services:  # Changed from 'matches' to 'potential_services'
         service = match.group()
         normalized = re.sub(r'^(Amazon|AWS)\s+', '', service, flags=re.IGNORECASE)
         normalized = normalized.strip().lower()
@@ -111,7 +112,7 @@ def contains_unapproved_service(message: str) -> Optional[str]:
         # Check for AWS prefix pattern even if not matched
         if not re.match(r'^(Amazon|AWS)\s+', service, re.IGNORECASE):
             # For non-prefixed names, only check if it's a known acronym
-            if len(normalized) > 5 and normalized not in approved_lower:
+            if len(normalized) > 5 and normalized not in [s.lower() for s in APPROVED_SERVICES.keys()]:
                 continue
                 
         # Check all possible variations against approved services
@@ -123,7 +124,7 @@ def contains_unapproved_service(message: str) -> Optional[str]:
         }
         
         # If none of the variations match approved services
-        if not any(variation in approved_lower for variation in normalized_variations):
+        if not any(is_service_approved(variation) for variation in normalized_variations):
             return service
             
     return None
@@ -150,7 +151,50 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/api/chat")
-async def chat_endpoint(request: Request, message: str):
+async def chat_endpoint(request: Request):
+    try:
+        body = await request.json()
+        message = body.get('message', '')
+
+        if not message:
+            return JSONResponse(
+                content={"response": "Please provide a message"},
+                status_code=400
+            )
+
+        # Check for unapproved services
+        unapproved_service = contains_unapproved_service(message)
+        if unapproved_service:
+            return {
+                "response": (
+                    f"I specialize in AWS IAM and don't have information about {unapproved_service}.\n"
+                    "I can help with these approved services:\n"
+                    + "\n".join([f"- {k} ({v})" for k, v in APPROVED_SERVICES.items()])
+                ),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        # Handle IAM-related questions
+        if is_iam_related(message):
+            bot_response = get_ollama_response(message)
+        else:
+            # Handle non-IAM questions
+            if any(greeting in message.lower() for greeting in ['hi', 'hello', 'hey']):
+                bot_response = "Hello! I'm your AWS IAM assistant. How can I help you today?"
+            else:
+                bot_response = "I specialize in AWS IAM questions. Could you tell me more about your IAM-related needs?"
+
+        return {
+            "response": bot_response,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        print(f"Error in chat endpoint: {e}")
+        return JSONResponse(
+            content={"response": "An error occurred while processing your request"},
+            status_code=500
+        )
     # Check for unapproved services first
     unapproved_service = contains_unapproved_service(message)
     if unapproved_service:

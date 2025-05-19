@@ -28,17 +28,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    function sendMessage() {
+    async function sendMessage() {
         const message = userInput.value.trim();
-        if (message) {
-            addMessage(message, 'user');
-            userInput.value = '';
-            
-            // Here you would typically send the message to your backend
-            // For now, we'll just simulate a response
-            setTimeout(() => {
-                addMessage("Thanks for your message! How can I assist you with AWS IAM?", 'bot');
-            }, 1000);
+        if (!message) return;
+
+        addMessage('user', message);
+        document.getElementById('userInput').value = '';
+        // addMessage('bot', data.response.replace(/\n/g, '<br>'));
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            addMessage('bot', data.response.replace(/\n/g, '<br>'));
+            // Format the response better if it's about unapproved services
+            if (data.response.includes('not currently approved') || 
+                data.response.includes('I specialize only')) {
+                addMessage('bot', data.response.replace(/\n/g, '<br>'));
+            } else {
+                addMessage('bot', data.response);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addMessage('bot', 'Sorry, there was an error processing your request.');
         }
     }
     
