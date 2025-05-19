@@ -22,12 +22,22 @@ class AWSErrorService:
         error_files = Path("./data/aws_errors").glob("*.json")
         
         for file in error_files:
-            with open(file) as f:
-                data = json.load(f)
-                service = file.stem.replace("_errors", "").upper()
-                for error in data.get("Errors", data.get("IAMErrors", [])):
-                    error["service"] = service  # Add service tag
-                    errors.append(error)
+            try:
+                with open(file) as f:
+                    data = json.load(f)
+                    service = file.stem.replace("_errors", "").upper()
+                    # Handle both "Errors" and "IAMErrors" top-level keys
+                    error_list = data.get("Errors", data.get(f"{service}Errors", []))
+                    for error in error_list:
+                        error["service"] = service
+                        errors.append(error)
+            except json.JSONDecodeError as e:
+                print(f"⚠️ Skipping {file.name} due to JSON error: {e}")
+                continue
+            except Exception as e:
+                print(f"⚠️ Error processing {file.name}: {e}")
+                continue
+                
         return errors
 
     def _initialize_db(self):

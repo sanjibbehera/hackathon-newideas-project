@@ -23,8 +23,12 @@ templates = Jinja2Templates(directory="templates")
 
 @app.on_event("startup")
 async def init_rag():
-    from app.services.aws_error_service import AWSErrorService
-    AWSErrorService()  # Auto-initializes DB
+    try:
+        from app.services.aws_error_service import AWSErrorService
+        AWSErrorService()
+        print("✅ RAG database initialized successfully")
+    except Exception as e:
+        print(f"⚠️ RAG initialization failed: {e}")
 
 def load_approved_services(file_path: str = "db/approved_aws_services.txt") -> Set[str]:
     """Load approved AWS services from file and return all valid service names"""
