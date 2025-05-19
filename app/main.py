@@ -12,12 +12,19 @@ from app.iam_analyzer import analyze_iam_policy
 from ollama import Client
 import re
 from typing import Optional, Set
+from .routes import aws_errors
 
 app = FastAPI()
+app.include_router(aws_errors.router)
 
 # Configure static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+@app.on_event("startup")
+async def init_rag():
+    from app.services.aws_error_service import AWSErrorService
+    AWSErrorService()  # Auto-initializes DB
 
 def load_approved_services(file_path: str = "db/approved_aws_services.txt") -> Set[str]:
     """Load approved AWS services from file and return all valid service names"""

@@ -89,6 +89,13 @@ hackathon-newideas-project/
 ### Chatbot Frontend
 ![Chatbot Interface](./images/chatbot_frontend_screenshot.png)
 
+## Build the LLM model
+
+```bash
+ollama pull mistral
+ollama create aws-expert -f ./data/aws_expert.Modelfile
+```
+
 ## Contributing
 1. Fork the repository
 2. Create a new branch (git checkout -b feature/your-feature)
