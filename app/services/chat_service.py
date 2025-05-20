@@ -3,7 +3,7 @@ from ollama import AsyncClient
 from app.services.aws_error_service import AWSErrorService
 import re
 from enum import Enum
-from app.services.approved_aws_services import APPROVED_SERVICES, is_service_approved, get_approved_services_list
+from app.services.approved_aws_services import APPROVED_SERVICES, is_service_approved, get_approved_services_list, get_unapproved_service
 
 class ConversationState(str, Enum):
     NORMAL = "normal"
@@ -21,45 +21,91 @@ class ChatService:
     async def process_message(self, user_input: str, conversation_state: str, current_service: str = None, is_first_interaction: bool = True) -> dict:     
         # Normalize input
         user_input = user_input.strip().lower()
+        unapproved_service = get_unapproved_service(user_input)
+        APPROVAL_LINK = "https://your-company.com/aws-service-approval"
+        # print("=====>>>>>>>>>>", unapproved_service)
+
+        if unapproved_service and not is_service_approved(unapproved_service):
+            return {
+                "response": (
+                    f"I'm sorry, but {unapproved_service} is not currently an approved AWS service in SYF.\n"
+                    "To get access, please request a CDA (Cloud Deployment Approval) by visiting:\n"
+                    f"{APPROVAL_LINK}"
+                ),
+                "services": get_approved_services_list(),
+                "response_type": "approved_services",
+                "new_state": ConversationState.AWS_HELP,
+                "service": unapproved_service,
+            }
 
         # Check for greetings
-        if self._is_greeting(user_input):
+        if is_first_interaction and self._is_greeting(user_input):
             return {
-                "response": "Hello! How can I assist you with AWS services today?" if is_first_interaction 
-                       else "How can I help you with AWS services?",
-                "new_state": ConversationState.NORMAL,
+                "response": "Hello! I'm your AWS support assistant.",
+                "new_state": ConversationState.INITIAL_GREETING,
                 "response_type": "normal"
             }
         
         # Check for AWS service mentions
         detected_service = self._detect_service(user_input)
-        APPROVAL_LINK = "https://your-company.com/aws-service-approval"
 
-        # Special handling for first technical interaction
-        if is_first_interaction and self._is_aws_related(user_input):
+        # Handle first technical interaction
+        if is_first_interaction and not self._is_greeting(user_input):
             if detected_service:
                 if is_service_approved(detected_service):
-                    return await self._handle_service_query(detected_service, user_input)
+                    print("Inside Line 56")
+                    return {
+                        "response": (
+                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            "1. What specific issue are you facing?\n"
+                            "2. Any error messages or codes?\n"
+                            "3. Screenshots or code snippets would be helpful!"
+                        ),
+                        "new_state": ConversationState.SERVICE_SPECIFIC,
+                        "service": detected_service,
+                        "response_type": "service_response"
+                    }
+                else:
+                    return {
+                        "response": f"I specialize in AWS IAM and related services, but not {detected_service}.",
+                        "services": get_approved_services_list(),
+                        "response_type": "approved_services",
+                        "new_state": ConversationState.AWS_HELP
+                    }
+            elif self._is_aws_related(user_input):
                 return {
-                    "response": f"I specialize in AWS IAM and related services, but not {detected_service}. Here are the services I support:",
+                    "response": "Which AWS service are you having trouble with?",
                     "services": get_approved_services_list(),
                     "response_type": "approved_services",
                     "new_state": ConversationState.AWS_HELP
                 }
-            return {
-                "response": "Which AWS service do you need help with?",
-                "services": get_approved_services_list(),
-                "response_type": "approved_services",
-                "new_state": ConversationState.AWS_HELP
-            }
             
         # State machine logic
-        if conversation_state == ConversationState.NORMAL:
+        if conversation_state == ConversationState.INITIAL_GREETING:
             if detected_service:
                 if is_service_approved(detected_service):
-                    return await self._handle_service_query(detected_service, user_input)
+                    print("Inside Line 87")
+                    return {
+                        "response": (
+                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            "1. What specific issue are you facing?\n"
+                            "2. Any error messages or codes?\n"
+                            "3. Screenshots or code snippets would be helpful!"
+                        ),
+                        "new_state": ConversationState.SERVICE_SPECIFIC,
+                        "service": detected_service,
+                        "response_type": "service_response"
+                    }
+                else:
+                    return {
+                        "response": f"I don't support {detected_service}.",
+                        "services": get_approved_services_list(),
+                        "response_type": "approved_services",
+                        "new_state": ConversationState.AWS_HELP
+                    }
+            elif self._is_aws_related(user_input):
                 return {
-                    "response": f"I don't support {detected_service}.",
+                    "response": "Which AWS service are you having trouble with?",
                     "services": get_approved_services_list(),
                     "response_type": "approved_services",
                     "new_state": ConversationState.AWS_HELP
@@ -75,20 +121,52 @@ class ChatService:
         elif conversation_state == ConversationState.AWS_HELP:
             if detected_service:
                 if is_service_approved(detected_service):
-                    return await self._handle_service_query(detected_service, user_input)
-                return {
-                    "response": f"I don't support {detected_service}.",
-                    "services": get_approved_services_list(),
-                    "response_type": "approved_services"
-                }
+                    print("Inside Line 124")
+                    return {
+                        "response": (
+                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            "1. What specific issue are you facing?\n"
+                            "2. Any error messages or codes?\n"
+                            "3. Screenshots or code snippets would be helpful!"
+                        ),
+                        "new_state": ConversationState.SERVICE_SPECIFIC,
+                        "service": detected_service,
+                        "response_type": "service_response"
+                    }
+                else:
+                    return {
+                        "response": f"I don't support {detected_service}.",
+                        "services": get_approved_services_list(),
+                        "response_type": "approved_services"
+                    }
             return {
                 "response": "Please specify an AWS service from the list.",
                 "services": get_approved_services_list(),
                 "response_type": "approved_services"
             }
         
-        elif conversation_state == ConversationState.SERVICE_SPECIFIC and current_service:
-            return await self._handle_service_query(current_service, user_input)
+        elif conversation_state == ConversationState.SERVICE_SPECIFIC:
+            if current_service:
+                # Check if user provided error details or attachments
+                if self._contains_error_details(user_input):
+                    return await self._handle_service_query(current_service, user_input)
+                else:
+                    return {
+                        "response": (
+                            f"To better assist with your {current_service} issue:\n"
+                            "1. Please describe the exact problem\n"
+                            "2. Share any error messages\n"
+                            "3. Attach screenshots if possible"
+                        ),
+                        "new_state": ConversationState.SERVICE_SPECIFIC,
+                        "service": current_service,
+                        "response_type": "service_response"
+                    }
+            # Default fallback
+            return {
+                "response": "How can I help you with AWS services today?",
+                "response_type": "normal"
+            }
         
         if detected_service and not is_service_approved(detected_service):
             return {
@@ -108,6 +186,11 @@ class ChatService:
             "response": "How can I help you with AWS services today?",
             "response_type": "normal"
         }
+    
+    def _contains_error_details(self, text: str) -> bool:
+        """Check if message contains potential error details"""
+        error_indicators = ['error', 'issue', 'problem', 'not working', 'failed']
+        return any(indicator in text.lower() for indicator in error_indicators)
 
     def _get_context_service(self, conversation: List[dict]) -> Optional[str]:
         """Check if service was already established in conversation"""
@@ -157,10 +240,8 @@ class ChatService:
         results = self.rag.search_errors(query, service)
         context = self._format_rag_results(results)
 
-        # Check if this is the first message about this service
-        is_first_service_message = not bool(context)
-
-        if is_first_service_message:
+        if not bool(context):
+            print("Inside Line 247")
             return {
                 "response": (
                     f"Thanks for asking about {service}. "

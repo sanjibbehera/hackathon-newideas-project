@@ -1,0 +1,100 @@
+{
+  "SQSIAMErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "Access to the SQS queue is denied.",
+      "remediation_steps": [
+        "1. Ensure IAM policy includes actions like `sqs:SendMessage`, `sqs:ReceiveMessage`, `sqs:DeleteMessage`, or `sqs:GetQueueAttributes`.",
+        "2. Check the SQS queue policy for required permissions.",
+        "3. Confirm no explicit denies in SCPs or permission boundaries.",
+        "4. Use IAM policy simulator to validate permissions."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-access-policy-language-summary.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "QueueDoesNotExist",
+      "error_message": "The specified queue does not exist or is incorrectly referenced.",
+      "remediation_steps": [
+        "1. Verify queue name or URL is correct.",
+        "2. Ensure the queue was not recently deleted.",
+        "3. Check correct AWS region is being used.",
+        "4. List queues using `aws sqs list-queues` to verify."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueUrl.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClientTokenId",
+      "error_message": "The AWS access key ID does not exist.",
+      "remediation_steps": [
+        "1. Regenerate IAM user access keys from AWS Console.",
+        "2. Update AWS credentials via CLI: `aws configure`.",
+        "3. Check if temporary credentials have expired.",
+        "4. Double-check for typos in credentials."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "OverLimit",
+      "error_message": "The action failed due to AWS SQS throttling.",
+      "remediation_steps": [
+        "1. Implement retries with exponential backoff.",
+        "2. Reduce the request rate.",
+        "3. Check SQS service quotas.",
+        "4. Request a quota increase if needed."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-queues.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "A parameter provided in the request is invalid.",
+      "remediation_steps": [
+        "1. Validate parameter formats, such as queue URLs or message body size (max 256 KB).",
+        "2. Ensure delay, visibility, and retention settings fall within allowed ranges.",
+        "3. Review API request or SDK method for correct usage.",
+        "4. Refer to AWS API documentation for parameter limits."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.NonExistentQueue",
+      "error_message": "The specified queue does not exist.",
+      "remediation_steps": [
+        "1. Confirm the queue URL is accurate.",
+        "2. Ensure the queue has not been deleted.",
+        "3. Use `GetQueueUrl` to retrieve the correct URL.",
+        "4. Recreate the queue if necessary."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueUrl.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidMessageContents",
+      "error_message": "The message contains invalid characters or encoding.",
+      "remediation_steps": [
+        "1. Ensure message body is UTF-8 encoded.",
+        "2. Remove binary data or encode it (e.g., base64).",
+        "3. Check for disallowed characters in message attributes.",
+        "4. Validate message using AWS SDK tools."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReceiptHandleIsInvalid",
+      "error_message": "The receipt handle provided is not valid.",
+      "remediation_steps": [
+        "1. Make sure the receipt handle is not expired or reused.",
+        "2. Use the receipt handle returned by `ReceiveMessage`.",
+        "3. Avoid deleting messages more than once.",
+        "4. Implement proper message lifecycle handling."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html",
+      "severity": "Low"
+    }
+  ]
+}

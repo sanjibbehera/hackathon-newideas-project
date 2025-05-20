@@ -1,0 +1,64 @@
+{
+  "EventBridgeIAMErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "You do not have sufficient access to perform this action.",
+      "remediation_steps": [
+        "1. Attach necessary EventBridge permissions such as `events:PutRule`, `events:PutTargets`, etc.",
+        "2. Verify resource-based permissions on targets like Lambda or SNS",
+        "3. Check for Service Control Policies (SCPs) or permission boundaries blocking access",
+        "4. Test with AWS CLI: `aws events list-rules` to verify permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-permissions-reference.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidClientTokenId",
+      "error_message": "The AWS access key ID provided does not exist in our records.",
+      "remediation_steps": [
+        "1. Verify the access key in AWS IAM Console",
+        "2. Use `aws configure` to set valid credentials",
+        "3. Check if the key was deleted or rotated",
+        "4. For temporary credentials, ensure the session token is included"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ExpiredTokenException",
+      "error_message": "The security token included in the request is expired.",
+      "remediation_steps": [
+        "1. Refresh temporary credentials (e.g., via STS AssumeRole)",
+        "2. Validate session token expiration time",
+        "3. Update credentials in environment or CLI",
+        "4. Regenerate session token if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "RequestExpired",
+      "error_message": "The request reached the service more than 15 minutes after the date stamp on the request.",
+      "remediation_steps": [
+        "1. Ensure system clock is synced (e.g., via NTP)",
+        "2. Regenerate the request closer to real-time",
+        "3. Adjust local time zone settings if incorrect",
+        "4. Avoid using stale pre-signed requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/sigv4-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NotAuthorized",
+      "error_message": "You do not have permission to perform this action.",
+      "remediation_steps": [
+        "1. Review attached IAM policies and confirm required EventBridge actions are allowed",
+        "2. Confirm role trust relationships if EventBridge is invoking a service on your behalf",
+        "3. Verify identity is using correct credentials and role",
+        "4. Use IAM Policy Simulator to validate permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_testing-policies.html",
+      "severity": "High"
+    }
+  ]
+}

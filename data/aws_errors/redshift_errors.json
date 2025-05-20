@@ -1,0 +1,100 @@
+{
+  "RedshiftIAMErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "User is not authorized to perform this Redshift operation.",
+      "remediation_steps": [
+        "1. Verify IAM policy includes necessary Redshift actions (e.g., `redshift:DescribeClusters`, `redshift:CreateCluster`).",
+        "2. Check IAM role trust relationships for assumed roles.",
+        "3. Ensure there are no explicit denies from SCPs or permission boundaries.",
+        "4. Use IAM policy simulator to test permissions."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/authorizing-redshift-service.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterNotFound",
+      "error_message": "The specified Redshift cluster does not exist.",
+      "remediation_steps": [
+        "1. Verify the cluster identifier is correct.",
+        "2. Confirm the cluster hasn't been deleted.",
+        "3. List clusters with `aws redshift describe-clusters`.",
+        "4. Check correct region and account context."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-clusters-console.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClusterState",
+      "error_message": "Operation cannot be performed due to the current state of the cluster.",
+      "remediation_steps": [
+        "1. Wait until the cluster is in `available` state.",
+        "2. Use `describe-clusters` to check current status.",
+        "3. Avoid actions during `modifying`, `rebooting`, or `deleting` states.",
+        "4. Use CloudWatch Events to track cluster status."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-cluster-status.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterCombination",
+      "error_message": "The provided parameters are not valid together.",
+      "remediation_steps": [
+        "1. Check the AWS CLI or SDK documentation for valid parameter combinations.",
+        "2. Avoid incompatible flags or options (e.g., using snapshot name with restore type `full` without proper source).",
+        "3. Validate parameter types and formats.",
+        "4. Use `--debug` in CLI for more context."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/APIReference/API_Operations.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InsufficientClusterCapacity",
+      "error_message": "AWS does not currently have sufficient capacity to fulfill your request.",
+      "remediation_steps": [
+        "1. Try launching the cluster in a different AZ or region.",
+        "2. Reduce node count or use a different node type.",
+        "3. Wait and retry later.",
+        "4. Contact AWS Support for capacity issues."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidCredentials",
+      "error_message": "The IAM role or credentials are invalid or expired.",
+      "remediation_steps": [
+        "1. Refresh or rotate IAM credentials.",
+        "2. Validate role trust policy for Redshift integration.",
+        "3. Check temporary STS credentials expiration.",
+        "4. Use `aws sts get-caller-identity` to verify identity context."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/authorizing-redshift-service.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "UnauthorizedOperation",
+      "error_message": "You are not authorized to perform this Redshift operation.",
+      "remediation_steps": [
+        "1. Add required IAM permissions (e.g., `redshift:ModifyCluster`).",
+        "2. Confirm role used in session has correct policy attached.",
+        "3. Use AWS CLI's `sts assume-role` to verify assumed identity.",
+        "4. Use AWS IAM Access Analyzer for policy validation."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate limit exceeded for Redshift API operations.",
+      "remediation_steps": [
+        "1. Implement retries with exponential backoff.",
+        "2. Reduce frequency of API calls.",
+        "3. Use batch operations where possible.",
+        "4. Contact AWS Support if rate limits persist."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/query-monitoring.html",
+      "severity": "Medium"
+    }
+  ]
+}

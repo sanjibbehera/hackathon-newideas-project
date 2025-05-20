@@ -25,12 +25,20 @@ body {
     background-color: #ffffff;
     padding: 15px 20px;
     border-bottom: 1px solid #e9ecef;
+    text-align: center; /* Center-align the text */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically if needed */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional subtle shadow */
+    position: relative;
 }
 
 .chat-header h4 {
     margin: 0;
     color: #333;
     font-weight: 600;
+    font-size: 1.25rem; /* Slightly larger font */
+    padding: 0 20px;
 }
 
 .chat-messages {
@@ -62,6 +70,33 @@ body {
     height: 40px;
     margin: 0 10px;
     border-radius: 50%;
+}
+
+/* Style for the services list in initial message */
+.message-group:first-child .services-ul {
+    margin: 8px 0 0 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.message-group:first-child .service-item {
+    padding: 6px 0;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.message-group:first-child .service-item:last-child {
+    border-bottom: none;
+}
+
+.message-group:first-child .service-item::before {
+    content: "•";
+    color: #007bff;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
 }
 
 /* Ensure dynamic messages get bubble styling */
@@ -242,9 +277,8 @@ body {
     margin-top: 5px;
 }
 
-.message-text {
-    /* line-height: 1.4;
-    color: #333; */
+.message-text, .service-item {
+    font-family: inherit;
     font-size: 14px;
     line-height: 1.4;
     white-space: pre-wrap; /* Preserve line breaks */
@@ -305,11 +339,11 @@ body {
 }
 
 /* Speech bubble styling */
-.message.bot-message {
+.message.bot-message  .message-content {
     position: relative;
     background: white;
-    border-radius: 10px;
-    padding: 10px 15px;
+    border-radius: 12px;
+    padding: 12px 16px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     border: 1px solid #e9ecef;
     margin-left: 10px;
@@ -351,22 +385,19 @@ body {
 /* Add these styles */
 .services-list {
     max-height: 300px;
+    overflow-x: auto;
     overflow-y: auto;
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 8px;
     margin: 5px 0;
+    font-family: inherit; /* Match chat font */
+    font-size: 14px; /* Match message text size */
+    line-height: 1.5;
 }
 
-.services-ul {
-    margin: 8px 0 0 20px;
-    padding: 0;
-    list-style-type: none;
-}
-
-.service-item {
-    padding: 3px 0;
-    color: #333;
+.service-item:last-child {
+    border-bottom: none;
 }
 
 .service-item::before {
@@ -376,4 +407,30 @@ body {
     display: inline-block;
     width: 1em;
     margin-left: -1em;
+}
+
+/* Scrollbar styling */
+.services-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.services-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.services-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+/* Approval link styling */
+.approval-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.approval-link:hover {
+    text-decoration: underline;
 }

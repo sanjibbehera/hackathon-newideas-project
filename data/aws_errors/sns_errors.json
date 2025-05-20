@@ -1,0 +1,87 @@
+{
+  "SNSIAMErrors": [
+    {
+      "error_code": "AuthorizationError",
+      "error_message": "User is not authorized to perform this action on the specified SNS resource.",
+      "remediation_steps": [
+        "1. Verify IAM policy includes necessary actions like `sns:Publish`, `sns:Subscribe`, or `sns:CreateTopic`.",
+        "2. Check resource-level permissions in SNS topic policy.",
+        "3. Look for explicit denies in permission boundaries or SCPs.",
+        "4. Test permissions using IAM policy simulator."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-use-cases.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EndpointDisabled",
+      "error_message": "The endpoint is disabled and unable to receive messages.",
+      "remediation_steps": [
+        "1. Enable the endpoint in SNS console or via CLI.",
+        "2. Check delivery failures and logs for troubleshooting.",
+        "3. Re-subscribe the endpoint if needed.",
+        "4. Verify mobile push platform credentials if using mobile endpoints."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalError",
+      "error_message": "An internal error occurred. Try the request again.",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff.",
+        "2. Check AWS Health Dashboard for ongoing service issues.",
+        "3. Contact AWS Support if problem persists."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameter",
+      "error_message": "One or more parameters in the request are invalid.",
+      "remediation_steps": [
+        "1. Verify parameter names and values match API expectations.",
+        "2. Check message size limits and formats (e.g., JSON for message attributes).",
+        "3. Ensure ARN values are properly formed.",
+        "4. Use the AWS SDKs to minimize manual formatting errors."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "NotFound",
+      "error_message": "The requested topic or subscription does not exist.",
+      "remediation_steps": [
+        "1. Confirm the topic or subscription ARN is correct.",
+        "2. Use `aws sns list-topics` or `list-subscriptions` to verify existence.",
+        "3. Ensure the resource was not deleted.",
+        "4. Check IAM permissions for `sns:ListTopics` or `sns:ListSubscriptions`."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Request rate is too high. SNS is throttling the request.",
+      "remediation_steps": [
+        "1. Implement retry logic with exponential backoff.",
+        "2. Reduce the frequency of requests.",
+        "3. Request a service quota increase from AWS.",
+        "4. Use batch publishing where applicable."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/api-retries.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TopicLimitExceeded",
+      "error_message": "The maximum number of topics per account has been exceeded.",
+      "remediation_steps": [
+        "1. Delete unused topics.",
+        "2. Consolidate similar topics where possible.",
+        "3. Request a quota increase via AWS Support.",
+        "4. Monitor topic creation limits proactively."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-service-limits.html",
+      "severity": "Low"
+    }
+  ]
+}

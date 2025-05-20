@@ -1,0 +1,65 @@
+{
+  "BedrockIAMErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "You do not have sufficient access to perform this action.",
+      "http_status_code": 400,
+      "remediation_steps": [
+        "1. Ensure your IAM user or role has the necessary permissions, such as 'bedrock:InvokeModel'.",
+        "2. Verify that the model access status is set to 'Granted' in the AWS Region you're operating in.",
+        "3. Check for any Service Control Policies (SCPs) that might be restricting access.",
+        "4. Confirm that the foundation model is available in the specified AWS Region."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#accessdeniedexception",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidClientTokenId",
+      "error_message": "The AWS access key ID provided does not exist in our records.",
+      "http_status_code": 403,
+      "remediation_steps": [
+        "1. Verify that you're using the correct AWS access key ID.",
+        "2. If you've recently rotated your access keys, ensure you're using the updated credentials.",
+        "3. For temporary credentials, confirm that the session token is included and valid."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#invalidclienttokenid",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ExpiredTokenException",
+      "error_message": "The security token included in the request is expired.",
+      "http_status_code": 403,
+      "remediation_steps": [
+        "1. Obtain new temporary security credentials.",
+        "2. Update your application's configuration with the new credentials.",
+        "3. Ensure that your system's clock is synchronized to prevent premature expiration."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#expiredtokenexception",
+      "severity": "High"
+    },
+    {
+      "error_code": "RequestExpired",
+      "error_message": "The request reached the service more than 15 minutes after the date stamp on the request.",
+      "http_status_code": 400,
+      "remediation_steps": [
+        "1. Synchronize your system clock using a reliable time source, such as NTP.",
+        "2. Regenerate the request closer to the current time.",
+        "3. Avoid using stale pre-signed requests."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#requestexpired",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NotAuthorized",
+      "error_message": "You do not have permission to perform this action.",
+      "http_status_code": 400,
+      "remediation_steps": [
+        "1. Review and update your IAM policies to grant the required permissions for the intended action.",
+        "2. Confirm that any roles you are assuming have the appropriate trust relationships.",
+        "3. Check for any organizational policies or SCPs that might be restricting your access."
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#notauthorized",
+      "severity": "High"
+    }
+  ]
+}
