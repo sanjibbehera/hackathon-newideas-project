@@ -13,12 +13,20 @@ from app.chat_handler import process_message
 from app.iam_analyzer import analyze_iam_policy
 from ollama import Client
 import re
+from enum import Enum
 from typing import Optional, Set
 from .routes import aws_errors
 from .services.approved_aws_services import is_service_approved, APPROVED_SERVICES
+from .services.chat_service import ChatService
 
 app = FastAPI()
 app.include_router(aws_errors.router)
+
+class ConversationState(str, Enum):
+    NORMAL = "normal"
+    AWS_HELP = "aws_help"
+    SERVICE_SPECIFIC = "service_specific"
+    INITIAL_GREETING = "initial_greeting"
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +35,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+APPROVAL_LINK = "https://your-company.com/aws-service-approval"
 
 # Configure static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -155,6 +165,9 @@ async def chat_endpoint(request: Request):
     try:
         body = await request.json()
         message = body.get('message', '')
+        current_state = body.get('current_state', ConversationState.NORMAL)
+        current_service = body.get('current_service', None)
+        is_first_interaction = body.get('is_first_interaction', True)  # Get the flag
 
         if not message:
             return JSONResponse(
@@ -162,32 +175,30 @@ async def chat_endpoint(request: Request):
                 status_code=400
             )
 
-        # Check for unapproved services
-        unapproved_service = contains_unapproved_service(message)
-        if unapproved_service:
-            return {
-                "response": (
-                    f"I specialize in AWS IAM and don't have information about {unapproved_service}.\n"
-                    "I can help with these approved services:\n"
-                    + "\n".join([f"- {k} ({v})" for k, v in APPROVED_SERVICES.items()])
-                ),
-                "timestamp": datetime.now().isoformat()
-            }
+        # Initialize chat service
+        chat_service = ChatService()
+        
+        # Process the message
+        result = await chat_service.process_message(
+            user_input=message,
+            conversation_state=current_state,
+            current_service=current_service,
+            is_first_interaction=is_first_interaction  # Pass to service
+        )
 
-        # Handle IAM-related questions
-        if is_iam_related(message):
-            bot_response = get_ollama_response(message)
-        else:
-            # Handle non-IAM questions
-            if any(greeting in message.lower() for greeting in ['hi', 'hello', 'hey']):
-                bot_response = "Hello! I'm your AWS IAM assistant. How can I help you today?"
-            else:
-                bot_response = "I specialize in AWS IAM questions. Could you tell me more about your IAM-related needs?"
-
-        return {
-            "response": bot_response,
-            "timestamp": datetime.now().isoformat()
+        response = {
+            "response": result["response"],
+            "timestamp": datetime.now().isoformat(),
+            "new_state": result.get("new_state", current_state),
+            "service": result.get("service", current_service),
+            "response_type": result.get("response_type", "normal"),
+            "approval_link": APPROVAL_LINK if result.get("response_type") == "approved_services" else None
         }
+
+        if "services" in result:
+            response["services"] = result["services"]
+
+        return response
 
     except Exception as e:
         print(f"Error in chat endpoint: {e}")
@@ -195,35 +206,6 @@ async def chat_endpoint(request: Request):
             content={"response": "An error occurred while processing your request"},
             status_code=500
         )
-    # Check for unapproved services first
-    unapproved_service = contains_unapproved_service(message)
-    if unapproved_service:
-        return {
-            "response": (
-                f"The AWS service '{unapproved_service}' is not currently approved for use. "
-                f"Please request approval by visiting {APPROVAL_LINK} "
-                "before using this service."
-            ),
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    # Check if this is an IAM-related question
-    if is_iam_related(message):
-        # Get technical response from Ollama
-        bot_response = get_ollama_response(message)
-    else:
-        # Handle non-IAM questions (pleasantries, etc.)
-        if any(greeting in message.lower() for greeting in ['hi', 'hello', 'hey']):
-            bot_response = "Hello! I'm your AWS IAM assistant. How can I help you with IAM policies, roles, or permissions today?"
-        elif 'thank' in message.lower():
-            bot_response = "You're welcome! Is there anything else you'd like to know about AWS IAM?"
-        else:
-            bot_response = "I specialize in AWS IAM questions. Could you tell me more about your IAM-related needs?"
-    
-    return {
-        "response": bot_response,
-        "timestamp": datetime.now().isoformat()
-    }
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -249,3 +231,8 @@ async def upload_file(file: UploadFile = File(...)):
         return {"filename": file.filename, "analysis": analysis_result}
     
     return {"filename": file.filename, "message": "File uploaded successfully"}
+
+@app.get("/api/approved-services")
+async def get_approved_services():
+    from .services.approved_aws_services import get_approved_services_list
+    return {"services": get_approved_services_list()}

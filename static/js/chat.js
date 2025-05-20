@@ -1,3 +1,12 @@
+const STATE = {
+    NORMAL: 'normal',
+    AWS_HELP: 'aws_help',
+    SERVICE_SPECIFIC: 'service_specific',
+    INITIAL_GREETING: 'initial_greeting'  // New state for handling greetings
+};
+let conversationState = STATE.INITIAL_GREETING;
+let currentService = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
@@ -5,14 +14,67 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileUpload = document.getElementById('fileUpload');
     const fileName = document.getElementById('fileName');
     const messageContainer = document.getElementById('messageContainer');
+
+    // Track if it's the first user message
+    let isFirstInteraction = true;
+
+    // Add this function to display approved services
+    function displayApprovedServices(services) {
+        const servicesContainer = document.createElement('div');
+        servicesContainer.className = 'services-list';
+        
+        const title = document.createElement('div');
+        title.className = 'message-text';
+        title.textContent = 'I can help with these AWS services:';
+        servicesContainer.appendChild(title);
+        
+        const list = document.createElement('ul');
+        list.className = 'services-ul';
+        
+        services.forEach(service => {
+            const item = document.createElement('li');
+            item.className = 'service-item';
+            item.textContent = service;
+            list.appendChild(item);
+        });
+        
+        servicesContainer.appendChild(list);
+        
+        // Create a complete message group
+        const messageGroup = document.createElement('div');
+        messageGroup.className = 'message-group bot-message-group dynamic-message';
+        
+        const avatar = document.createElement('img');
+        avatar.className = 'avatar';
+        avatar.src = '/static/images/bot.png';
+        avatar.alt = 'Bot avatar';
+        messageGroup.appendChild(avatar);
+        
+        const messagesContainer = document.createElement('div');
+        messagesContainer.className = 'messages-container';
+        
+        const messageBubble = document.createElement('div');
+        messageBubble.className = 'message bot-message';
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.appendChild(servicesContainer);
+        
+        messageBubble.appendChild(messageContent);
+        messagesContainer.appendChild(messageBubble);
+        messageGroup.appendChild(messagesContainer);
+        
+        // Add to chat
+        // document.getElementById('messageContainer').appendChild(messageGroup);
+        messageContainer.appendChild(messageGroup);
+        
+        // Scroll to bottom
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
     
     // Handle text messages
     sendButton.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    userInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
     
     // Handle file attachment button click
     attachButton.addEventListener('click', function() {
@@ -32,9 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = userInput.value.trim();
         if (!message) return;
 
-        addMessage('user', message);
-        document.getElementById('userInput').value = '';
-        // addMessage('bot', data.response.replace(/\n/g, '<br>'));
+        addMessage(message, 'user');
+        userInput.value = '';
 
         try {
             const response = await fetch('/api/chat', {
@@ -42,7 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({ 
+                    message: message,
+                    current_state: conversationState,
+                    current_service: currentService,
+                    is_first_interaction: isFirstInteraction  // Send this flag to backend
+                })
             });
 
             if (!response.ok) {
@@ -50,13 +116,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const data = await response.json();
-            addMessage('bot', data.response.replace(/\n/g, '<br>'));
+
+            if (data.new_state) conversationState = data.new_state;
+            if (data.service) currentService = data.service;
+
+            // Mark first interaction as complete
+            if (isFirstInteraction) isFirstInteraction = false;
+            
             // Format the response better if it's about unapproved services
-            if (data.response.includes('not currently approved') || 
-                data.response.includes('I specialize only')) {
-                addMessage('bot', data.response.replace(/\n/g, '<br>'));
+            // Handle different response types
+            if (data.response_type === 'approved_services') {
+                displayApprovedServices(data.services);
+                if (data.approval_link) {
+                    const approvalGroup = document.createElement('div');
+                    approvalGroup.className = 'message-group bot-message-group dynamic-message';
+                    
+                    const avatar = document.createElement('img');
+                    avatar.className = 'avatar';
+                    avatar.src = '/static/images/bot.png';
+                    avatar.alt = 'Bot avatar';
+                    approvalGroup.appendChild(avatar);
+                    
+                    const messagesContainer = document.createElement('div');
+                    messagesContainer.className = 'messages-container';
+                    
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message bot-message';
+                    
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    
+                    const messageText = document.createElement('div');
+                    messageText.className = 'message-text';
+                    messageText.innerHTML = `To request access to other services, please visit: <a href="${data.approval_link}" target="_blank">${data.approval_link}</a>`;
+                    
+                    messageContent.appendChild(messageText);
+                    messageBubble.appendChild(messageContent);
+                    messagesContainer.appendChild(messageBubble);
+                    approvalGroup.appendChild(messagesContainer);
+                    
+                    messageContainer.appendChild(approvalGroup);
+                } else {
+                    addMessage(data.response.replace(/\n/g, '<br>'), 'bot');
+                }
             } else {
-                addMessage('bot', data.response);
+                // addMessage('bot', data.response.replace(/\n/g, '<br>'));
+                let formattedResponse = data.response.replace(/\n/g, '<br>');
+                // Add follow-up prompts based on state
+                if (conversationState === STATE.INITIAL_GREETING) {
+                    formattedResponse += '<br><br>How can we help you with AWS IAM today?';
+                } 
+                else if (conversationState === STATE.AWS_HELP) {
+                    formattedResponse += '<br><br>Please share the specific issue you\'re facing with AWS so we can help you better.';
+                }
+                else if (conversationState === STATE.SERVICE_SPECIFIC && !data.is_approved_service) {
+                    formattedResponse += '<br><br>I can only help with approved AWS services. ' + 
+                    `To request access, please visit: <a href="${data.approval_link}" target="_blank">${data.approval_link}</a>`;
+                    // The backend should send approved services list in this case
+                }
+                
+                addMessage(formattedResponse, 'bot');
             }
         } catch (error) {
             console.error('Error:', error);
