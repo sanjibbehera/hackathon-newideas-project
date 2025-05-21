@@ -15,4 +15,7 @@ def client():
 def test_app_is_reachable(client):
     response = client.get('/health')
     assert response.status_code == 200
-    assert response.json() == {"status": "OK"}
+    assert response.json() == {
+        "message": "Chatbot is ready",
+        "status": "healthy"
+    }
