@@ -29,7 +29,7 @@ class ChatService:
             return {
                 "response": (
                     f"I'm sorry, but {unapproved_service} is not currently an approved AWS service in SYF.\n"
-                    "To get access, please request a CDA (Cloud Deployment Approval) by visiting:\n"
+                    "To get access, please request a CDA (Cloud Deployment Approval) by visiting:  "
                     f"{APPROVAL_LINK}"
                 ),
                 "services": get_approved_services_list(),
@@ -84,7 +84,7 @@ class ChatService:
         if conversation_state == ConversationState.INITIAL_GREETING:
             if detected_service:
                 if is_service_approved(detected_service):
-                    print("Inside Line 87")
+                    print("Inside Line 87;;;;chat_service.py")
                     return {
                         "response": (
                             f"Thanks for asking about {detected_service}. To help you better:\n"
@@ -110,7 +110,7 @@ class ChatService:
                     "response_type": "approved_services",
                     "new_state": ConversationState.AWS_HELP
                 }
-            elif any(term in user_input for term in ['aws', 'amazon', 'help']):
+            elif any(term in user_input for term in ['aws', 'amazon', 'help', 'debug']):
                 return {
                     "response": "Which AWS service do you need help with?",
                     "services": get_approved_services_list(),
@@ -140,7 +140,7 @@ class ChatService:
                         "response_type": "approved_services"
                     }
             return {
-                "response": "Please specify an AWS service from the list.",
+                "response": "Please specify an AWS service from the below list.",
                 "services": get_approved_services_list(),
                 "response_type": "approved_services"
             }

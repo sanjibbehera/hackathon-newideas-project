@@ -41,6 +41,55 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Windows Installation Guide
+### 1. Install Python 3.12
+
+Download Python 3.12 for windows from the [link](https://www.python.org/downloads/release/python-31210/)  
+Run the Installer.  
+Important: Check "Add python.exe to PATH" during installation.  
+Complete the installation
+
+#### Verify python installation:
+```bash
+python --version
+python -m pip --version
+```
+
+### 2. Create a Virtual Environment
+```bash
+python -m venv venv
+cd venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Install Ollama in Windows
+
+Download Ollama for Windows from the [link](https://ollama.com/download/windows)  
+Run the installer  
+Add Ollama to your PATH (usually done automatically)  
+
+Verify Ollama installation:  
+```bash
+ollama --version
+```
+
+### Build the LLM model
+
+```bash
+ollama pull mistral
+ollama create aws-expert -f ./data/aws_expert.Modelfile
+```
+
+### Run the application
+
+```bash
+uvicorn app.main:app --reload
+```
+
 ## Usage
 - Access the web interface at http://localhost:8000
 - Ask questions like:
@@ -88,13 +137,6 @@ hackathon-newideas-project/
 
 ### Chatbot Frontend
 ![Chatbot Interface](./images/chatbot_frontend_screenshot.png)
-
-## Build the LLM model
-
-```bash
-ollama pull mistral
-ollama create aws-expert -f ./data/aws_expert.Modelfile
-```
 
 ## Contributing
 1. Fork the repository

@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const title = document.createElement('div');
         title.className = 'message-text';
-        title.textContent = 'I can help with these AWS services:';
+        title.textContent = 'I can help with the below AWS services:';
         messageContent.appendChild(title);
         
         const list = document.createElement('ul');
@@ -136,6 +136,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 } 
                 else if (conversationState === STATE.AWS_HELP) {
                     formattedResponse += '\nPlease share the specific issue you\'re facing with AWS so that I can help you better.';
+                }
+                else {
+                    console.log("SANJIB IS HERE IN THE ELSE ELSE CODN!!!", data);
+                    console.log("STATES inside else ELSE WAATTTTA STATE:::::", STATE);
                 }
                 // else if (conversationState === STATE.SERVICE_SPECIFIC && !data.is_approved_service) {
                 //     formattedResponse += '\nI can only help with approved AWS services. ' + 

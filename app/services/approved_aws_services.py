@@ -47,8 +47,8 @@ ALL_AWS_SERVICES = {
     "ECR": "Amazon ECR",
     "ECS": "Amazon ECS",
     "ROSA": "AWS ROSA",
-    "KMS": "Amazon Athena",
-    "Athena": "AWS KMS",
+    "KMS": "Amazon KMS",
+    "Athena": "AWS Athena",
     "DocumentDB": "Amazon DocumentDB",
     "ElastiCache": "Amazon ElastiCache",
     "Keyspaces": "Amazon Keyspaces",
@@ -121,5 +121,11 @@ def get_unapproved_service(message: str) -> Optional[str]:
     return None
 
 def get_approved_services_list() -> list:
-    """Return formatted list of approved services for messages"""
-    return [f"{k} ({v})" for k, v in APPROVED_SERVICES.items()]
+    """Return formatted list of approved services
+    
+    Args:
+        format: 'list' returns list of strings, 
+                'str' returns single formatted string
+    """
+    services = [f"{k} ({v})" for k, v in APPROVED_SERVICES.items()]
+    return "\n".join(services) if format == "str" else services
