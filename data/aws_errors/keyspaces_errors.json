@@ -1,0 +1,355 @@
+{
+  "AmazonKeyspacesErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: cassandra:Select on resource: arn:aws:cassandra:us-east-1:123456789012:keyspace/mykeyspace/table/mytable",
+      "remediation_steps": [
+        "1. Attach IAM policy with required permissions:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"cassandra:Select\",",
+        "       \"Resource\": \"arn:aws:cassandra:us-east-1:123456789012:keyspace/mykeyspace/table/mytable\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "Keyspace mykeyspace does not exist",
+      "remediation_steps": [
+        "1. List available keyspaces:",
+        "   ```bash",
+        "   aws keyspaces list-keyspaces",
+        "   ```",
+        "2. Check for typos in the keyspace name",
+        "3. Create the keyspace if needed:",
+        "   ```bash",
+        "   aws keyspaces create-keyspace --keyspace-name mykeyspace",
+        "   ```",
+        "4. Verify correct region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-keyspaces.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TableNotFoundException",
+      "error_message": "Table mytable does not exist in keyspace mykeyspace",
+      "remediation_steps": [
+        "1. List tables in the keyspace:",
+        "   ```bash",
+        "   aws keyspaces list-tables --keyspace-name mykeyspace",
+        "   ```",
+        "2. Check for typos in table name",
+        "3. Create the table if needed:",
+        "   ```bash",
+        "   aws keyspaces create-table --keyspace-name mykeyspace --table-name mytable --schema-definition file://schema.json",
+        "   ```",
+        "4. Verify the keyspace exists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-tables.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "1 validation error detected: Value at 'schemaDefinition.clusteringKeys' failed to satisfy constraint",
+      "remediation_steps": [
+        "1. Review table schema requirements",
+        "2. Validate schema definition file syntax",
+        "3. Check for required fields in schema",
+        "4. Test with minimal schema first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-tables.html#working-with-tables.schema",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConflictException",
+      "error_message": "Table mytable already exists in keyspace mykeyspace",
+      "remediation_steps": [
+        "1. List existing tables:",
+        "   ```bash",
+        "   aws keyspaces list-tables --keyspace-name mykeyspace",
+        "   ```",
+        "2. Use a different table name",
+        "3. Delete existing table if no longer needed",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-tables.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceQuotaExceededException",
+      "error_message": "The request would cause you to exceed the allowed number of tables per keyspace",
+      "remediation_steps": [
+        "1. Check current table count:",
+        "   ```bash",
+        "   aws keyspaces list-tables --keyspace-name mykeyspace",
+        "   ```",
+        "2. Delete unused tables if possible",
+        "3. Request service quota increase:",
+        "   ```bash",
+        "   aws service-quotas request-service-quota-increase --service-code cassandra --quota-code L-xxxx --desired-value XX",
+        "   ```",
+        "4. Consider consolidating data into fewer tables"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate exceeded for cassandra:Query",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your application",
+        "2. Reduce request frequency",
+        "3. Batch operations where possible",
+        "4. Request limit increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/programmatic.requests.html#programmatic.requests.limits",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalServerException",
+      "error_message": "Internal server error",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if error persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "InvalidParameterValueException",
+      "error_message": "The parameter TimeToLive is invalid",
+      "remediation_steps": [
+        "1. Review TTL parameter requirements",
+        "2. Check value is within allowed range",
+        "3. Verify parameter format",
+        "4. Test with different values"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/ttl.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConditionalCheckFailedException",
+      "error_message": "The conditional request failed",
+      "remediation_steps": [
+        "1. Verify the condition values match current data",
+        "2. Check for concurrent modifications",
+        "3. Implement optimistic concurrency control",
+        "4. Retry with updated conditions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-items.html#working-with-items.conditional-updates",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PartitionKeyMismatchException",
+      "error_message": "Partition key provided does not match schema",
+      "remediation_steps": [
+        "1. Review table schema:",
+        "   ```bash",
+        "   aws keyspaces get-table --keyspace-name mykeyspace --table-name mytable",
+        "   ```",
+        "2. Verify partition key in query matches schema",
+        "3. Check for typos in column names",
+        "4. Update query to match schema"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-items.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RequestLimitExceeded",
+      "error_message": "Throughput for the table exceeds the current capacity",
+      "remediation_steps": [
+        "1. Check table capacity settings:",
+        "   ```bash",
+        "   aws keyspaces get-table --keyspace-name mykeyspace --table-name mytable",
+        "   ```",
+        "2. Implement exponential backoff in your application",
+        "3. Consider increasing capacity:",
+        "   ```bash",
+        "   aws keyspaces update-table --keyspace-name mykeyspace --table-name mytable --capacity-specification throughputMode=PROVISIONED,readCapacityUnits=XX,writeCapacityUnits=XX",
+        "   ```",
+        "4. Optimize queries to reduce load"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/readwritecapacitymode.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KeyspaceAlreadyExistsException",
+      "error_message": "Keyspace mykeyspace already exists",
+      "remediation_steps": [
+        "1. List existing keyspaces:",
+        "   ```bash",
+        "   aws keyspaces list-keyspaces",
+        "   ```",
+        "2. Use a different keyspace name",
+        "3. Delete existing keyspace if no longer needed",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/working-with-keyspaces.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRequestException",
+      "error_message": "The request is invalid",
+      "remediation_steps": [
+        "1. Review API documentation for request format",
+        "2. Validate all required parameters are included",
+        "3. Check for malformed JSON in request",
+        "4. Test with simpler request first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/APIReference/CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedOperationException",
+      "error_message": "This operation is not supported",
+      "remediation_steps": [
+        "1. Check service documentation for supported operations",
+        "2. Verify you're using the correct API version",
+        "3. Consider alternative approaches",
+        "4. Contact AWS Support if feature is required"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/functional-differences.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EncryptionFailure",
+      "error_message": "Failed to encrypt data",
+      "remediation_steps": [
+        "1. Verify KMS key exists and is enabled",
+        "2. Check IAM permissions for KMS key usage",
+        "3. Validate key policy allows Keyspaces service to use the key",
+        "4. Try a different KMS key"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/encryption-at-rest.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PointInTimeRecoveryNotEnabledException",
+      "error_message": "Point-in-time recovery is not enabled for table mytable",
+      "remediation_steps": [
+        "1. Enable PITR for the table:",
+        "   ```bash",
+        "   aws keyspaces update-table --keyspace-name mykeyspace --table-name mytable --point-in-time-recovery enabled=true",
+        "   ```",
+        "2. Wait for PITR to be fully enabled",
+        "3. Verify PITR status:",
+        "   ```bash",
+        "   aws keyspaces get-table --keyspace-name mykeyspace --table-name mytable --query 'resource.pointInTimeRecovery'",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/PointInTimeRecovery.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RestoreNotFoundException",
+      "error_message": "Restore operation not found",
+      "remediation_steps": [
+        "1. List available restore operations:",
+        "   ```bash",
+        "   aws keyspaces list-restore-jobs",
+        "   ```",
+        "2. Check for typos in restore ID",
+        "3. Verify restore was initiated",
+        "4. Initiate new restore if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/PointInTimeRecovery_HowItWorks.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BackupInUseException",
+      "error_message": "Backup is currently in use by a restore operation",
+      "remediation_steps": [
+        "1. Wait for restore operation to complete",
+        "2. Check restore job status:",
+        "   ```bash",
+        "   aws keyspaces list-restore-jobs",
+        "   ```",
+        "3. Cancel restore operation if needed",
+        "4. Try again later"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/PointInTimeRecovery_HowItWorks.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BackupNotFoundException",
+      "error_message": "Backup not found",
+      "remediation_steps": [
+        "1. List available backups:",
+        "   ```bash",
+        "   aws keyspaces list-backups",
+        "   ```",
+        "2. Check for typos in backup ARN",
+        "3. Verify backup exists in same region",
+        "4. Create new backup if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/PointInTimeRecovery_HowItWorks.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CapacityExceededException",
+      "error_message": "The table has exceeded its maximum capacity",
+      "remediation_steps": [
+        "1. Check current table capacity:",
+        "   ```bash",
+        "   aws keyspaces get-table --keyspace-name mykeyspace --table-name mytable --query 'resource.capacitySpecification'",
+        "   ```",
+        "2. Increase provisioned capacity:",
+        "   ```bash",
+        "   aws keyspaces update-table --keyspace-name mykeyspace --table-name mytable --capacity-specification throughputMode=PROVISIONED,readCapacityUnits=XX,writeCapacityUnits=XX",
+        "   ```",
+        "3. Switch to on-demand capacity mode if appropriate",
+        "4. Optimize queries to reduce load"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/readwritecapacitymode.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CQLSyntaxError",
+      "error_message": "Syntax error in CQL query",
+      "remediation_steps": [
+        "1. Review CQL syntax documentation",
+        "2. Check for typos in query",
+        "3. Validate all required clauses are present",
+        "4. Test with simpler query first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/cql.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthenticationException",
+      "error_message": "Authentication failed",
+      "remediation_steps": [
+        "1. Verify IAM credentials are valid",
+        "2. Check IAM permissions for Keyspaces access",
+        "3. Ensure correct AWS region is specified",
+        "4. Regenerate credentials if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "OperationTimedOutException",
+      "error_message": "Operation timed out",
+      "remediation_steps": [
+        "1. Increase timeout settings in your client",
+        "2. Check network connectivity to Keyspaces",
+        "3. Reduce query complexity",
+        "4. Retry with exponential backoff"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/keyspaces/latest/devguide/programmatic.requests.html",
+      "severity": "Medium"
+    }
+  ]
+}

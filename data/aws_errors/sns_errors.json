@@ -1,87 +1,328 @@
 {
-  "SNSIAMErrors": [
+  "SNSErrors": [
     {
-      "error_code": "AuthorizationError",
-      "error_message": "User is not authorized to perform this action on the specified SNS resource.",
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: SNS:Publish on resource: arn:aws:sns:us-east-1:123456789012:MyTopic",
       "remediation_steps": [
-        "1. Verify IAM policy includes necessary actions like `sns:Publish`, `sns:Subscribe`, or `sns:CreateTopic`.",
-        "2. Check resource-level permissions in SNS topic policy.",
-        "3. Look for explicit denies in permission boundaries or SCPs.",
-        "4. Test permissions using IAM policy simulator."
+        "1. Attach IAM policy with SNS:Publish permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"sns:Publish\",",
+        "       \"Resource\": \"arn:aws:sns:us-east-1:123456789012:MyTopic\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify the topic ARN is correct",
+        "4. Use Policy Simulator to test permissions"
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-use-cases.html",
       "severity": "High"
     },
     {
-      "error_code": "EndpointDisabled",
-      "error_message": "The endpoint is disabled and unable to receive messages.",
+      "error_code": "AuthorizationError",
+      "error_message": "The request signature we calculated does not match the signature you provided",
       "remediation_steps": [
-        "1. Enable the endpoint in SNS console or via CLI.",
-        "2. Check delivery failures and logs for troubleshooting.",
-        "3. Re-subscribe the endpoint if needed.",
-        "4. Verify mobile push platform credentials if using mobile endpoints."
+        "1. Regenerate AWS credentials (access key/secret key)",
+        "2. Verify credentials are properly configured in AWS CLI/SDK",
+        "3. Check for expired temporary credentials (STS tokens)",
+        "4. Ensure correct AWS region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "EndpointDisabled",
+      "error_message": "Endpoint is disabled",
+      "remediation_steps": [
+        "1. Check endpoint status: `aws sns get-endpoint-attributes --endpoint-arn arn:aws:sns:us-east-1:123456789012:endpoint/GCM/MyApp/12345678`",
+        "2. Re-enable endpoint if needed",
+        "3. Verify device token is still valid",
+        "4. Check for excessive bounces/complaints"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html#sns-troubleshooting-endpoint-disabled",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalError",
+      "error_message": "Internal server error",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if error persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "InvalidParameter",
+      "error_message": "Invalid parameter: TopicArn",
+      "remediation_steps": [
+        "1. Verify the topic ARN format is correct",
+        "2. Check for typos in the ARN",
+        "3. List topics to confirm existence: `aws sns list-topics`",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSecurity",
+      "error_message": "The security token included in the request is invalid",
+      "remediation_steps": [
+        "1. Regenerate AWS credentials",
+        "2. Verify credentials are properly configured",
+        "3. Check for expired temporary credentials",
+        "4. Ensure correct AWS region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "NotFound",
+      "error_message": "Topic does not exist",
+      "remediation_steps": [
+        "1. Verify topic exists: `aws sns list-topics`",
+        "2. Check for typos in topic name/ARN",
+        "3. Create topic if needed: `aws sns create-topic --name MyTopic`",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html#sns-troubleshooting-not-found",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OptedOut",
+      "error_message": "User has opted out of receiving SMS messages",
+      "remediation_steps": [
+        "1. Verify recipient's opt-out status",
+        "2. Request recipient to opt back in (reply START for SMS)",
+        "3. Remove opted-out numbers from distribution lists",
+        "4. Implement opt-out handling in your application"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sms_manage.html#sms_manage_optout",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PlatformApplicationDisabled",
+      "error_message": "Platform application is disabled",
+      "remediation_steps": [
+        "1. Check platform application status",
+        "2. Re-enable if needed:",
+        "   ```bash",
+        "   aws sns set-platform-application-attributes \\",
+        "     --platform-application-arn arn:aws:sns:us-east-1:123456789012:app/GCM/MyApp \\",
+        "     --attributes Enabled=true",
+        "   ```",
+        "3. Verify credentials with platform provider (GCM/APNS)",
+        "4. Check for policy violations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html#sns-troubleshooting-platform-disabled",
+      "severity": "High"
+    },
+    {
+      "error_code": "SubscriptionLimitExceeded",
+      "error_message": "Cannot exceed subscription limit of 100 for topic arn:aws:sns:us-east-1:123456789012:MyTopic",
+      "remediation_steps": [
+        "1. List current subscriptions: `aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:123456789012:MyTopic`",
+        "2. Remove unused subscriptions",
+        "3. Request limit increase via AWS Support",
+        "4. Consider fan-out pattern with multiple topics"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "Throttling",
+      "error_message": "Rate exceeded for SNS:Publish",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of publish calls",
+        "3. Batch messages where possible",
+        "4. Request limit increase via AWS Support if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TopicLimitExceeded",
+      "error_message": "Cannot exceed topic limit of 100,000",
+      "remediation_steps": [
+        "1. List and delete unused topics",
+        "2. Combine similar topics where possible",
+        "3. Request limit increase via AWS Support",
+        "4. Consider using message attributes for filtering instead of separate topics"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationError",
+      "error_message": "Invalid parameter: PhoneNumber Reason: +1234567890 is not valid to publish to",
+      "remediation_steps": [
+        "1. Verify phone number format (E.164)",
+        "2. Check country/region support for SMS",
+        "3. Test with different number",
+        "4. Review SMS sandbox requirements if applicable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "FilterPolicyLimitExceeded",
+      "error_message": "Filter policy length cannot exceed 150KB",
+      "remediation_steps": [
+        "1. Simplify filter policy by removing unnecessary conditions",
+        "2. Split into multiple subscriptions with simpler policies",
+        "3. Consider using message attributes for coarse filtering",
+        "4. Review filter policy syntax for optimization"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "Invalid parameter: DeliveryPolicy Reason: Malformed policy document",
+      "remediation_steps": [
+        "1. Validate delivery policy JSON syntax",
+        "2. Check for required fields in delivery policy",
+        "3. Use policy generator if available",
+        "4. Test with minimal policy first"
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html",
       "severity": "Medium"
     },
     {
-      "error_code": "InternalError",
-      "error_message": "An internal error occurred. Try the request again.",
+      "error_code": "KMSAccessDenied",
+      "error_message": "The ciphertext references a key that doesn't exist or you don't have access to",
       "remediation_steps": [
-        "1. Retry the request with exponential backoff.",
-        "2. Check AWS Health Dashboard for ongoing service issues.",
-        "3. Contact AWS Support if problem persists."
+        "1. Verify KMS key ARN is correct",
+        "2. Check IAM permissions for KMS key usage",
+        "3. Verify key is enabled and not scheduled for deletion",
+        "4. Check for key policy restrictions"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSDisabled",
+      "error_message": "The key used by the topic is disabled",
+      "remediation_steps": [
+        "1. Enable the KMS key:",
+        "   ```bash",
+        "   aws kms enable-key --key-id arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+        "   ```",
+        "2. Update topic to use different key if needed",
+        "3. Check key state: `aws kms describe-key --key-id KEY_ARN`",
+        "4. Verify key rotation policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSInvalidState",
+      "error_message": "The key used by the topic is pending deletion",
+      "remediation_steps": [
+        "1. Cancel key deletion:",
+        "   ```bash",
+        "   aws kms cancel-key-deletion --key-id arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+        "   ```",
+        "2. Update topic to use different key",
+        "3. Verify key state: `aws kms describe-key --key-id KEY_ARN`",
+        "4. Schedule key rotation if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSNotFound",
+      "error_message": "The key used by the topic does not exist",
+      "remediation_steps": [
+        "1. Verify correct KMS key ARN",
+        "2. Create new KMS key if needed",
+        "3. Update topic to use existing key",
+        "4. Check cross-account access if applicable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SMSSandboxPhoneNumberRejected",
+      "error_message": "Phone number is not in the SMS sandbox",
+      "remediation_steps": [
+        "1. Verify phone number is verified in SMS sandbox",
+        "2. Add number to sandbox:",
+        "   ```bash",
+        "   aws sns create-sms-sandbox-phone-number --phone-number +1234567890",
+        "   ```",
+        "3. Complete verification process",
+        "4. Move out of sandbox when ready for production"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html",
       "severity": "Medium"
     },
     {
-      "error_code": "InvalidParameter",
-      "error_message": "One or more parameters in the request are invalid.",
+      "error_code": "StaleTag",
+      "error_message": "The TagValue associated with the TagKey is stale",
       "remediation_steps": [
-        "1. Verify parameter names and values match API expectations.",
-        "2. Check message size limits and formats (e.g., JSON for message attributes).",
-        "3. Ensure ARN values are properly formed.",
-        "4. Use the AWS SDKs to minimize manual formatting errors."
+        "1. Refresh tag values",
+        "2. Verify IAM permissions for tag modifications",
+        "3. Check for concurrent modifications",
+        "4. Retry with updated tags"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/api/API_Publish.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TagLimitExceeded",
+      "error_message": "Cannot exceed tag limit of 50",
+      "remediation_steps": [
+        "1. Remove unused tags",
+        "2. Combine similar tags where possible",
+        "3. Use tag values for additional categorization",
+        "4. Review tagging strategy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html",
       "severity": "Low"
     },
     {
-      "error_code": "NotFound",
-      "error_message": "The requested topic or subscription does not exist.",
+      "error_code": "TagPolicyViolation",
+      "error_message": "The tag does not comply with the tag policy",
       "remediation_steps": [
-        "1. Confirm the topic or subscription ARN is correct.",
-        "2. Use `aws sns list-topics` or `list-subscriptions` to verify existence.",
-        "3. Ensure the resource was not deleted.",
-        "4. Check IAM permissions for `sns:ListTopics` or `sns:ListSubscriptions`."
+        "1. Review organization tag policies",
+        "2. Correct tag key/value format",
+        "3. Check for prohibited tag names (aws:, AWS: etc.)",
+        "4. Verify IAM permissions for tag modifications"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-tags.html",
       "severity": "Medium"
     },
     {
-      "error_code": "ThrottlingException",
-      "error_message": "Request rate is too high. SNS is throttling the request.",
+      "error_code": "UserError",
+      "error_message": "Generic user error occurred",
       "remediation_steps": [
-        "1. Implement retry logic with exponential backoff.",
-        "2. Reduce the frequency of requests.",
-        "3. Request a service quota increase from AWS.",
-        "4. Use batch publishing where applicable."
+        "1. Review error details for specific cause",
+        "2. Verify all parameters are valid",
+        "3. Check AWS documentation for API requirements",
+        "4. Retry with corrected parameters"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/api-retries.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-troubleshooting.html",
       "severity": "Medium"
     },
     {
-      "error_code": "TopicLimitExceeded",
-      "error_message": "The maximum number of topics per account has been exceeded.",
+      "error_code": "VerificationException",
+      "error_message": "Phone number verification failed",
       "remediation_steps": [
-        "1. Delete unused topics.",
-        "2. Consolidate similar topics where possible.",
-        "3. Request a quota increase via AWS Support.",
-        "4. Monitor topic creation limits proactively."
+        "1. Verify phone number format (E.164)",
+        "2. Check for typos in phone number",
+        "3. Ensure number can receive SMS",
+        "4. Retry verification process"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-service-limits.html",
-      "severity": "Low"
+      "aws_doc_link": "https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox-verification.html",
+      "severity": "Medium"
     }
   ]
 }

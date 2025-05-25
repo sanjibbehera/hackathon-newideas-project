@@ -434,3 +434,36 @@ body {
 .approval-link:hover {
     text-decoration: underline;
 }
+
+/* Add to styles.css */
+.error-detail {
+    color: #6c757d;
+    font-style: italic;
+    margin: 8px 0;
+}
+
+.fix-header {
+    font-weight: bold;
+    margin: 12px 0 6px 0;
+    color: #dc3545;
+}
+
+.doc-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.doc-link:hover {
+    text-decoration: underline;
+}
+
+.message-group.dynamic-message ul {
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.message-group.dynamic-message li {
+    margin-bottom: 4px;
+}

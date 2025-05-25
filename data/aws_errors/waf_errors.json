@@ -1,0 +1,325 @@
+{
+  "WAFErrors": [
+    {
+      "error_code": "WAFNonexistentItemException",
+      "error_message": "The referenced item does not exist",
+      "remediation_steps": [
+        "1. Verify the resource exists:",
+        "   ```bash",
+        "   aws wafv2 get-web-acl --name MyWebACL --scope REGIONAL --id 12345678-1234-1234-1234-123456789012",
+        "   ```",
+        "2. Check for typos in the resource ID or name",
+        "3. List available resources to confirm existence",
+        "4. Ensure you're checking the correct scope (REGIONAL vs CLOUDFRONT)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFStaleDataException",
+      "error_message": "The operation failed because the entity being referenced is older than the client's timestamp",
+      "remediation_steps": [
+        "1. Retrieve the latest version of the resource",
+        "2. Implement retry logic with exponential backoff",
+        "3. Check for concurrent modifications",
+        "4. Verify your system clock is synchronized"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFLimitsExceededException",
+      "error_message": "The operation exceeds a resource limit",
+      "remediation_steps": [
+        "1. Check your current limits:",
+        "   ```bash",
+        "   aws wafv2 list-available-managed-rule-groups --scope REGIONAL",
+        "   ```",
+        "2. Delete unused rules or rule groups",
+        "3. Combine similar rules where possible",
+        "4. Request a limit increase through AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFInvalidParameterException",
+      "error_message": "The operation failed because a parameter was invalid",
+      "remediation_steps": [
+        "1. Review the API documentation for parameter requirements",
+        "2. Validate your input values",
+        "3. Check for special characters in names/descriptions",
+        "4. Use the AWS WAF console to test configurations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/APIReference/CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFTagOperationException",
+      "error_message": "An error occurred during tagging operation",
+      "remediation_steps": [
+        "1. Verify tag keys and values meet requirements",
+        "2. Check for duplicate tag keys",
+        "3. Ensure you're not exceeding the tag limit (50 tags per resource)",
+        "4. Review IAM permissions for tagging operations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/tagging-aws-waf-resources.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "WAFInvalidOperationException",
+      "error_message": "The operation isn't valid",
+      "remediation_steps": [
+        "1. Check the resource state (e.g., trying to delete an in-use WebACL)",
+        "2. Verify the operation is supported for the resource type",
+        "3. Review AWS WAF best practices",
+        "4. Check for conflicting operations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidResourceException",
+      "error_message": "The specified resource isn't valid",
+      "remediation_steps": [
+        "1. Verify the resource configuration",
+        "2. Check for malformed ARNs",
+        "3. Ensure the resource exists in the correct region",
+        "4. Validate the resource type matches the operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFUnavailableEntityException",
+      "error_message": "The entity referenced is temporarily unavailable",
+      "remediation_steps": [
+        "1. Wait and retry the operation",
+        "2. Check the AWS Service Health Dashboard",
+        "3. Try in a different region if applicable",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFOptimisticLockException",
+      "error_message": "The entity was modified while attempting an update",
+      "remediation_steps": [
+        "1. Retrieve the latest version of the entity",
+        "2. Implement optimistic concurrency control",
+        "3. Check for concurrent modifications",
+        "4. Retry the operation with the latest version"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFServiceLinkedRoleErrorException",
+      "error_message": "Error with service-linked role",
+      "remediation_steps": [
+        "1. Verify the AWSServiceRoleForWAF role exists:",
+        "   ```bash",
+        "   aws iam get-role --role-name AWSServiceRoleForWAF",
+        "   ```",
+        "2. Create the service-linked role if missing:",
+        "   ```bash",
+        "   aws iam create-service-linked-role --aws-service-name wafv2.amazonaws.com",
+        "   ```",
+        "3. Check IAM permissions for role management",
+        "4. Verify no SCPs are blocking role creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/using-service-linked-roles.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFSubscriptionNotFoundException",
+      "error_message": "The subscription does not exist",
+      "remediation_steps": [
+        "1. Verify you have an active AWS WAF subscription",
+        "2. Check your AWS Marketplace subscriptions",
+        "3. Contact AWS Support to verify subscription status",
+        "4. Ensure you're using the correct AWS account"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFAssociatedItemException",
+      "error_message": "The resource is associated with another resource",
+      "remediation_steps": [
+        "1. List associations for the resource:",
+        "   ```bash",
+        "   aws wafv2 list-resources-for-web-acl --web-acl-arn arn:aws:wafv2:...",
+        "   ```",
+        "2. Remove associations before deletion",
+        "3. Check all scopes (REGIONAL and CLOUDFRONT)",
+        "4. Verify CloudFront distributions if using CLOUDFRONT scope"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFDuplicateItemException",
+      "error_message": "The resource already exists",
+      "remediation_steps": [
+        "1. Check for existing resources with the same name",
+        "2. Use a unique name or ID for the new resource",
+        "3. Delete the duplicate if it's no longer needed",
+        "4. Verify scope (REGIONAL vs CLOUDFRONT) when checking for duplicates"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidPermissionPolicyException",
+      "error_message": "The permission policy isn't valid",
+      "remediation_steps": [
+        "1. Validate the policy syntax",
+        "2. Check for required statements in the policy",
+        "3. Verify principal and action elements",
+        "4. Use IAM Policy Simulator to test the policy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFLogDestinationPermissionIssueException",
+      "error_message": "Unable to publish logs to the destination",
+      "remediation_steps": [
+        "1. Verify the Kinesis Firehose delivery stream exists",
+        "2. Check IAM permissions for the logging role",
+        "3. Validate resource policies on the destination",
+        "4. Test with a minimal permission set first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/logging.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFNonEmptyEntityException",
+      "error_message": "The entity isn't empty",
+      "remediation_steps": [
+        "1. List all contents of the entity (e.g., rules in a rule group)",
+        "2. Remove all child entities before deletion",
+        "3. Check for nested dependencies",
+        "4. Use the AWS WAF console to visualize relationships"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFReferencedItemException",
+      "error_message": "The resource is referenced by another resource",
+      "remediation_steps": [
+        "1. Identify referencing resources:",
+        "   ```bash",
+        "   aws wafv2 list-resources-for-web-acl --web-acl-arn arn:aws:wafv2:...",
+        "   ```",
+        "2. Update or remove references before deletion",
+        "3. Check both WebACLs and RuleGroups for references",
+        "4. Verify scope (REGIONAL vs CLOUDFRONT) when checking references"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/troubleshooting-errors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidRegexPatternException",
+      "error_message": "The regular expression pattern isn't valid",
+      "remediation_steps": [
+        "1. Validate your regex syntax",
+        "2. Test patterns with online regex testers first",
+        "3. Check for unsupported regex features",
+        "4. Simplify complex patterns"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-regex-pattern-set-creating.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFExpiredManagedRuleGroupVersionException",
+      "error_message": "The managed rule group version has expired",
+      "remediation_steps": [
+        "1. List available versions:",
+        "   ```bash",
+        "   aws wafv2 describe-managed-rule-group --vendor-name AWS --name AWSManagedRulesCommonRuleSet --scope REGIONAL",
+        "   ```",
+        "2. Update to the latest version",
+        "3. Check for deprecated rule groups",
+        "4. Subscribe to AWS security bulletins for updates"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WAFCannotChangeManagedRuleGroupVersionException",
+      "error_message": "Cannot change version of managed rule group",
+      "remediation_steps": [
+        "1. Create a new rule group with the desired version",
+        "2. Update your WebACL to reference the new rule group",
+        "3. Check for version compatibility issues",
+        "4. Test new versions in staging first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFUnsupportedAggregateKeyTypeException",
+      "error_message": "The aggregate key type isn't supported",
+      "remediation_steps": [
+        "1. Review supported aggregation keys for rate-based rules",
+        "2. Check for invalid combinations of keys",
+        "3. Simplify your aggregation criteria",
+        "4. Consider using multiple rate-based rules"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rate-based-rules.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidGeoMatchConstraintException",
+      "error_message": "The geographic match constraint isn't valid",
+      "remediation_steps": [
+        "1. Verify country codes are valid ISO 3166 codes",
+        "2. Check for typos in country codes",
+        "3. Review geographic match rule documentation",
+        "4. Test with a single country first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-geo-match.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidIPAddressException",
+      "error_message": "The IP address isn't valid",
+      "remediation_steps": [
+        "1. Verify IP address format (IPv4 or IPv6)",
+        "2. Check for CIDR notation errors",
+        "3. Validate IP ranges don't overlap",
+        "4. Test with known good IPs first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidOperationWithLabelException",
+      "error_message": "The operation isn't valid with the current label",
+      "remediation_steps": [
+        "1. Check label namespace rules",
+        "2. Verify label naming conventions",
+        "3. Review label-based rule documentation",
+        "4. Test with simpler labels first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-labels.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WAFInvalidSizeConstraintException",
+      "error_message": "The size constraint isn't valid",
+      "remediation_steps": [
+        "1. Verify size values are within limits",
+        "2. Check comparison operator support",
+        "3. Review size constraint documentation",
+        "4. Test with extreme values"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-size-constraint.html",
+      "severity": "Medium"
+    }
+  ]
+}

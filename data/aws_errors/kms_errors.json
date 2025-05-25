@@ -1,0 +1,400 @@
+{
+  "KMSErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "The ciphertext references a key to which you don't have access",
+      "remediation_steps": [
+        "1. Verify IAM permissions for kms:Decrypt or other KMS actions",
+        "2. Check the key policy grants necessary permissions",
+        "3. Verify the requesting principal is in the key policy",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "AlreadyExistsException",
+      "error_message": "A customer master key (CMK) with the specified ID already exists",
+      "remediation_steps": [
+        "1. Use a different key ID or alias",
+        "2. Delete the existing key if unused",
+        "3. Check for concurrent creation attempts",
+        "4. Use the existing key if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CloudHsmClusterInvalidConfigurationException",
+      "error_message": "The CloudHSM cluster is not configured correctly for custom key store",
+      "remediation_steps": [
+        "1. Verify CloudHSM cluster meets KMS requirements",
+        "2. Check cluster certificate and connectivity",
+        "3. Reconfigure the CloudHSM cluster",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/create-cmk-keystore.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CustomKeyStoreHasCMKsException",
+      "error_message": "The custom key store contains AWS KMS customer master keys (CMKs)",
+      "remediation_steps": [
+        "1. Schedule deletion of all CMKs in the key store",
+        "2. Wait for key deletion to complete (7-30 days)",
+        "3. Verify no active CMKs remain",
+        "4. Retry the operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/delete-keystore.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CustomKeyStoreInvalidStateException",
+      "error_message": "The custom key store is in an invalid state",
+      "remediation_steps": [
+        "1. Check the connection status of the CloudHSM cluster",
+        "2. Verify the CloudHSM cluster is active and healthy",
+        "3. Disconnect and reconnect the custom key store",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/fix-keystore.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CustomKeyStoreNameInUseException",
+      "error_message": "A custom key store with the specified name already exists",
+      "remediation_steps": [
+        "1. Use a different name for the custom key store",
+        "2. Delete the existing key store if unused",
+        "3. Check for concurrent creation attempts",
+        "4. Use the existing key store if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/create-keystore.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DisabledException",
+      "error_message": "The specified CMK is not enabled",
+      "remediation_steps": [
+        "1. Enable the CMK: `aws kms enable-key --key-id key-id`",
+        "2. Check key state before cryptographic operations",
+        "3. Verify key hasn't been scheduled for deletion",
+        "4. Create a new key if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/enabling-keys.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ExpiredImportTokenException",
+      "error_message": "The import token provided in the request is expired",
+      "remediation_steps": [
+        "1. Generate a new import token",
+        "2. Complete the import within 24 hours of token generation",
+        "3. Check system clock synchronization",
+        "4. Retry the import operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/importing-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "IncorrectKeyException",
+      "error_message": "The specified key doesn't match the key used to encrypt the ciphertext",
+      "remediation_steps": [
+        "1. Verify the correct key ID or alias is specified",
+        "2. Check the encryption context matches the original",
+        "3. Use the same key that encrypted the data",
+        "4. Re-encrypt data if original key is unavailable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#cryptographic-operations",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidAliasNameException",
+      "error_message": "The specified alias name is not valid",
+      "remediation_steps": [
+        "1. Follow alias naming rules (1-256 characters, alphanumeric + _-/.)",
+        "2. Avoid reserved prefixes like 'aws/'",
+        "3. Check for special characters",
+        "4. Use a different alias name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/kms-alias.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidArnException",
+      "error_message": "The specified key ARN or alias ARN is not valid",
+      "remediation_steps": [
+        "1. Verify the ARN format is correct",
+        "2. Check for typos in the ARN",
+        "3. Validate the ARN with `aws kms describe-key`",
+        "4. Use correct region/account in ARN"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidCiphertextException",
+      "error_message": "The ciphertext is corrupt or was encrypted with a different key",
+      "remediation_steps": [
+        "1. Verify the ciphertext was not modified",
+        "2. Check the encryption context matches the original",
+        "3. Use the same key that encrypted the data",
+        "4. Re-encrypt data if necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#cryptographic-operations",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidGrantIdException",
+      "error_message": "The specified grant ID is not valid",
+      "remediation_steps": [
+        "1. Verify the grant ID format is correct",
+        "2. List active grants to find valid IDs",
+        "3. Check if grant was revoked or expired",
+        "4. Create a new grant if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/grants.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidImportTokenException",
+      "error_message": "The import token provided is invalid",
+      "remediation_steps": [
+        "1. Generate a new import token",
+        "2. Verify the token matches the key being imported",
+        "3. Check for token corruption",
+        "4. Retry the import operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/importing-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidKeyUsageException",
+      "error_message": "The requested operation is not valid for the specified CMK",
+      "remediation_steps": [
+        "1. Verify the key's usage matches the operation",
+        "2. Check if key is asymmetric when symmetric is needed",
+        "3. Create a new key with correct usage",
+        "4. Review key specifications before use"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-usage",
+      "severity": "High"
+    },
+    {
+      "error_code": "KMSInternalException",
+      "error_message": "An internal error occurred in AWS KMS",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry with exponential backoff",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/programming-errors.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "KeyUnavailableException",
+      "error_message": "The specified CMK is currently unavailable",
+      "remediation_steps": [
+        "1. Wait and retry the operation",
+        "2. Check if key is pending deletion",
+        "3. Verify key state with `aws kms describe-key`",
+        "4. Use a different key if urgent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/key-state.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "The request exceeds a resource limit",
+      "remediation_steps": [
+        "1. Check current resource usage against limits",
+        "2. Delete unused keys, aliases, or grants",
+        "3. Request limit increase via AWS Support",
+        "4. Distribute resources across multiple regions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/resource-limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MalformedPolicyDocumentException",
+      "error_message": "The key policy document is malformed",
+      "remediation_steps": [
+        "1. Validate JSON syntax in policy document",
+        "2. Check for unescaped special characters",
+        "3. Use IAM Policy Validator",
+        "4. Test with minimal policy first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NotFoundException",
+      "error_message": "The specified key or alias was not found",
+      "remediation_steps": [
+        "1. Verify key ID or alias is correct",
+        "2. List available keys: `aws kms list-keys`",
+        "3. Check if key was recently deleted",
+        "4. Create a new key if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/find-keys-and-aliases.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "TagException",
+      "error_message": "The request contains invalid or duplicate tags",
+      "remediation_steps": [
+        "1. Follow tag naming rules (max 50 tags, key length 1-128 chars)",
+        "2. Avoid reserved prefixes (aws:, AWS:)",
+        "3. Check for duplicate tag keys",
+        "4. Validate tag values"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/tagging-keys.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedOperationException",
+      "error_message": "The operation is not supported for this CMK",
+      "remediation_steps": [
+        "1. Verify key type supports the operation",
+        "2. Check for regional limitations",
+        "3. Use alternative methods to achieve your goal",
+        "4. Create a new key with correct specifications"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-types",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "XksKeyAlreadyInUseException",
+      "error_message": "The external key (XKS key) is already associated with another KMS key",
+      "remediation_steps": [
+        "1. Use a different external key",
+        "2. Disassociate the XKS key from the other KMS key",
+        "3. Verify XKS proxy connectivity",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-keys.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksKeyInvalidConfigurationException",
+      "error_message": "The external key store proxy (XKS proxy) is not configured properly",
+      "remediation_steps": [
+        "1. Verify XKS proxy meets KMS requirements",
+        "2. Check proxy certificate and connectivity",
+        "3. Reconfigure the XKS proxy",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksKeyNotFoundException",
+      "error_message": "The external key (XKS key) was not found in the external key store",
+      "remediation_steps": [
+        "1. Verify the XKS key ID is correct",
+        "2. Check the external key store for the key",
+        "3. Create the key in the external store if needed",
+        "4. Verify XKS proxy connectivity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-keys.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyIncorrectAuthenticationCredentialException",
+      "error_message": "The authentication credential for the external key store proxy (XKS proxy) is incorrect",
+      "remediation_steps": [
+        "1. Verify XKS proxy credentials",
+        "2. Check credential rotation policies",
+        "3. Update KMS with new credentials",
+        "4. Test proxy connectivity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyInvalidConfigurationException",
+      "error_message": "The external key store proxy (XKS proxy) configuration is invalid",
+      "remediation_steps": [
+        "1. Verify XKS proxy URI and path prefix",
+        "2. Check TLS certificate chain",
+        "3. Validate proxy network connectivity",
+        "4. Reconfigure the XKS proxy"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyInvalidResponseException",
+      "error_message": "The external key store proxy (XKS proxy) returned an invalid response",
+      "remediation_steps": [
+        "1. Verify XKS proxy implementation meets specifications",
+        "2. Check proxy logs for errors",
+        "3. Test proxy with sample requests",
+        "4. Contact proxy vendor for support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyUriInUseException",
+      "error_message": "The URI of the external key store proxy (XKS proxy) is already in use",
+      "remediation_steps": [
+        "1. Use a different URI for the XKS proxy",
+        "2. Check for duplicate proxy configurations",
+        "3. Delete unused proxy associations",
+        "4. Verify proxy uniqueness"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "XksProxyUriUnreachableException",
+      "error_message": "The URI of the external key store proxy (XKS proxy) is unreachable",
+      "remediation_steps": [
+        "1. Verify network connectivity to the proxy",
+        "2. Check DNS resolution for the URI",
+        "3. Validate TLS certificate trust chain",
+        "4. Test proxy availability"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyVpcEndpointServiceInUseException",
+      "error_message": "The VPC endpoint service for the external key store proxy (XKS proxy) is already in use",
+      "remediation_steps": [
+        "1. Use a different VPC endpoint service",
+        "2. Check for duplicate proxy configurations",
+        "3. Delete unused proxy associations",
+        "4. Verify endpoint service uniqueness"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "XksProxyVpcEndpointServiceInvalidConfigurationException",
+      "error_message": "The VPC endpoint service for the external key store proxy (XKS proxy) is not properly configured",
+      "remediation_steps": [
+        "1. Verify VPC endpoint service configuration",
+        "2. Check network load balancer settings",
+        "3. Validate security group rules",
+        "4. Reconfigure the endpoint service"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "XksProxyVpcEndpointServiceNotFoundException",
+      "error_message": "The VPC endpoint service for the external key store proxy (XKS proxy) was not found",
+      "remediation_steps": [
+        "1. Verify the endpoint service name is correct",
+        "2. Check the endpoint service exists in your account",
+        "3. Create the endpoint service if needed",
+        "4. Verify IAM permissions for endpoint services"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/kms/latest/developerguide/xks-proxy.html",
+      "severity": "High"
+    }
+  ]
+}

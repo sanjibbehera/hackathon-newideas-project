@@ -1,0 +1,544 @@
+{
+  "GlueErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "User is not authorized to perform: glue:CreateDatabase",
+      "remediation_steps": [
+        "1. Attach IAM policy with glue:CreateDatabase permission",
+        "2. Check for SCP restrictions in AWS Organizations",
+        "3. Verify resource-level permissions",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/access-control-overview.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AlreadyExistsException",
+      "error_message": "Database already exists: example_db",
+      "remediation_steps": [
+        "1. List existing databases: aws glue get-databases",
+        "2. Use different name or delete existing database",
+        "3. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConcurrentModificationException",
+      "error_message": "Two processes are trying to modify the same resource simultaneously",
+      "remediation_steps": [
+        "1. Implement retry logic with exponential backoff",
+        "2. Check for parallel Glue operations",
+        "3. Use AWS Glue workflows for orchestration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/concurrent-runs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConcurrentRunsExceededException",
+      "error_message": "Maximum number of concurrent runs (100) exceeded",
+      "remediation_steps": [
+        "1. Increase concurrency limit via AWS Support",
+        "2. Implement job queueing mechanism",
+        "3. Reduce job frequency or optimize job duration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-jobs-runs.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CrawlerRunningException",
+      "error_message": "Crawler is already running: example_crawler",
+      "remediation_steps": [
+        "1. Wait for current run to complete",
+        "2. Check crawler status: aws glue get-crawler --name example_crawler",
+        "3. Implement status checks before starting new runs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-crawler.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CrawlerNotRunningException",
+      "error_message": "Crawler is not running: example_crawler",
+      "remediation_steps": [
+        "1. Start the crawler: aws glue start-crawler --name example_crawler",
+        "2. Check crawler configuration",
+        "3. Verify IAM permissions for crawler execution"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-crawling.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DatabaseNotEmptyException",
+      "error_message": "Database example_db is not empty",
+      "remediation_steps": [
+        "1. List and delete tables in database first",
+        "2. Use force delete option if available",
+        "3. Check for hidden resources in database"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-catalog-databases.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EntityNotFoundException",
+      "error_message": "Table not found: example_db.example_table",
+      "remediation_steps": [
+        "1. Verify table exists: aws glue get-table --database-name example_db --name example_table",
+        "2. Check for typos in names",
+        "3. Run crawler to populate metadata if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "GlueEncryptionException",
+      "error_message": "Client-side encryption failed for the request",
+      "remediation_steps": [
+        "1. Verify KMS key permissions",
+        "2. Check encryption configuration",
+        "3. Rotate encryption keys if compromised"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/encryption-security-configuration.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IdempotentParameterMismatchException",
+      "error_message": "Idempotent parameters don't match previous call",
+      "remediation_steps": [
+        "1. Use consistent parameters for idempotent operations",
+        "2. Generate new idempotency token for new operations",
+        "3. Check for parameter changes between retries"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalServiceException",
+      "error_message": "Internal service error occurred",
+      "remediation_steps": [
+        "1. Retry with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidInputException",
+      "error_message": "Input parameter violated a constraint",
+      "remediation_steps": [
+        "1. Validate input parameters against API documentation",
+        "2. Check for special characters in names",
+        "3. Verify parameter value ranges"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OperationTimeoutException",
+      "error_message": "Operation timed out",
+      "remediation_steps": [
+        "1. Increase timeout setting if available",
+        "2. Optimize query/operation performance",
+        "3. Break operation into smaller chunks"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNumberLimitExceededException",
+      "error_message": "Maximum number of resources exceeded",
+      "remediation_steps": [
+        "1. Delete unused resources",
+        "2. Request limit increase via AWS Support",
+        "3. Consolidate resources where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SchedulerRunningException",
+      "error_message": "Scheduler is already running",
+      "remediation_steps": [
+        "1. Wait for current operation to complete",
+        "2. Check scheduler status",
+        "3. Implement status checks before new operations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-scheduler.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SchedulerNotRunningException",
+      "error_message": "Scheduler is not running",
+      "remediation_steps": [
+        "1. Start the scheduler",
+        "2. Check scheduler configuration",
+        "3. Verify IAM permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/monitor-debug-scheduler.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "Input fails to satisfy constraints",
+      "remediation_steps": [
+        "1. Review error details for specific validation failure",
+        "2. Check API documentation for parameter requirements",
+        "3. Validate input data formats"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "VersionMismatchException",
+      "error_message": "Version mismatch detected",
+      "remediation_steps": [
+        "1. Refresh client SDK to latest version",
+        "2. Check API version compatibility",
+        "3. Update resource versions if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PartitionAlreadyExistsException",
+      "error_message": "Partition already exists",
+      "remediation_steps": [
+        "1. Use different partition values",
+        "2. Overwrite existing partition if intended",
+        "3. Check for concurrent partition creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-catalog-partitions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PartitionNotFoundException",
+      "error_message": "Partition not found",
+      "remediation_steps": [
+        "1. Verify partition exists",
+        "2. Check for typos in partition values",
+        "3. Run crawler to update metadata"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-catalog-partitions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotReadyException",
+      "error_message": "Resource is not ready",
+      "remediation_steps": [
+        "1. Wait and retry operation",
+        "2. Check resource status",
+        "3. Verify dependencies are met"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-exceptions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NoScheduleException",
+      "error_message": "No schedule defined for trigger",
+      "remediation_steps": [
+        "1. Define a schedule for the trigger",
+        "2. Use ON_DEMAND trigger type if no schedule needed",
+        "3. Check trigger configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-jobs-trigger.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WorkflowRunInProgressException",
+      "error_message": "Workflow run already in progress",
+      "remediation_steps": [
+        "1. Wait for current run to complete",
+        "2. Check workflow run status",
+        "3. Implement workflow run status checks"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-workflows.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MLTransformNotReadyException",
+      "error_message": "ML Transform is not ready",
+      "remediation_steps": [
+        "1. Wait for transform to complete training",
+        "2. Check transform status",
+        "3. Verify training data quality"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-machine-learning-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ColumnStatisticsTaskRunningException",
+      "error_message": "Column statistics task already running",
+      "remediation_steps": [
+        "1. Wait for current task to complete",
+        "2. Check task status",
+        "3. Reduce frequency of statistics generation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-statistics.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ColumnStatisticsTaskStoppingException",
+      "error_message": "Column statistics task is stopping",
+      "remediation_steps": [
+        "1. Wait for task to fully stop",
+        "2. Check task status",
+        "3. Restart task if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-statistics.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BlueprintRunningException",
+      "error_message": "Blueprint is already running",
+      "remediation_steps": [
+        "1. Wait for current run to complete",
+        "2. Check blueprint status",
+        "3. Implement status checks before new runs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-workflows.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BlueprintNotActiveException",
+      "error_message": "Blueprint is not active",
+      "remediation_steps": [
+        "1. Activate the blueprint",
+        "2. Check blueprint configuration",
+        "3. Verify IAM permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-workflows.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SessionAlreadyExistsException",
+      "error_message": "Session already exists",
+      "remediation_steps": [
+        "1. Use different session name",
+        "2. Delete existing session if unused",
+        "3. Check for concurrent session creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-session.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SessionNotReadyException",
+      "error_message": "Session is not ready",
+      "remediation_steps": [
+        "1. Wait for session to initialize",
+        "2. Check session status",
+        "3. Verify session configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-session.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DataFormatNotSupportedException",
+      "error_message": "Data format not supported",
+      "remediation_steps": [
+        "1. Check supported formats in documentation",
+        "2. Convert data to supported format",
+        "3. Use custom classifiers if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-classifiers.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClassifierNotFound",
+      "error_message": "Classifier not found",
+      "remediation_steps": [
+        "1. Verify classifier exists",
+        "2. Check for typos in classifier name",
+        "3. Create classifier if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-classifiers.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConnectionPropertyValidationException",
+      "error_message": "Connection property validation failed",
+      "remediation_steps": [
+        "1. Review connection properties",
+        "2. Check for required properties",
+        "3. Validate property values"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-catalog-connections.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RegistryNotEmptyException",
+      "error_message": "Registry is not empty",
+      "remediation_steps": [
+        "1. Delete schemas in registry first",
+        "2. Use force delete option if available",
+        "3. Check for hidden resources"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SchemaVersionMetadataLimitExceededException",
+      "error_message": "Schema version metadata limit exceeded",
+      "remediation_steps": [
+        "1. Reduce metadata items",
+        "2. Delete unused metadata",
+        "3. Consolidate metadata where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SchemaVersionNotFound",
+      "error_message": "Schema version not found",
+      "remediation_steps": [
+        "1. Verify schema version exists",
+        "2. Check for typos in version ID",
+        "3. Register new version if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SchemaAlreadyExistsException",
+      "error_message": "Schema already exists",
+      "remediation_steps": [
+        "1. Use different schema name",
+        "2. Update existing schema if intended",
+        "3. Check for concurrent schema creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SchemaNotFound",
+      "error_message": "Schema not found",
+      "remediation_steps": [
+        "1. Verify schema exists",
+        "2. Check for typos in schema name",
+        "3. Register schema if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RegistryNotFound",
+      "error_message": "Registry not found",
+      "remediation_steps": [
+        "1. Verify registry exists",
+        "2. Check for typos in registry name",
+        "3. Create registry if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MetadataTooLargeException",
+      "error_message": "Metadata exceeds size limit",
+      "remediation_steps": [
+        "1. Reduce metadata size",
+        "2. Split metadata across multiple items",
+        "3. Store large metadata externally"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-schema-registry-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SecurityConfigurationExistsException",
+      "error_message": "Security configuration already exists",
+      "remediation_steps": [
+        "1. Use different configuration name",
+        "2. Update existing configuration if intended",
+        "3. Delete old configuration first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-security-configuration.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DevEndpointRunningException",
+      "error_message": "Development endpoint is already running",
+      "remediation_steps": [
+        "1. Wait for current operation to complete",
+        "2. Check endpoint status",
+        "3. Terminate endpoint if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-dev-endpoint.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DevEndpointNotReadyException",
+      "error_message": "Development endpoint is not ready",
+      "remediation_steps": [
+        "1. Wait for endpoint to initialize",
+        "2. Check endpoint status",
+        "3. Verify endpoint configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-dev-endpoint.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DevEndpointLimitExceededException",
+      "error_message": "Development endpoint limit exceeded",
+      "remediation_steps": [
+        "1. Delete unused endpoints",
+        "2. Request limit increase via AWS Support",
+        "3. Share endpoints between users if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "JobRunLimitExceededException",
+      "error_message": "Job run limit exceeded",
+      "remediation_steps": [
+        "1. Reduce concurrent job runs",
+        "2. Request limit increase via AWS Support",
+        "3. Optimize job duration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CrawlerLimitExceededException",
+      "error_message": "Crawler limit exceeded",
+      "remediation_steps": [
+        "1. Delete unused crawlers",
+        "2. Request limit increase via AWS Support",
+        "3. Consolidate crawlers where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "TriggerLimitExceededException",
+      "error_message": "Trigger limit exceeded",
+      "remediation_steps": [
+        "1. Delete unused triggers",
+        "2. Request limit increase via AWS Support",
+        "3. Consolidate triggers where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ConnectionLimitExceededException",
+      "error_message": "Connection limit exceeded",
+      "remediation_steps": [
+        "1. Delete unused connections",
+        "2. Request limit increase via AWS Support",
+        "3. Share connections between jobs if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "WorkflowLimitExceededException",
+      "error_message": "Workflow limit exceeded",
+      "remediation_steps": [
+        "1. Delete unused workflows",
+        "2. Request limit increase via AWS Support",
+        "3. Consolidate workflows where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/glue/latest/dg/limits.html",
+      "severity": "High"
+    }
+  ]
+}

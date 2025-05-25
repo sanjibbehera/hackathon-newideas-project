@@ -1,0 +1,329 @@
+{
+  "SageMakerErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: sagemaker:CreateTrainingJob on resource: arn:aws:sagemaker:us-east-1:123456789012:training-job/my-training-job",
+      "remediation_steps": [
+        "1. Attach IAM policy with sagemaker:CreateTrainingJob permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"sagemaker:CreateTrainingJob\",",
+        "       \"Resource\": \"*\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceInUse",
+      "error_message": "Cannot delete endpoint configuration 'my-endpoint-config' because it is associated with endpoint 'my-endpoint'",
+      "remediation_steps": [
+        "1. List associated endpoints:",
+        "   ```bash",
+        "   aws sagemaker list-endpoints --name-contains my-endpoint",
+        "   ```",
+        "2. Delete endpoint first:",
+        "   ```bash",
+        "   aws sagemaker delete-endpoint --endpoint-name my-endpoint",
+        "   ```",
+        "3. Wait for endpoint deletion to complete",
+        "4. Then delete endpoint configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/endpoint-config.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceLimitExceeded",
+      "error_message": "Account-level service limit 'ml.p3.2xlarge for training job usage' exceeded",
+      "remediation_steps": [
+        "1. Check current usage:",
+        "   ```bash",
+        "   aws sagemaker describe-account-attributes",
+        "   ```",
+        "2. Stop unused resources",
+        "3. Request limit increase:",
+        "   ```bash",
+        "   aws sagemaker create-service-quota-increase-request \\",
+        "     --service-code sagemaker \\",
+        "     --quota-code L-12345678 \\",
+        "     --desired-value 10",
+        "   ```",
+        "4. Use different instance types if available"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/regions-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ValidationError",
+      "error_message": "Invalid hyperparameter value for 'learning_rate': must be a float between 0 and 1",
+      "remediation_steps": [
+        "1. Review algorithm's hyperparameter requirements",
+        "2. Check for correct data type (string vs float)",
+        "3. Validate hyperparameter ranges before submission",
+        "4. Use SageMaker SDK's parameter validation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ImageNotFound",
+      "error_message": "The image '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-image:latest' does not exist",
+      "remediation_steps": [
+        "1. Verify ECR repository exists:",
+        "   ```bash",
+        "   aws ecr describe-repositories --repository-names my-image",
+        "   ```",
+        "2. Check image tag spelling",
+        "3. Push image to ECR if missing:",
+        "   ```bash",
+        "   docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-image:latest",
+        "   ```",
+        "4. Verify ECR permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/docker-containers.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ModelError",
+      "error_message": "Failed to load model: Unable to load model artifact from s3://my-bucket/model.tar.gz",
+      "remediation_steps": [
+        "1. Verify model artifact exists in S3",
+        "2. Check S3 permissions for SageMaker execution role",
+        "3. Validate model archive structure",
+        "4. Test model loading locally before deployment"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-load-error.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InternalFailure",
+      "error_message": "Service encountered an internal error",
+      "remediation_steps": [
+        "1. Retry with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if error persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/troubleshoot.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate exceeded for sagemaker:CreateEndpoint",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of API calls",
+        "3. Batch operations where possible",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/regions-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFound",
+      "error_message": "Training job 'my-training-job' not found",
+      "remediation_steps": [
+        "1. Verify training job exists:",
+        "   ```bash",
+        "   aws sagemaker describe-training-job --training-job-name my-training-job",
+        "   ```",
+        "2. Check for typos in job name",
+        "3. List all training jobs if unsure",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/training-job.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClientError",
+      "error_message": "Input configuration has invalid S3 URI: s3:/my-bucket/data (missing '//')",
+      "remediation_steps": [
+        "1. Validate S3 URI format (s3://bucket/key)",
+        "2. Check for typos in bucket/prefix",
+        "3. Verify S3 object exists",
+        "4. Test S3 access independently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/API_S3DataSource.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MissingParameter",
+      "error_message": "Required parameter 'OutputDataConfig' not specified",
+      "remediation_steps": [
+        "1. Review API documentation for required parameters",
+        "2. Check SDK/CLI parameter names",
+        "3. Validate request payload structure",
+        "4. Use SageMaker SDK's parameter validation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_CreateTrainingJob.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ExecutionTimeout",
+      "error_message": "Training job exceeded max runtime (86400 seconds)",
+      "remediation_steps": [
+        "1. Increase MaxRuntimeInSeconds in job configuration",
+        "2. Optimize training script performance",
+        "3. Use more powerful instance type",
+        "4. Implement checkpointing if supported"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/training-job.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BadAlgorithmSpecification",
+      "error_message": "Invalid algorithm specification: both AlgorithmName and TrainingImage cannot be specified",
+      "remediation_steps": [
+        "1. Choose either built-in algorithm or custom container",
+        "2. Remove conflicting parameter",
+        "3. Validate job configuration before submission",
+        "4. Review algorithm specification requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/API_AlgorithmSpecification.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "S3UploadFailed",
+      "error_message": "Failed to upload model artifacts to s3://my-bucket/output/model.tar.gz",
+      "remediation_steps": [
+        "1. Verify S3 bucket exists and is accessible",
+        "2. Check IAM permissions for S3 write access",
+        "3. Validate bucket region matches SageMaker region",
+        "4. Test S3 upload independently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-permissions.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EndpointDeploymentFailed",
+      "error_message": "Failed to deploy model to endpoint 'my-endpoint'",
+      "remediation_steps": [
+        "1. Check CloudWatch logs for deployment errors",
+        "2. Verify model artifacts exist in S3",
+        "3. Test model container locally",
+        "4. Reduce instance count if capacity issues"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/endpoint-deployment.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "IncompatibleFrameworkVersion",
+      "error_message": "Model was trained with TensorFlow 2.4 but endpoint is using TensorFlow 2.1 container",
+      "remediation_steps": [
+        "1. Use matching framework versions for training/inference",
+        "2. Retrain model with supported version",
+        "3. Specify correct image URI for inference",
+        "4. Check SageMaker's supported framework versions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/adapt-inference-container.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidVpcConfig",
+      "error_message": "Invalid subnet subnet-123456: not in availability zone us-east-1a",
+      "remediation_steps": [
+        "1. Verify subnet exists in specified AZ",
+        "2. Check VPC configuration requirements",
+        "3. List available subnets:",
+        "   ```bash",
+        "   aws ec2 describe-subnets --filters \"Name=vpc-id,Values=vpc-123456\"",
+        "   ```",
+        "4. Ensure security groups allow SageMaker traffic"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/API_VpcConfig.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NotebookInstanceLifecycleConfigError",
+      "error_message": "Failed to execute notebook instance lifecycle configuration",
+      "remediation_steps": [
+        "1. Check lifecycle script for errors",
+        "2. Validate script has execute permissions",
+        "3. Test script outside SageMaker",
+        "4. Review CloudWatch logs for details"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/notebook-lifecycle-config.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TransformJobFailed",
+      "error_message": "Transform job 'my-transform-job' failed: Input data format error",
+      "remediation_steps": [
+        "1. Verify input data matches expected format",
+        "2. Check for header row in CSV files",
+        "3. Validate content type specification",
+        "4. Test with small sample data first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/API_TransformInput.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AutoMLJobFailed",
+      "error_message": "AutoML job 'my-automl-job' failed: No valid candidate algorithms found",
+      "remediation_steps": [
+        "1. Check input data quality and format",
+        "2. Verify target attribute is correctly specified",
+        "3. Increase MaxCandidates if too restrictive",
+        "4. Review AutoML job constraints"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/autopilot-troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "FeatureStoreError",
+      "error_message": "Failed to ingest records into feature group 'my-feature-group'",
+      "remediation_steps": [
+        "1. Verify feature definitions match data schema",
+        "2. Check for missing required features",
+        "3. Validate data types in records",
+        "4. Review offline store configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store-troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PipelineExecutionFailed",
+      "error_message": "Pipeline execution failed at step 'DataProcessingStep'",
+      "remediation_steps": [
+        "1. Check execution details in SageMaker Studio",
+        "2. Review step-specific error messages",
+        "3. Validate input/output artifacts",
+        "4. Test individual steps independently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/pipelines-troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "StudioAppCreationFailed",
+      "error_message": "Failed to create Studio app for user 'my-user'",
+      "remediation_steps": [
+        "1. Verify domain and user exist",
+        "2. Check VPC/subnet configuration",
+        "3. Validate execution role permissions",
+        "4. Review service quota limits"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/studio-troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InferenceRecommendationsJobFailed",
+      "error_message": "Failed to generate inference recommendations: Unsupported instance type",
+      "remediation_steps": [
+        "1. Check supported instance types for model",
+        "2. Verify framework version compatibility",
+        "3. Provide valid instance type candidates",
+        "4. Review model artifacts for issues"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/sagemaker/latest/dg/inference-recommender-troubleshooting.html",
+      "severity": "Medium"
+    }
+  ]
+}

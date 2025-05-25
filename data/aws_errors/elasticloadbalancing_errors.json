@@ -1,0 +1,388 @@
+{
+  "LoadBalancerErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: elasticloadbalancing:CreateLoadBalancer",
+      "remediation_steps": [
+        "1. Attach IAM policy with required permissions:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"elasticloadbalancing:CreateLoadBalancer\",",
+        "       \"Resource\": \"*\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-authentication-access-control.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CertificateNotFound",
+      "error_message": "Certificate 'arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012' not found",
+      "remediation_steps": [
+        "1. Verify ACM certificate exists:",
+        "   ```bash",
+        "   aws acm describe-certificate --certificate-arn arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012",
+        "   ```",
+        "2. Check certificate is issued and validated",
+        "3. Verify certificate is in the same region as the load balancer",
+        "4. Request new certificate if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/elb-listener-certificates.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DuplicateListener",
+      "error_message": "A listener already exists on port 443",
+      "remediation_steps": [
+        "1. List existing listeners:",
+        "   ```bash",
+        "   aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/1234567890123456",
+        "   ```",
+        "2. Delete conflicting listener if no longer needed",
+        "3. Choose a different port for new listener",
+        "4. Update existing listener instead of creating new one"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/listener-update-rules.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DuplicateLoadBalancerName",
+      "error_message": "A load balancer with name 'my-load-balancer' already exists",
+      "remediation_steps": [
+        "1. List existing load balancers:",
+        "   ```bash",
+        "   aws elbv2 describe-load-balancers --names my-load-balancer",
+        "   ```",
+        "2. Use a unique name for new load balancer",
+        "3. Delete old load balancer if no longer needed",
+        "4. Check for load balancers in other regions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DuplicateTagKeys",
+      "error_message": "Tag key 'Name' specified more than once",
+      "remediation_steps": [
+        "1. Check for duplicate tags in your request",
+        "2. Merge tag values if intentional",
+        "3. Remove duplicate tags",
+        "4. Verify tag formatting in API/SDK calls"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidConfigurationRequest",
+      "error_message": "The requested configuration is not valid",
+      "remediation_steps": [
+        "1. Review load balancer configuration requirements",
+        "2. Check for incompatible settings (e.g., protocol combinations)",
+        "3. Validate security group settings",
+        "4. Use AWS console to test configurations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSecurityGroup",
+      "error_message": "Security group 'sg-12345678' is invalid",
+      "remediation_steps": [
+        "1. Verify security group exists:",
+        "   ```bash",
+        "   aws ec2 describe-security-groups --group-ids sg-12345678",
+        "   ```",
+        "2. Check security group is in same VPC as load balancer",
+        "3. Validate security group rules allow traffic",
+        "4. Create new security group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-update-security-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSubnet",
+      "error_message": "Subnet 'subnet-12345678' is invalid",
+      "remediation_steps": [
+        "1. Verify subnet exists:",
+        "   ```bash",
+        "   aws ec2 describe-subnets --subnet-ids subnet-12345678",
+        "   ```",
+        "2. Check subnet is in same VPC as load balancer",
+        "3. Validate subnet has available IP addresses",
+        "4. Ensure subnet is in supported availability zone"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/elb-subnets.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ListenerNotFound",
+      "error_message": "Listener 'arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/my-load-balancer/1234567890123456/1234567890123456' not found",
+      "remediation_steps": [
+        "1. List existing listeners:",
+        "   ```bash",
+        "   aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/1234567890123456",
+        "   ```",
+        "2. Check for typos in listener ARN",
+        "3. Verify load balancer exists",
+        "4. Create new listener if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/listener-update-rules.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LoadBalancerNotFound",
+      "error_message": "Load balancer 'arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/1234567890123456' not found",
+      "remediation_steps": [
+        "1. List existing load balancers:",
+        "   ```bash",
+        "   aws elbv2 describe-load-balancers",
+        "   ```",
+        "2. Check for typos in load balancer ARN",
+        "3. Verify correct region is specified",
+        "4. Create new load balancer if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OperationNotPermitted",
+      "error_message": "The operation is not permitted",
+      "remediation_steps": [
+        "1. Check load balancer state (must be active)",
+        "2. Verify IAM permissions for the operation",
+        "3. Check for conflicting operations in progress",
+        "4. Review service limits"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PriorityInUse",
+      "error_message": "Priority '100' is already in use",
+      "remediation_steps": [
+        "1. List existing rules to check priorities:",
+        "   ```bash",
+        "   aws elbv2 describe-rules --listener-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/my-load-balancer/1234567890123456/1234567890123456",
+        "   ```",
+        "2. Choose a different priority value",
+        "3. Delete or modify conflicting rule",
+        "4. Use auto-assign priority if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/listener-update-rules.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceInUse",
+      "error_message": "Cannot delete target group 'arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-target-group/1234567890123456' because it is currently in use",
+      "remediation_steps": [
+        "1. List associated resources:",
+        "   ```bash",
+        "   aws elbv2 describe-target-groups --target-group-arns arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-target-group/1234567890123456",
+        "   ```",
+        "2. Remove target group from listeners/rules first",
+        "3. Wait for changes to propagate",
+        "4. Verify no Auto Scaling groups reference the target group"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/target-group-delete.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RuleNotFound",
+      "error_message": "Rule 'arn:aws:elasticloadbalancing:us-east-1:123456789012:listener-rule/app/my-load-balancer/1234567890123456/1234567890123456/1234567890123456' not found",
+      "remediation_steps": [
+        "1. List existing rules:",
+        "   ```bash",
+        "   aws elbv2 describe-rules --listener-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/my-load-balancer/1234567890123456/1234567890123456",
+        "   ```",
+        "2. Check for typos in rule ARN",
+        "3. Verify listener exists",
+        "4. Create new rule if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/listener-update-rules.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SSLPolicyNotFound",
+      "error_message": "SSL policy 'ELBSecurityPolicy-2016-08' not found",
+      "remediation_steps": [
+        "1. List available SSL policies:",
+        "   ```bash",
+        "   aws elbv2 describe-ssl-policies",
+        "   ```",
+        "2. Choose a supported policy",
+        "3. Check for typos in policy name",
+        "4. Use recommended policy: ELBSecurityPolicy-TLS13-1-2-2021-06"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubnetNotFound",
+      "error_message": "Subnet 'subnet-12345678' not found",
+      "remediation_steps": [
+        "1. Verify subnet exists:",
+        "   ```bash",
+        "   aws ec2 describe-subnets --subnet-ids subnet-12345678",
+        "   ```",
+        "2. Check for typos in subnet ID",
+        "3. Verify subnet is in same region as load balancer",
+        "4. Create new subnet if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/elb-subnets.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "TargetGroupAssociationLimit",
+      "error_message": "Cannot register more targets to target group 'arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-target-group/1234567890123456'. The limit is 1000",
+      "remediation_steps": [
+        "1. Check current target registrations:",
+        "   ```bash",
+        "   aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-target-group/1234567890123456",
+        "   ```",
+        "2. Deregister unused targets",
+        "3. Split targets across multiple target groups",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TargetGroupNotFound",
+      "error_message": "Target group 'arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-target-group/1234567890123456' not found",
+      "remediation_steps": [
+        "1. List existing target groups:",
+        "   ```bash",
+        "   aws elbv2 describe-target-groups",
+        "   ```",
+        "2. Check for typos in target group ARN",
+        "3. Verify correct region is specified",
+        "4. Create new target group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/target-group-delete.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyCertificates",
+      "error_message": "Cannot add more certificates to listener. The limit is 25",
+      "remediation_steps": [
+        "1. List current certificates on listener:",
+        "   ```bash",
+        "   aws elbv2 describe-listener-certificates --listener-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/my-load-balancer/1234567890123456/1234567890123456",
+        "   ```",
+        "2. Remove unused certificates",
+        "3. Consolidate certificates using wildcards",
+        "4. Use separate listeners for additional certificates"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyListeners",
+      "error_message": "Cannot create more listeners for load balancer. The limit is 50",
+      "remediation_steps": [
+        "1. List current listeners:",
+        "   ```bash",
+        "   aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/1234567890123456",
+        "   ```",
+        "2. Delete unused listeners",
+        "3. Combine rules under existing listeners",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyLoadBalancers",
+      "error_message": "Cannot create more load balancers. The limit is 50",
+      "remediation_steps": [
+        "1. List current load balancers:",
+        "   ```bash",
+        "   aws elbv2 describe-load-balancers",
+        "   ```",
+        "2. Delete unused load balancers",
+        "3. Combine applications under existing LBs",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyRegistrationsForTargetId",
+      "error_message": "Target 'i-12345678901234567' is already registered to 100 target groups",
+      "remediation_steps": [
+        "1. List target group registrations:",
+        "   ```bash",
+        "   aws elbv2 describe-target-health --target Id=i-12345678901234567",
+        "   ```",
+        "2. Deregister from unused target groups",
+        "3. Reduce target group dependencies",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyRules",
+      "error_message": "Cannot create more rules for listener. The limit is 100",
+      "remediation_steps": [
+        "1. List current rules:",
+        "   ```bash",
+        "   aws elbv2 describe-rules --listener-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/my-load-balancer/1234567890123456/1234567890123456",
+        "   ```",
+        "2. Delete unused rules",
+        "3. Combine conditions in existing rules",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyTags",
+      "error_message": "Cannot add more tags to resource. The limit is 50",
+      "remediation_steps": [
+        "1. List current tags:",
+        "   ```bash",
+        "   aws elbv2 describe-tags --resource-arns arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/1234567890123456",
+        "   ```",
+        "2. Remove unused tags",
+        "3. Combine values in existing tags",
+        "4. Use separate resource for additional tagging needs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "UnsupportedProtocol",
+      "error_message": "Protocol 'TCP_UDP' is not supported",
+      "remediation_steps": [
+        "1. Check supported protocols for load balancer type:",
+        "   - ALB: HTTP, HTTPS",
+        "   - NLB: TCP, TLS, UDP, TCP_UDP",
+        "   - GLB: TCP, UDP",
+        "2. Choose appropriate protocol",
+        "3. Consider different load balancer type if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "HealthUnavailable",
+      "error_message": "Unable to retrieve health check information",
+      "remediation_steps": [
+        "1. Verify target group health check settings",
+        "2. Check network connectivity to targets",
+        "3. Validate security group rules allow health checks",
+        "4. Test health check endpoint manually"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/target-group-health-checks.html",
+      "severity": "High"
+    }
+  ]
+}

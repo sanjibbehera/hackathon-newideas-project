@@ -1,100 +1,518 @@
 {
-  "SQSIAMErrors": [
+  "SQSErrors": [
     {
       "error_code": "AccessDenied",
-      "error_message": "Access to the SQS queue is denied.",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: sqs:SendMessage on resource: arn:aws:sqs:us-east-1:123456789012:example-queue",
       "remediation_steps": [
-        "1. Ensure IAM policy includes actions like `sqs:SendMessage`, `sqs:ReceiveMessage`, `sqs:DeleteMessage`, or `sqs:GetQueueAttributes`.",
-        "2. Check the SQS queue policy for required permissions.",
-        "3. Confirm no explicit denies in SCPs or permission boundaries.",
-        "4. Use IAM policy simulator to validate permissions."
+        "1. Attach IAM policy with sqs:SendMessage permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"sqs:SendMessage\",",
+        "       \"Resource\": \"arn:aws:sqs:us-east-1:123456789012:example-queue\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check queue policy for explicit denies",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-access-policy-language-summary.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-authentication-and-access-control.html",
       "severity": "High"
     },
     {
-      "error_code": "QueueDoesNotExist",
-      "error_message": "The specified queue does not exist or is incorrectly referenced.",
+      "error_code": "AWS.SimpleQueueService.NonExistentQueue",
+      "error_message": "The specified queue does not exist or you do not have access to it",
       "remediation_steps": [
-        "1. Verify queue name or URL is correct.",
-        "2. Ensure the queue was not recently deleted.",
-        "3. Check correct AWS region is being used.",
-        "4. List queues using `aws sqs list-queues` to verify."
+        "1. Verify queue name spelling and region",
+        "2. List available queues: `aws sqs list-queues`",
+        "3. Check IAM permissions: `sqs:ListQueues`",
+        "4. Create queue if needed: `aws sqs create-queue --queue-name example-queue`"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueUrl.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ListQueues.html",
       "severity": "Medium"
     },
     {
-      "error_code": "InvalidClientTokenId",
-      "error_message": "The AWS access key ID does not exist.",
+      "error_code": "InvalidAttributeValue",
+      "error_message": "Invalid value for the DelaySeconds parameter",
       "remediation_steps": [
-        "1. Regenerate IAM user access keys from AWS Console.",
-        "2. Update AWS credentials via CLI: `aws configure`.",
-        "3. Check if temporary credentials have expired.",
-        "4. Double-check for typos in credentials."
+        "1. Ensure DelaySeconds is between 0 and 900 (15 minutes)",
+        "2. Check for non-numeric characters",
+        "3. Verify parameter type (must be string representing integer)",
+        "4. Review API documentation for valid values"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
-      "severity": "Critical"
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html",
+      "severity": "Medium"
     },
     {
-      "error_code": "OverLimit",
-      "error_message": "The action failed due to AWS SQS throttling.",
+      "error_code": "AWS.SimpleQueueService.QueueDeletedRecently",
+      "error_message": "You must wait 60 seconds after deleting a queue before you can create another with the same name",
       "remediation_steps": [
-        "1. Implement retries with exponential backoff.",
-        "2. Reduce the request rate.",
-        "3. Check SQS service quotas.",
-        "4. Request a quota increase if needed."
+        "1. Wait 60 seconds before recreating queue",
+        "2. Use different queue name",
+        "3. Check for duplicate automation scripts",
+        "4. Implement error handling with retry logic"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-queues.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReceiptHandleIsInvalid",
+      "error_message": "The receipt handle provided is not valid",
+      "remediation_steps": [
+        "1. Get new messages from the queue",
+        "2. Ensure receipt handle hasn't expired (default 12 hours)",
+        "3. Check for message visibility timeout changes",
+        "4. Verify receipt handle wasn't modified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MessageTooLong",
+      "error_message": "Message must be shorter than 262144 bytes",
+      "remediation_steps": [
+        "1. Reduce message size below 256KB",
+        "2. Split large messages into multiple parts",
+        "3. Store payload in S3 and send reference in SQS",
+        "4. Enable large message support if using SQS Extended Client"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.UnsupportedOperation",
+      "error_message": "This action is not supported for FIFO queues",
+      "remediation_steps": [
+        "1. Check queue type (FIFO vs Standard)",
+        "2. Use correct API for queue type",
+        "3. Create standard queue if operation is required",
+        "4. Review FIFO queue limitations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidBatchEntryId",
+      "error_message": "A batch entry id can only contain alphanumeric characters, hyphens and underscores",
+      "remediation_steps": [
+        "1. Check for special characters in batch entry IDs",
+        "2. Generate simple IDs (e.g., msg1, msg2)",
+        "3. Use UUID without special characters",
+        "4. Validate batch entries before sending"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessageBatch.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "BatchRequestTooLong",
+      "error_message": "Batch requests cannot be longer than 262144 bytes",
+      "remediation_steps": [
+        "1. Reduce batch size or message size",
+        "2. Split into multiple batch requests",
+        "3. Check total size of all messages in batch",
+        "4. Implement batch size validation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.EmptyBatchRequest",
+      "error_message": "The batch request does not contain any entries",
+      "remediation_steps": [
+        "1. Verify batch entries array is not empty",
+        "2. Check for null/empty values in batch processing",
+        "3. Validate input before making API call",
+        "4. Implement error handling for empty batches"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessageBatch.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TooManyEntriesInBatchRequest",
+      "error_message": "Maximum number of entries per request is 10",
+      "remediation_steps": [
+        "1. Reduce batch size to 10 or fewer messages",
+        "2. Split large batches into multiple requests",
+        "3. Implement batch chunking in your application",
+        "4. Use parallel processing for multiple batches"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.QueueNameExists",
+      "error_message": "A queue with this name already exists",
+      "remediation_steps": [
+        "1. Use different queue name",
+        "2. Check for existing queues: `aws sqs list-queues`",
+        "3. Add suffix/prefix to make name unique",
+        "4. Delete existing queue if unused"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html",
       "severity": "Medium"
     },
     {
       "error_code": "InvalidParameterValue",
-      "error_message": "A parameter provided in the request is invalid.",
+      "error_message": "Value for parameter QueueUrl is invalid",
       "remediation_steps": [
-        "1. Validate parameter formats, such as queue URLs or message body size (max 256 KB).",
-        "2. Ensure delay, visibility, and retention settings fall within allowed ranges.",
-        "3. Review API request or SDK method for correct usage.",
-        "4. Refer to AWS API documentation for parameter limits."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html",
-      "severity": "Low"
-    },
-    {
-      "error_code": "AWS.SimpleQueueService.NonExistentQueue",
-      "error_message": "The specified queue does not exist.",
-      "remediation_steps": [
-        "1. Confirm the queue URL is accurate.",
-        "2. Ensure the queue has not been deleted.",
-        "3. Use `GetQueueUrl` to retrieve the correct URL.",
-        "4. Recreate the queue if necessary."
+        "1. Verify Queue URL format",
+        "2. Get correct URL: `aws sqs get-queue-url --queue-name example-queue`",
+        "3. Check region matches queue location",
+        "4. Ensure URL hasn't expired"
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueUrl.html",
       "severity": "Medium"
     },
     {
-      "error_code": "InvalidMessageContents",
-      "error_message": "The message contains invalid characters or encoding.",
+      "error_code": "AWS.SimpleQueueService.PurgeQueueInProgress",
+      "error_message": "Only one PurgeQueue operation on a queue is allowed every 60 seconds",
       "remediation_steps": [
-        "1. Ensure message body is UTF-8 encoded.",
-        "2. Remove binary data or encode it (e.g., base64).",
-        "3. Check for disallowed characters in message attributes.",
-        "4. Validate message using AWS SDK tools."
+        "1. Wait 60 seconds before retrying",
+        "2. Check if another process is purging the queue",
+        "3. Implement purge queue rate limiting",
+        "4. Verify purge operation is necessary"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessage.html",
-      "severity": "Low"
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_PurgeQueue.html",
+      "severity": "Medium"
     },
     {
-      "error_code": "ReceiptHandleIsInvalid",
-      "error_message": "The receipt handle provided is not valid.",
+      "error_code": "OverLimit",
+      "error_message": "You have exceeded the maximum number of inflight messages for this queue",
       "remediation_steps": [
-        "1. Make sure the receipt handle is not expired or reused.",
-        "2. Use the receipt handle returned by `ReceiveMessage`.",
-        "3. Avoid deleting messages more than once.",
-        "4. Implement proper message lifecycle handling."
+        "1. Increase queue's ReceiveMessageWaitTimeSeconds",
+        "2. Reduce number of concurrent consumers",
+        "3. Adjust visibility timeout for faster processing",
+        "4. Request limit increase via AWS Support"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html",
-      "severity": "Low"
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.QueueAlreadyExists",
+      "error_message": "Queue already exists with different attributes",
+      "remediation_steps": [
+        "1. Delete existing queue if unused",
+        "2. Use different queue name",
+        "3. Compare and match existing queue attributes",
+        "4. Update existing queue attributes if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidMessageContents",
+      "error_message": "The message contains characters outside the allowed set",
+      "remediation_steps": [
+        "1. Ensure message is UTF-8 encoded",
+        "2. Remove binary/non-text data",
+        "3. Base64 encode binary data if needed",
+        "4. Validate message content before sending"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.BatchEntryIdsNotDistinct",
+      "error_message": "Two or more batch entries have the same Id",
+      "remediation_steps": [
+        "1. Ensure each batch entry has unique Id",
+        "2. Use sequential numbers or UUIDs",
+        "3. Validate batch entries before sending",
+        "4. Generate unique IDs programmatically"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessageBatch.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KmsDisabled",
+      "error_message": "The specified KMS key is disabled",
+      "remediation_steps": [
+        "1. Enable the KMS key",
+        "2. Use different KMS key",
+        "3. Check KMS key permissions",
+        "4. Verify key hasn't been deleted"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-key-management.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KmsInvalidState",
+      "error_message": "The KMS key is in an invalid state",
+      "remediation_steps": [
+        "1. Check KMS key state",
+        "2. Wait for key to become active",
+        "3. Use different KMS key",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-key-management.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KmsNotFound",
+      "error_message": "The specified KMS key does not exist",
+      "remediation_steps": [
+        "1. Verify KMS key ARN is correct",
+        "2. Check key exists in same region",
+        "3. Create new KMS key if needed",
+        "4. Update queue SSE configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-key-management.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "KmsOptInRequired",
+      "error_message": "The AWS account must be opted in to AWS KMS",
+      "remediation_steps": [
+        "1. Opt in to AWS KMS service",
+        "2. Use unencrypted queue temporarily",
+        "3. Contact AWS Support for KMS enablement",
+        "4. Verify account permissions for KMS"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-key-management.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.UnsupportedQueueConfiguration",
+      "error_message": "This queue configuration is not supported",
+      "remediation_steps": [
+        "1. Review queue configuration parameters",
+        "2. Check for conflicting attributes",
+        "3. Use standard queue if FIFO features not needed",
+        "4. Verify region supports requested configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-configure-queue.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.InvalidParameterCombination",
+      "error_message": "Parameters cannot be used together",
+      "remediation_steps": [
+        "1. Review API documentation for parameter requirements",
+        "2. Check for conflicting parameters",
+        "3. Remove one of the conflicting parameters",
+        "4. Use default values where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidAddress",
+      "error_message": "The account ID is invalid",
+      "remediation_steps": [
+        "1. Verify account ID in queue URL/ARN",
+        "2. Check for typos in numeric account ID",
+        "3. Get correct queue URL: `aws sqs get-queue-url --queue-name example-queue`",
+        "4. Verify cross-account permissions if applicable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-authentication-and-access-control.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidSecurity",
+      "error_message": "The security token included in the request is invalid",
+      "remediation_steps": [
+        "1. Refresh temporary credentials (STS tokens)",
+        "2. Check token expiration time",
+        "3. Verify AssumeRole permissions",
+        "4. Use long-term credentials if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "RequestExpired",
+      "error_message": "Request has expired",
+      "remediation_steps": [
+        "1. Check system clock for accuracy",
+        "2. Reduce time between request signing and sending",
+        "3. Regenerate request signature",
+        "4. Verify no network delays"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-request-response.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate of requests exceeds the maximum allowed",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of API calls",
+        "3. Batch operations where possible",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationError",
+      "error_message": "Input validation failed",
+      "remediation_steps": [
+        "1. Review API documentation for input requirements",
+        "2. Validate all required parameters are provided",
+        "3. Check for empty or malformed input",
+        "4. Use AWS SDK input validation features"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MalformedQueryString",
+      "error_message": "The query string contains a syntax error",
+      "remediation_steps": [
+        "1. Verify query parameter formatting",
+        "2. Check for unencoded special characters",
+        "3. Use AWS SDKs to generate requests",
+        "4. Validate query string construction"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-request-response.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MissingParameter",
+      "error_message": "The request must contain the parameter QueueUrl",
+      "remediation_steps": [
+        "1. Verify all required parameters are included",
+        "2. Check parameter names match API spec",
+        "3. Get queue URL if missing: `aws sqs get-queue-url --queue-name example-queue`",
+        "4. Review API documentation for required parameters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OptInRequired",
+      "error_message": "The AWS account must be opted in to the service",
+      "remediation_steps": [
+        "1. Opt in to the required AWS service",
+        "2. Contact AWS Support for service enablement",
+        "3. Verify account permissions",
+        "4. Use alternative service if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "RequestTimeout",
+      "error_message": "The request timed out",
+      "remediation_steps": [
+        "1. Check network connectivity to SQS endpoints",
+        "2. Increase timeout settings in client",
+        "3. Retry with exponential backoff",
+        "4. Verify no AWS service disruptions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceUnavailable",
+      "error_message": "The request has failed due to a temporary failure of the server",
+      "remediation_steps": [
+        "1. Retry with exponential backoff",
+        "2. Check AWS Health Dashboard for service issues",
+        "3. Implement circuit breaker pattern",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClientTokenId",
+      "error_message": "The security token included in the request is invalid",
+      "remediation_steps": [
+        "1. Regenerate AWS credentials (access key/secret key)",
+        "2. Verify credentials are properly configured in AWS CLI/SDK",
+        "3. Check for expired temporary credentials (STS tokens)",
+        "4. Ensure correct AWS region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_expired-credentials",
+      "severity": "High"
+    },
+    {
+      "error_code": "SignatureDoesNotMatch",
+      "error_message": "The request signature we calculated does not match the signature you provided",
+      "remediation_steps": [
+        "1. Verify the secret key matches the access key",
+        "2. Check for trailing spaces in credentials",
+        "3. Ensure correct AWS region is configured",
+        "4. For temporary credentials, refresh STS tokens"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-request-response.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidAction",
+      "error_message": "The action specified is not valid",
+      "remediation_steps": [
+        "1. Verify action name spelling",
+        "2. Check API version compatibility",
+        "3. Review available actions in documentation",
+        "4. Use AWS SDKs to generate requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidQueryParameter",
+      "error_message": "The AWS query string is malformed",
+      "remediation_steps": [
+        "1. Verify query parameter formatting",
+        "2. Check for unencoded special characters",
+        "3. Use AWS SDKs to generate requests",
+        "4. Validate query string construction"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-request-response.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "QueueDoesNotExist",
+      "error_message": "The specified queue does not exist for this wsdl version",
+      "remediation_steps": [
+        "1. Verify queue name and region",
+        "2. Create queue if needed: `aws sqs create-queue --queue-name example-queue`",
+        "3. Check for typos in queue URL",
+        "4. Verify cross-account access if applicable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.DeletedQueue",
+      "error_message": "The specified queue has been deleted",
+      "remediation_steps": [
+        "1. Recreate the queue if needed",
+        "2. Update applications to use different queue",
+        "3. Check for accidental deletion",
+        "4. Verify queue lifecycle management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.QueueOperationNotPermitted",
+      "error_message": "This operation is not permitted on this queue",
+      "remediation_steps": [
+        "1. Verify queue type (FIFO vs Standard)",
+        "2. Check IAM permissions for the operation",
+        "3. Review queue configuration restrictions",
+        "4. Use different queue if operation is required"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-authentication-and-access-control.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AWS.SimpleQueueService.UnsupportedProtocol",
+      "error_message": "This protocol is not supported",
+      "remediation_steps": [
+        "1. Use HTTPS for API requests",
+        "2. Verify SDK/CLI version supports your protocol",
+        "3. Update client to latest version",
+        "4. Check for protocol restrictions in your network"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-request-response.html",
+      "severity": "Medium"
     }
   ]
 }

@@ -1,64 +1,351 @@
 {
-  "EventBridgeIAMErrors": [
+  "EventBridgeErrors": [
     {
-      "error_code": "AccessDeniedException",
-      "error_message": "You do not have sufficient access to perform this action.",
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: events:PutRule on resource: arn:aws:events:us-east-1:123456789012:rule/MyRule",
       "remediation_steps": [
-        "1. Attach necessary EventBridge permissions such as `events:PutRule`, `events:PutTargets`, etc.",
-        "2. Verify resource-based permissions on targets like Lambda or SNS",
-        "3. Check for Service Control Policies (SCPs) or permission boundaries blocking access",
-        "4. Test with AWS CLI: `aws events list-rules` to verify permissions"
+        "1. Attach IAM policy with events:PutRule permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"events:PutRule\",",
+        "       \"Resource\": \"arn:aws:events:us-east-1:123456789012:rule/*\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-permissions-reference.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/iam-identity-based-access-control-eventbridge.html",
       "severity": "High"
     },
     {
-      "error_code": "InvalidClientTokenId",
-      "error_message": "The AWS access key ID provided does not exist in our records.",
+      "error_code": "ConcurrentModificationException",
+      "error_message": "Unable to complete request due to concurrent modification",
       "remediation_steps": [
-        "1. Verify the access key in AWS IAM Console",
-        "2. Use `aws configure` to set valid credentials",
-        "3. Check if the key was deleted or rotated",
-        "4. For temporary credentials, ensure the session token is included"
+        "1. Wait a few minutes and retry",
+        "2. Check for parallel EventBridge operations",
+        "3. Implement optimistic concurrency control",
+        "4. Verify no automation is making conflicting changes"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
-      "severity": "Critical"
-    },
-    {
-      "error_code": "ExpiredTokenException",
-      "error_message": "The security token included in the request is expired.",
-      "remediation_steps": [
-        "1. Refresh temporary credentials (e.g., via STS AssumeRole)",
-        "2. Validate session token expiration time",
-        "3. Update credentials in environment or CLI",
-        "4. Regenerate session token if needed"
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html",
-      "severity": "High"
-    },
-    {
-      "error_code": "RequestExpired",
-      "error_message": "The request reached the service more than 15 minutes after the date stamp on the request.",
-      "remediation_steps": [
-        "1. Ensure system clock is synced (e.g., via NTP)",
-        "2. Regenerate the request closer to real-time",
-        "3. Adjust local time zone settings if incorrect",
-        "4. Avoid using stale pre-signed requests"
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/sigv4-errors.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-troubleshooting.html",
       "severity": "Medium"
     },
     {
-      "error_code": "NotAuthorized",
-      "error_message": "You do not have permission to perform this action.",
+      "error_code": "InternalException",
+      "error_message": "Internal server error",
       "remediation_steps": [
-        "1. Review attached IAM policies and confirm required EventBridge actions are allowed",
-        "2. Confirm role trust relationships if EventBridge is invoking a service on your behalf",
-        "3. Verify identity is using correct credentials and role",
-        "4. Use IAM Policy Simulator to validate permissions"
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if error persists"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_testing-policies.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "InvalidEventPatternException",
+      "error_message": "The event pattern is not valid",
+      "remediation_steps": [
+        "1. Validate event pattern syntax:",
+        "   ```bash",
+        "   aws events test-event-pattern --event-pattern file://pattern.json --event file://event.json",
+        "   ```",
+        "2. Check for JSON formatting errors",
+        "3. Verify all fields in the pattern exist in the event",
+        "4. Start with simple pattern and gradually add complexity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "You've reached the limit for the number of rules you can create",
+      "remediation_steps": [
+        "1. List and delete unused rules:",
+        "   ```bash",
+        "   aws events list-rules",
+        "   aws events delete-rule --name OldRule",
+        "   ```",
+        "2. Combine similar rules where possible",
+        "3. Request limit increase via AWS Support",
+        "4. Consider using input transformers for rule variations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ManagedRuleException",
+      "error_message": "The rule is managed by AWS and cannot be modified",
+      "remediation_steps": [
+        "1. Create a custom rule with similar pattern",
+        "2. Disable the managed rule if no longer needed",
+        "3. Check AWS documentation for managed rule behavior",
+        "4. Consider using input transformers to modify events"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-managed-rule.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "OperationDisabledException",
+      "error_message": "The operation is disabled in this region",
+      "remediation_steps": [
+        "1. Check EventBridge service availability in your region",
+        "2. Use an alternative supported region",
+        "3. Verify AWS account type supports this feature",
+        "4. Contact AWS Support for region enablement"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/rande.html#eb_region",
       "severity": "High"
+    },
+    {
+      "error_code": "PolicyLengthExceededException",
+      "error_message": "The event bus policy exceeds the size limit",
+      "remediation_steps": [
+        "1. Review and simplify policy statements",
+        "2. Split into multiple policies if possible",
+        "3. Remove unnecessary conditions",
+        "4. Consider using tags for coarse-grained access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-permissions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceAlreadyExistsException",
+      "error_message": "A rule with the name MyRule already exists",
+      "remediation_steps": [
+        "1. List existing rules: `aws events list-rules`",
+        "2. Delete duplicate if unused: `aws events delete-rule --name MyRule`",
+        "3. Choose a unique rule name",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "The rule MyRule does not exist",
+      "remediation_steps": [
+        "1. Verify rule exists: `aws events describe-rule --name MyRule`",
+        "2. Check for typos in rule name",
+        "3. List all rules: `aws events list-rules`",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RuleLimitExceededException",
+      "error_message": "You've exceeded the maximum number of targets per rule",
+      "remediation_steps": [
+        "1. List current targets:",
+        "   ```bash",
+        "   aws events list-targets-by-rule --rule MyRule",
+        "   ```",
+        "2. Remove unused targets",
+        "3. Combine similar targets where possible",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TargetAssociationException",
+      "error_message": "Could not associate target with rule",
+      "remediation_steps": [
+        "1. Verify target service permissions",
+        "2. Check for resource conflicts",
+        "3. Validate target ARN format",
+        "4. Test with minimal target configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "The input fails to satisfy the constraints specified by EventBridge",
+      "remediation_steps": [
+        "1. Verify all parameters are within documented limits",
+        "2. Check for special characters in names/descriptions",
+        "3. Validate JSON event pattern syntax",
+        "4. Review API documentation for parameter requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/APIReference/CommonErrors.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EventBusNotFoundException",
+      "error_message": "The event bus custom-bus does not exist",
+      "remediation_steps": [
+        "1. Verify event bus exists:",
+        "   ```bash",
+        "   aws events describe-event-bus --name custom-bus",
+        "   ```",
+        "2. Check for typos in bus name",
+        "3. Create event bus if needed:",
+        "   ```bash",
+        "   aws events create-event-bus --name custom-bus",
+        "   ```",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EventSourceNotFoundException",
+      "error_message": "The event source aws.partner/example.com does not exist",
+      "remediation_steps": [
+        "1. Verify event source exists:",
+        "   ```bash",
+        "   aws events list-event-sources",
+        "   ```",
+        "2. Check partner integration status",
+        "3. Create event source if needed",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-sources.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "IllegalStatusException",
+      "error_message": "The rule is in an invalid state for this operation",
+      "remediation_steps": [
+        "1. Check rule status:",
+        "   ```bash",
+        "   aws events describe-rule --name MyRule",
+        "   ```",
+        "2. Enable/disable rule as needed",
+        "3. Wait for state transition to complete",
+        "4. Retry the operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidStateException",
+      "error_message": "The archive is in an invalid state for this operation",
+      "remediation_steps": [
+        "1. Check archive status:",
+        "   ```bash",
+        "   aws events describe-archive --archive-name MyArchive",
+        "   ```",
+        "2. Wait for archive creation/deletion to complete",
+        "3. Retry the operation",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-archive.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PartnerEventSourceNotFoundException",
+      "error_message": "The partner event source aws.partner/example.com does not exist",
+      "remediation_steps": [
+        "1. Verify partner event source exists:",
+        "   ```bash",
+        "   aws events list-partner-event-sources",
+        "   ```",
+        "2. Check partner integration status",
+        "3. Create partner event source if needed",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-saas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PermissionAlreadyExistsException",
+      "error_message": "The permission already exists for this event bus",
+      "remediation_steps": [
+        "1. List existing permissions:",
+        "   ```bash",
+        "   aws events describe-event-bus --name custom-bus",
+        "   ```",
+        "2. Update existing permission if needed",
+        "3. Remove duplicate permission if unnecessary",
+        "4. Check for concurrent permission creation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-permissions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PermissionNotFoundException",
+      "error_message": "The permission does not exist for this event bus",
+      "remediation_steps": [
+        "1. Verify permission exists:",
+        "   ```bash",
+        "   aws events describe-event-bus --name custom-bus",
+        "   ```",
+        "2. Check for typos in permission statement ID",
+        "3. Create permission if needed",
+        "4. Ensure correct AWS account/region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-permissions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ArchiveLimitExceededException",
+      "error_message": "You've exceeded the maximum number of archives",
+      "remediation_steps": [
+        "1. List and delete unused archives:",
+        "   ```bash",
+        "   aws events list-archives",
+        "   aws events delete-archive --archive-name OldArchive",
+        "   ```",
+        "2. Combine similar archives where possible",
+        "3. Request limit increase via AWS Support",
+        "4. Consider longer retention period instead of multiple archives"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EndpointLimitExceededException",
+      "error_message": "You've exceeded the maximum number of endpoints",
+      "remediation_steps": [
+        "1. List and delete unused endpoints:",
+        "   ```bash",
+        "   aws events list-endpoints",
+        "   aws events delete-endpoint --name OldEndpoint",
+        "   ```",
+        "2. Combine similar endpoints where possible",
+        "3. Request limit increase via AWS Support",
+        "4. Consider reusing endpoints for similar event patterns"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReplayLimitExceededException",
+      "error_message": "You've exceeded the maximum number of concurrent replays",
+      "remediation_steps": [
+        "1. List current replays:",
+        "   ```bash",
+        "   aws events list-replays",
+        "   ```",
+        "2. Wait for existing replays to complete",
+        "3. Schedule replays sequentially",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConnectionLimitExceededException",
+      "error_message": "You've exceeded the maximum number of API destination connections",
+      "remediation_steps": [
+        "1. List and delete unused connections:",
+        "   ```bash",
+        "   aws events list-connections",
+        "   aws events delete-connection --name OldConnection",
+        "   ```",
+        "2. Reuse connections where possible",
+        "3. Request limit increase via AWS Support",
+        "4. Implement connection pooling in your application"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-quota.html",
+      "severity": "Medium"
     }
   ]
 }

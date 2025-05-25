@@ -311,6 +311,49 @@
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html",
       "severity": "Medium"
+    },
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User is not authorized to perform s3:CreateBucket",
+      "remediation_steps": [
+        "1. Verify IAM permissions include `s3:CreateBucket`",
+        "2. Check for SCPs blocking bucket creation",
+        "3. Ensure no permission boundaries restrict access",
+        "4. Try creating bucket in different region"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies.html",
+      "severity": "High",
+      "screenshot_example": "access_denied_console.png"
+    },
+    {
+      "error_code": "TooManyBuckets",
+      "error_message": "You have attempted to create more buckets than allowed (default limit: 100 per account)",
+      "remediation_steps": [
+        "1. Delete unused buckets: `aws s3 rb s3://bucket-name --force`",
+        "2. Request limit increase via AWS Support",
+        "3. Consider using S3 folders instead of new buckets",
+        "4. Check for old buckets in other regions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/BucketRestrictions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidBucketName",
+      "patterns": [
+        "invalid bucket name",
+        "bucket name is not valid",
+        "naming rules",
+        "dns compliant"
+      ],
+      "error_message": "Bucket name must be DNS-compliant and follow specific rules",
+      "remediation_steps": [
+        "Use only lowercase letters, numbers, and hyphens (no underscores)",
+        "Ensure length is between 3-63 characters",
+        "Must start and end with a letter or number",
+        "Avoid names that look like IP addresses"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html",
+      "severity": "High"
     }
   ]
 }

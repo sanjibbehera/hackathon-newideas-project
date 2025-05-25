@@ -1,99 +1,603 @@
 {
-  "RedshiftIAMErrors": [
+  "RedshiftErrors": [
     {
-      "error_code": "AccessDeniedException",
-      "error_message": "User is not authorized to perform this Redshift operation.",
+      "error_code": "ClusterAlreadyExists",
+      "error_message": "Cluster already exists with identifier: example-cluster",
       "remediation_steps": [
-        "1. Verify IAM policy includes necessary Redshift actions (e.g., `redshift:DescribeClusters`, `redshift:CreateCluster`).",
-        "2. Check IAM role trust relationships for assumed roles.",
-        "3. Ensure there are no explicit denies from SCPs or permission boundaries.",
-        "4. Use IAM policy simulator to test permissions."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/authorizing-redshift-service.html",
-      "severity": "High"
-    },
-    {
-      "error_code": "ClusterNotFound",
-      "error_message": "The specified Redshift cluster does not exist.",
-      "remediation_steps": [
-        "1. Verify the cluster identifier is correct.",
-        "2. Confirm the cluster hasn't been deleted.",
-        "3. List clusters with `aws redshift describe-clusters`.",
-        "4. Check correct region and account context."
+        "1. Use a different cluster identifier",
+        "2. Delete existing cluster if unused: `aws redshift delete-cluster --cluster-identifier example-cluster --skip-final-cluster-snapshot`",
+        "3. Check for duplicate automation scripts",
+        "4. Verify cluster isn't in 'available' state"
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-clusters-console.html",
       "severity": "Medium"
     },
     {
-      "error_code": "InvalidClusterState",
-      "error_message": "Operation cannot be performed due to the current state of the cluster.",
+      "error_code": "ClusterNotFound",
+      "error_message": "Cluster not found with identifier: non-existent-cluster",
       "remediation_steps": [
-        "1. Wait until the cluster is in `available` state.",
-        "2. Use `describe-clusters` to check current status.",
-        "3. Avoid actions during `modifying`, `rebooting`, or `deleting` states.",
-        "4. Use CloudWatch Events to track cluster status."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-cluster-status.html",
-      "severity": "Medium"
-    },
-    {
-      "error_code": "InvalidParameterCombination",
-      "error_message": "The provided parameters are not valid together.",
-      "remediation_steps": [
-        "1. Check the AWS CLI or SDK documentation for valid parameter combinations.",
-        "2. Avoid incompatible flags or options (e.g., using snapshot name with restore type `full` without proper source).",
-        "3. Validate parameter types and formats.",
-        "4. Use `--debug` in CLI for more context."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/APIReference/API_Operations.html",
-      "severity": "Low"
-    },
-    {
-      "error_code": "InsufficientClusterCapacity",
-      "error_message": "AWS does not currently have sufficient capacity to fulfill your request.",
-      "remediation_steps": [
-        "1. Try launching the cluster in a different AZ or region.",
-        "2. Reduce node count or use a different node type.",
-        "3. Wait and retry later.",
-        "4. Contact AWS Support for capacity issues."
+        "1. Verify cluster identifier spelling",
+        "2. List available clusters: `aws redshift describe-clusters`",
+        "3. Check AWS region matches cluster location",
+        "4. Verify IAM permissions: `redshift:DescribeClusters`"
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
       "severity": "High"
     },
     {
-      "error_code": "InvalidCredentials",
-      "error_message": "The IAM role or credentials are invalid or expired.",
+      "error_code": "ClusterQuotaExceeded",
+      "error_message": "Cluster quota exceeded. Maximum allowed: 200",
       "remediation_steps": [
-        "1. Refresh or rotate IAM credentials.",
-        "2. Validate role trust policy for Redshift integration.",
-        "3. Check temporary STS credentials expiration.",
-        "4. Use `aws sts get-caller-identity` to verify identity context."
+        "1. Delete unused clusters",
+        "2. Request quota increase via AWS Support",
+        "3. Consider larger cluster sizes to consolidate workloads",
+        "4. Check for pending cluster creations"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/authorizing-redshift-service.html",
-      "severity": "Critical"
-    },
-    {
-      "error_code": "UnauthorizedOperation",
-      "error_message": "You are not authorized to perform this Redshift operation.",
-      "remediation_steps": [
-        "1. Add required IAM permissions (e.g., `redshift:ModifyCluster`).",
-        "2. Confirm role used in session has correct policy attached.",
-        "3. Use AWS CLI's `sts assume-role` to verify assumed identity.",
-        "4. Use AWS IAM Access Analyzer for policy validation."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
       "severity": "High"
     },
     {
-      "error_code": "ThrottlingException",
-      "error_message": "Rate limit exceeded for Redshift API operations.",
+      "error_code": "ClusterSubnetGroupNotFound",
+      "error_message": "Subnet group not found: example-subnet-group",
       "remediation_steps": [
-        "1. Implement retries with exponential backoff.",
-        "2. Reduce frequency of API calls.",
-        "3. Use batch operations where possible.",
-        "4. Contact AWS Support if rate limits persist."
+        "1. Verify subnet group exists: `aws redshift describe-cluster-subnet-groups`",
+        "2. Create subnet group if needed",
+        "3. Check VPC/Subnet configurations",
+        "4. Verify cross-account access permissions"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/query-monitoring.html",
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-cluster-subnet-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterParameterGroupNotFound",
+      "error_message": "Parameter group not found: example-parameter-group",
+      "remediation_steps": [
+        "1. Verify parameter group exists: `aws redshift describe-cluster-parameter-groups`",
+        "2. Create parameter group if needed",
+        "3. Check AWS region matches parameter group location",
+        "4. Use default parameter groups if customization not required"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-parameter-groups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterSecurityGroupNotFound",
+      "error_message": "Security group not found: example-security-group",
+      "remediation_steps": [
+        "1. Verify security group exists: `aws redshift describe-cluster-security-groups`",
+        "2. Create security group if needed",
+        "3. Check VPC configurations",
+        "4. Update cluster with correct security group"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-security-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterSnapshotAlreadyExists",
+      "error_message": "Snapshot already exists with identifier: example-snapshot",
+      "remediation_steps": [
+        "1. Use different snapshot identifier",
+        "2. Delete existing snapshot if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify snapshot isn't in progress"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterSnapshotQuotaExceeded",
+      "error_message": "Snapshot quota exceeded. Maximum allowed: 100",
+      "remediation_steps": [
+        "1. Delete unused snapshots",
+        "2. Request quota increase via AWS Support",
+        "3. Implement snapshot lifecycle policy",
+        "4. Consider automated snapshot sharing"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterSnapshotNotFound",
+      "error_message": "Snapshot not found with identifier: non-existent-snapshot",
+      "remediation_steps": [
+        "1. Verify snapshot identifier spelling",
+        "2. List available snapshots: `aws redshift describe-cluster-snapshots`",
+        "3. Check AWS region matches snapshot location",
+        "4. Verify IAM permissions: `redshift:DescribeClusterSnapshots`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DependentServiceRequestThrottling",
+      "error_message": "Request throttled by dependent service (EC2, IAM, etc.)",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Check dependent service limits",
+        "3. Reduce request frequency",
+        "4. Verify IAM role permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DependentServiceUnavailable",
+      "error_message": "Dependent service (EC2, IAM, etc.) is unavailable",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry with exponential backoff",
+        "3. Verify network connectivity to service endpoints",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://health.aws.amazon.com/",
+      "severity": "High"
+    },
+    {
+      "error_code": "HsmClientCertificateAlreadyExists",
+      "error_message": "HSM client certificate already exists with identifier: example-cert",
+      "remediation_steps": [
+        "1. Use different certificate identifier",
+        "2. Delete existing certificate if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify certificate isn't in use"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "HsmClientCertificateQuotaExceeded",
+      "error_message": "HSM client certificate quota exceeded. Maximum allowed: 10",
+      "remediation_steps": [
+        "1. Delete unused certificates",
+        "2. Request quota increase via AWS Support",
+        "3. Rotate certificates instead of creating new ones",
+        "4. Consider using IAM authentication instead"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "HsmConfigurationAlreadyExists",
+      "error_message": "HSM configuration already exists with identifier: example-hsm-config",
+      "remediation_steps": [
+        "1. Use different configuration identifier",
+        "2. Delete existing configuration if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify configuration isn't in use"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "IncompatibleOrderableOptions",
+      "error_message": "The specified options are incompatible",
+      "remediation_steps": [
+        "1. Review cluster configuration parameters",
+        "2. Check for conflicting instance types and features",
+        "3. Verify region supports selected options",
+        "4. Use default values for conflicting options"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientClusterCapacity",
+      "error_message": "Insufficient capacity to fulfill request",
+      "remediation_steps": [
+        "1. Try different instance type or region",
+        "2. Reduce requested node count",
+        "3. Check AWS Service Health Dashboard for outages",
+        "4. Contact AWS Support for capacity allocation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidClusterParameterGroupState",
+      "error_message": "Parameter group is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for parameter group to become available",
+        "2. Check for pending modifications",
+        "3. Reboot cluster if needed",
+        "4. Create new parameter group and apply"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-parameter-groups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClusterSecurityGroupState",
+      "error_message": "Security group is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for security group to become available",
+        "2. Check for pending modifications",
+        "3. Verify network ACLs aren't blocking access",
+        "4. Reboot cluster if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-security-groups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClusterSnapshotState",
+      "error_message": "Snapshot is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for snapshot to become available",
+        "2. Check snapshot status: `aws redshift describe-cluster-snapshots --snapshot-identifier example-snapshot`",
+        "3. Verify cluster isn't being modified",
+        "4. Create new snapshot if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClusterState",
+      "error_message": "Cluster is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for cluster to become available",
+        "2. Check cluster status: `aws redshift describe-clusters --cluster-identifier example-cluster`",
+        "3. Reboot cluster if stuck in modifying state",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidClusterSubnetGroupState",
+      "error_message": "Subnet group is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for subnet group to become available",
+        "2. Check VPC/subnet configurations",
+        "3. Verify network ACLs allow Redshift traffic",
+        "4. Create new subnet group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-cluster-subnet-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidElasticIp",
+      "error_message": "Elastic IP address is invalid",
+      "remediation_steps": [
+        "1. Verify Elastic IP exists in same region",
+        "2. Check Elastic IP isn't already associated",
+        "3. Release and allocate new Elastic IP if needed",
+        "4. Use VPC networking instead of Elastic IPs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidHsmClientCertificateState",
+      "error_message": "HSM client certificate is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for certificate to become available",
+        "2. Check certificate status",
+        "3. Create new certificate if needed",
+        "4. Verify cluster encryption settings"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidHsmConfigurationState",
+      "error_message": "HSM configuration is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for configuration to become available",
+        "2. Check configuration status",
+        "3. Create new configuration if needed",
+        "4. Verify cluster encryption settings"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterCombination",
+      "error_message": "Parameters cannot be used together",
+      "remediation_steps": [
+        "1. Review API documentation for parameter requirements",
+        "2. Check for conflicting parameters",
+        "3. Remove one of the conflicting parameters",
+        "4. Use default values where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "Parameter value is invalid",
+      "remediation_steps": [
+        "1. Review API documentation for valid values",
+        "2. Check parameter value formatting",
+        "3. Verify parameter meets requirements",
+        "4. Use default values where possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidReservedNodeState",
+      "error_message": "Reserved node is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for reserved node to become available",
+        "2. Check reserved node status",
+        "3. Verify reservation period hasn't expired",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-reserved-nodes.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidRestore",
+      "error_message": "Restore operation is invalid",
+      "remediation_steps": [
+        "1. Verify snapshot exists and is available",
+        "2. Check cluster and snapshot compatibility",
+        "3. Use different snapshot if corrupted",
+        "4. Verify IAM permissions for restore"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSubnet",
+      "error_message": "Subnet is invalid for Redshift cluster",
+      "remediation_steps": [
+        "1. Verify subnet exists in same region/AZ",
+        "2. Check subnet has enough available IPs",
+        "3. Verify subnet route table allows Redshift traffic",
+        "4. Use different subnet in same VPC"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-cluster-subnet-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSubscriptionState",
+      "error_message": "Subscription is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for subscription to become active",
+        "2. Check subscription status",
+        "3. Verify payment method is valid",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidTag",
+      "error_message": "Tag is invalid",
+      "remediation_steps": [
+        "1. Review tag key/value requirements",
+        "2. Check for prohibited characters",
+        "3. Verify tag doesn't start with 'aws:'",
+        "4. Use different tag name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidVpcNetworkState",
+      "error_message": "VPC network is in invalid state for requested operation",
+      "remediation_steps": [
+        "1. Wait for VPC modifications to complete",
+        "2. Check VPC peering connections",
+        "3. Verify DNS resolution in VPC",
+        "4. Create new VPC if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-cluster-subnet-groups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "LimitExceeded",
+      "error_message": "Request would exceed service limit",
+      "remediation_steps": [
+        "1. Delete unused resources",
+        "2. Request limit increase via AWS Support",
+        "3. Check for pending operations",
+        "4. Implement resource cleanup automation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NumberOfNodesQuotaExceeded",
+      "error_message": "Number of nodes quota exceeded",
+      "remediation_steps": [
+        "1. Reduce requested node count",
+        "2. Request quota increase via AWS Support",
+        "3. Use larger node types to reduce count",
+        "4. Delete unused clusters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ReservedNodeAlreadyExists",
+      "error_message": "Reserved node already exists with identifier: example-reserved-node",
+      "remediation_steps": [
+        "1. Use different reserved node identifier",
+        "2. Delete existing reservation if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify reservation isn't active"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-reserved-nodes.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedNodeNotFound",
+      "error_message": "Reserved node not found with identifier: non-existent-reserved-node",
+      "remediation_steps": [
+        "1. Verify reserved node identifier spelling",
+        "2. List available reserved nodes: `aws redshift describe-reserved-nodes`",
+        "3. Check AWS region matches reservation location",
+        "4. Verify IAM permissions: `redshift:DescribeReservedNodes`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-reserved-nodes.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReservedNodeQuotaExceeded",
+      "error_message": "Reserved node quota exceeded",
+      "remediation_steps": [
+        "1. Delete unused reservations",
+        "2. Request quota increase via AWS Support",
+        "3. Use On-Demand instances instead",
+        "4. Consolidate workloads onto fewer clusters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/amazon-redshift-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResizeNotFound",
+      "error_message": "Resize operation not found",
+      "remediation_steps": [
+        "1. Verify resize was initiated",
+        "2. Check cluster modification history",
+        "3. Retry resize operation",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFound",
+      "error_message": "Resource not found",
+      "remediation_steps": [
+        "1. Verify resource identifier spelling",
+        "2. List available resources of that type",
+        "3. Check AWS region matches resource location",
+        "4. Verify IAM permissions to describe resources"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SNSInvalidTopic",
+      "error_message": "SNS topic is invalid",
+      "remediation_steps": [
+        "1. Verify SNS topic ARN is correct",
+        "2. Check SNS topic exists in same region",
+        "3. Verify permissions to publish to topic",
+        "4. Create new SNS topic if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SNSNoAuthorization",
+      "error_message": "No authorization to publish to SNS topic",
+      "remediation_steps": [
+        "1. Verify IAM permissions include `sns:Publish`",
+        "2. Check SNS topic policy allows Redshift to publish",
+        "3. Use correct SNS topic ARN",
+        "4. Contact topic owner for permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SNSTopicArnNotFound",
+      "error_message": "SNS topic ARN not found",
+      "remediation_steps": [
+        "1. Verify SNS topic ARN is correct",
+        "2. Check SNS topic exists in same region",
+        "3. Create new SNS topic if needed",
+        "4. Verify IAM permissions to describe SNS topics"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SourceNotFound",
+      "error_message": "Source not found",
+      "remediation_steps": [
+        "1. Verify source identifier spelling",
+        "2. Check source exists and is available",
+        "3. Verify IAM permissions to access source",
+        "4. Recreate source if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubscriptionAlreadyExist",
+      "error_message": "Subscription already exists",
+      "remediation_steps": [
+        "1. Use different subscription identifier",
+        "2. Delete existing subscription if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify subscription isn't active"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubscriptionCategoryNotFound",
+      "error_message": "Subscription category not found",
+      "remediation_steps": [
+        "1. Verify category name spelling",
+        "2. Check available categories in documentation",
+        "3. Use default categories if unsure",
+        "4. Verify IAM permissions for event subscriptions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubscriptionEventIdNotFound",
+      "error_message": "Subscription event ID not found",
+      "remediation_steps": [
+        "1. Verify event ID spelling",
+        "2. Check available event IDs in documentation",
+        "3. Use default event IDs if unsure",
+        "4. Verify IAM permissions for event subscriptions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubscriptionSeverityNotFound",
+      "error_message": "Subscription severity not found",
+      "remediation_steps": [
+        "1. Verify severity level spelling",
+        "2. Check available severity levels in documentation",
+        "3. Use default severity if unsure",
+        "4. Verify IAM permissions for event subscriptions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnauthorizedOperation",
+      "error_message": "Unauthorized operation",
+      "remediation_steps": [
+        "1. Verify IAM permissions for the operation",
+        "2. Check for explicit denies in SCPs",
+        "3. Use IAM Policy Simulator to test permissions",
+        "4. Contact account administrator for required permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-iam-authentication-access-control.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "UnknownSnapshotCopyRegion",
+      "error_message": "Unknown snapshot copy region",
+      "remediation_steps": [
+        "1. Verify region name spelling",
+        "2. Check region is enabled for your account",
+        "3. Enable region if needed: `aws redshift enable-snapshot-copy --cluster-identifier example-cluster --destination-region us-west-2 --retention-period 7`",
+        "4. Verify cross-region permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedOperation",
+      "error_message": "Operation not supported",
+      "remediation_steps": [
+        "1. Review API documentation for supported operations",
+        "2. Check for region-specific limitations",
+        "3. Use alternative API or method",
+        "4. Verify cluster version supports the operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/redshift/latest/APIReference/API_Operations.html",
       "severity": "Medium"
     }
   ]

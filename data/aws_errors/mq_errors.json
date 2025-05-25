@@ -1,0 +1,352 @@
+{
+  "MQErrors": [
+    {
+      "error_code": "BadRequestException",
+      "error_message": "The request is invalid or contains errors",
+      "remediation_steps": [
+        "1. Review the request syntax and parameters",
+        "2. Check for missing required fields",
+        "3. Validate JSON payload formatting",
+        "4. Consult the Amazon MQ API documentation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConflictException",
+      "error_message": "The request conflicts with the current state of the resource",
+      "remediation_steps": [
+        "1. Verify the resource state before making changes",
+        "2. Check for concurrent modifications",
+        "3. Wait for pending operations to complete",
+        "4. Retry the request with updated parameters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ForbiddenException",
+      "error_message": "Access to the specified resource is denied",
+      "remediation_steps": [
+        "1. Verify IAM permissions for Amazon MQ actions",
+        "2. Check resource-based policies",
+        "3. Review VPC/Security Group settings",
+        "4. Use the Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/security-iam.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InternalServerErrorException",
+      "error_message": "An internal service error occurred",
+      "remediation_steps": [
+        "1. Check the AWS Service Health Dashboard",
+        "2. Retry the request with exponential backoff",
+        "3. Try the operation in a different region",
+        "4. Contact AWS Support if the issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "NotFoundException",
+      "error_message": "The specified resource was not found",
+      "remediation_steps": [
+        "1. Verify the resource name or ARN is correct",
+        "2. Check the AWS region matches the resource location",
+        "3. List available resources to confirm existence",
+        "4. Create the resource if it doesn't exist"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "UnauthorizedException",
+      "error_message": "Authentication credentials are missing or invalid",
+      "remediation_steps": [
+        "1. Verify AWS credentials are properly configured",
+        "2. Check for expired temporary credentials",
+        "3. Validate IAM permissions for Amazon MQ",
+        "4. Ensure correct AWS region is specified"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/security-iam.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "BrokerStateException",
+      "error_message": "The broker is in an invalid state for the requested operation",
+      "remediation_steps": [
+        "1. Check the current broker state using the AWS console or CLI",
+        "2. Wait for the broker to enter a valid state",
+        "3. Reboot the broker if appropriate",
+        "4. Contact AWS Support if stuck in invalid state"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-broker-states.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "DeploymentInProgressException",
+      "error_message": "A deployment is already in progress for this broker",
+      "remediation_steps": [
+        "1. Wait for the current deployment to complete",
+        "2. Check the broker's deployment status",
+        "3. Avoid concurrent deployment operations",
+        "4. Implement retry logic in automation scripts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EngineTypeNotSupportedException",
+      "error_message": "The specified engine type is not supported",
+      "remediation_steps": [
+        "1. Verify supported engine types in your region",
+        "2. Check for typos in the engine type parameter",
+        "3. Use either 'ACTIVEMQ' or 'RABBITMQ'",
+        "4. Consider migrating to a supported engine"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "HostInstanceTypeNotSupportedException",
+      "error_message": "The specified host instance type is not supported",
+      "remediation_steps": [
+        "1. Verify supported instance types in your region",
+        "2. Check the Amazon MQ pricing page for available types",
+        "3. Use a smaller instance type if hitting limits",
+        "4. Request limit increases if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidAuthenticationRequestException",
+      "error_message": "The authentication request is invalid",
+      "remediation_steps": [
+        "1. Verify username and password are correct",
+        "2. Check for special characters in credentials",
+        "3. Reset credentials if needed",
+        "4. Review LDAP/Active Directory integration settings"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/security-authentication.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "The request exceeds a service limit",
+      "remediation_steps": [
+        "1. Check your current resource usage against limits",
+        "2. Delete unused brokers or configurations",
+        "3. Request a service limit increase",
+        "4. Distribute resources across multiple regions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MaintenanceWindowConflictException",
+      "error_message": "The specified maintenance window conflicts with an existing one",
+      "remediation_steps": [
+        "1. Choose a different maintenance window time",
+        "2. Check existing maintenance windows",
+        "3. Consider using automatic minor version upgrades",
+        "4. Plan maintenance during low-traffic periods"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-maintenance-window.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReplicationGroupNotFoundException",
+      "error_message": "The specified replication group was not found",
+      "remediation_steps": [
+        "1. Verify the replication group name is correct",
+        "2. Check if the replication group was deleted",
+        "3. Create a new replication group if needed",
+        "4. Ensure proper IAM permissions for replication"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-replication.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceAlreadyExistsException",
+      "error_message": "The resource already exists with different parameters",
+      "remediation_steps": [
+        "1. Use a different resource name",
+        "2. Delete the existing resource if unused",
+        "3. Check for concurrent creation attempts",
+        "4. Update the existing resource if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceInUseException",
+      "error_message": "The resource is in use and cannot be deleted",
+      "remediation_steps": [
+        "1. Check for active connections to the broker",
+        "2. Wait for operations to complete",
+        "3. Force deletion if appropriate (with caution)",
+        "4. Reboot the broker before deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "StorageTypeNotSupportedException",
+      "error_message": "The specified storage type is not supported",
+      "remediation_steps": [
+        "1. Verify supported storage types for your engine",
+        "2. Check for typos in the storage type parameter",
+        "3. Use either 'EBS' or 'EFS' where appropriate",
+        "4. Consider migrating to a supported storage type"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SubnetIdNotFoundException",
+      "error_message": "The specified subnet ID was not found",
+      "remediation_steps": [
+        "1. Verify the subnet ID exists in your VPC",
+        "2. Check the AWS region matches your VPC",
+        "3. Create a new subnet if needed",
+        "4. Ensure subnets are in supported AZs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "UnsupportedOperationException",
+      "error_message": "The operation is not supported for this resource",
+      "remediation_steps": [
+        "1. Verify the operation is available for your broker engine",
+        "2. Check for regional service limitations",
+        "3. Use alternative methods to achieve your goal",
+        "4. Consider upgrading broker version"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UserNotFoundException",
+      "error_message": "The specified user was not found",
+      "remediation_steps": [
+        "1. Verify the username is correct",
+        "2. List existing users to confirm existence",
+        "3. Create a new user if needed",
+        "4. Check for typos in the username"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/security-authentication.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "VPCIdNotFoundException",
+      "error_message": "The specified VPC ID was not found",
+      "remediation_steps": [
+        "1. Verify the VPC ID exists in your account",
+        "2. Check the AWS region matches your VPC",
+        "3. Create a new VPC if needed",
+        "4. Ensure proper IAM permissions for VPC access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ConfigurationRevisionUnavailableException",
+      "error_message": "The specified configuration revision is unavailable",
+      "remediation_steps": [
+        "1. Verify the revision number exists",
+        "2. List available configuration revisions",
+        "3. Use a different revision if available",
+        "4. Create a new configuration revision"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-configuring.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EncryptionOptionsInvalidException",
+      "error_message": "The specified encryption options are invalid",
+      "remediation_steps": [
+        "1. Verify KMS key exists and is enabled",
+        "2. Check IAM permissions for KMS key usage",
+        "3. Validate key policy allows Amazon MQ to use the key",
+        "4. Try different KMS key if available"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-encryption.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "LoggingOptionsInvalidException",
+      "error_message": "The specified logging options are invalid",
+      "remediation_steps": [
+        "1. Verify CloudWatch Logs permissions",
+        "2. Check log group exists and is accessible",
+        "3. Validate logging configuration syntax",
+        "4. Enable logging step-by-step"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-configuring-cloudwatch-logs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RabbitMQVersionNotSupportedException",
+      "error_message": "The specified RabbitMQ version is not supported",
+      "remediation_steps": [
+        "1. Verify supported RabbitMQ versions in your region",
+        "2. Upgrade to a supported version",
+        "3. Check for typos in version number",
+        "4. Consider migrating to ActiveMQ if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-rabbitmq-versions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ActiveMQVersionNotSupportedException",
+      "error_message": "The specified ActiveMQ version is not supported",
+      "remediation_steps": [
+        "1. Verify supported ActiveMQ versions in your region",
+        "2. Upgrade to a supported version",
+        "3. Check for typos in version number",
+        "4. Consider migrating to RabbitMQ if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-activemq-versions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConfigurationAssociationExistsException",
+      "error_message": "The configuration association already exists",
+      "remediation_steps": [
+        "1. Verify the broker's current configuration",
+        "2. Disassociate the existing configuration first",
+        "3. Use a different configuration if needed",
+        "4. Check for concurrent association attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-configuring.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConfigurationAssociationNotFoundException",
+      "error_message": "The configuration association was not found",
+      "remediation_steps": [
+        "1. Verify the broker has an associated configuration",
+        "2. Check for typos in association ID",
+        "3. Create a new configuration association",
+        "4. List existing associations to confirm"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-configuring.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SanitizationWarningException",
+      "error_message": "The configuration contains values that will be sanitized",
+      "remediation_steps": [
+        "1. Review the configuration for sensitive data",
+        "2. Check for credentials in configuration files",
+        "3. Use parameterized configuration values",
+        "4. Store sensitive data in AWS Secrets Manager"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-configuring.html",
+      "severity": "Low"
+    }
+  ]
+}

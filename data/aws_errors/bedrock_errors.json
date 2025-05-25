@@ -1,65 +1,566 @@
 {
-  "BedrockIAMErrors": [
+  "BedrockErrors": [
     {
       "error_code": "AccessDeniedException",
-      "error_message": "You do not have sufficient access to perform this action.",
-      "http_status_code": 400,
+      "error_message": "User is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:us-east-1:123456789012:foundation-model/anthropic.claude-v2",
       "remediation_steps": [
-        "1. Ensure your IAM user or role has the necessary permissions, such as 'bedrock:InvokeModel'.",
-        "2. Verify that the model access status is set to 'Granted' in the AWS Region you're operating in.",
-        "3. Check for any Service Control Policies (SCPs) that might be restricting access.",
-        "4. Confirm that the foundation model is available in the specified AWS Region."
+        "1. Attach IAM policy with bedrock:InvokeModel permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"bedrock:InvokeModel\",",
+        "       \"Resource\": \"arn:aws:bedrock:*:123456789012:foundation-model/*\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check for explicit denies in SCPs",
+        "3. Verify permission boundaries allow this action",
+        "4. Use Policy Simulator to test permissions"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#accessdeniedexception",
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/security-iam.html",
       "severity": "High"
     },
     {
-      "error_code": "InvalidClientTokenId",
-      "error_message": "The AWS access key ID provided does not exist in our records.",
-      "http_status_code": 403,
+      "error_code": "InvalidParameterException",
+      "error_message": "Invalid parameter: maxTokens must be between 1 and 4096",
       "remediation_steps": [
-        "1. Verify that you're using the correct AWS access key ID.",
-        "2. If you've recently rotated your access keys, ensure you're using the updated credentials.",
-        "3. For temporary credentials, confirm that the session token is included and valid."
+        "1. Review API documentation for parameter requirements",
+        "2. Adjust parameter value to be within valid range",
+        "3. Validate input parameters before API call",
+        "4. Use AWS SDK input validation features"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#invalidclienttokenid",
-      "severity": "Critical"
-    },
-    {
-      "error_code": "ExpiredTokenException",
-      "error_message": "The security token included in the request is expired.",
-      "http_status_code": 403,
-      "remediation_steps": [
-        "1. Obtain new temporary security credentials.",
-        "2. Update your application's configuration with the new credentials.",
-        "3. Ensure that your system's clock is synchronized to prevent premature expiration."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#expiredtokenexception",
-      "severity": "High"
-    },
-    {
-      "error_code": "RequestExpired",
-      "error_message": "The request reached the service more than 15 minutes after the date stamp on the request.",
-      "http_status_code": 400,
-      "remediation_steps": [
-        "1. Synchronize your system clock using a reliable time source, such as NTP.",
-        "2. Regenerate the request closer to the current time.",
-        "3. Avoid using stale pre-signed requests."
-      ],
-      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#requestexpired",
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
       "severity": "Medium"
     },
     {
-      "error_code": "NotAuthorized",
-      "error_message": "You do not have permission to perform this action.",
-      "http_status_code": 400,
+      "error_code": "ModelNotAccessibleException",
+      "error_message": "The requested model anthropic.claude-v2 is not accessible in region us-east-1",
       "remediation_steps": [
-        "1. Review and update your IAM policies to grant the required permissions for the intended action.",
-        "2. Confirm that any roles you are assuming have the appropriate trust relationships.",
-        "3. Check for any organizational policies or SCPs that might be restricting your access."
+        "1. Check model availability in your region",
+        "2. List available models: `aws bedrock list-foundation-models`",
+        "3. Use different region where model is available",
+        "4. Request model access via AWS Support if needed"
       ],
-      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html#notauthorized",
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelTimeoutException",
+      "error_message": "The request to the model timed out after 60 seconds",
+      "remediation_steps": [
+        "1. Reduce input size/prompt complexity",
+        "2. Implement retry logic with exponential backoff",
+        "3. Check AWS Health Dashboard for service issues",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "Custom model custom-model-123 not found",
+      "remediation_steps": [
+        "1. Verify model identifier is correct",
+        "2. List available custom models: `aws bedrock list-custom-models`",
+        "3. Check model training status if recently created",
+        "4. Verify IAM permissions to access the model"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceQuotaExceededException",
+      "error_message": "The request exceeds the service quota of 1000 TPM (tokens per minute)",
+      "remediation_steps": [
+        "1. Reduce request rate",
+        "2. Implement request throttling in your application",
+        "3. Request quota increase via AWS Support",
+        "4. Use Provisioned Throughput for consistent capacity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
       "severity": "High"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate of requests exceeds the maximum allowed",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of API calls",
+        "3. Batch requests where possible",
+        "4. Use Provisioned Throughput for guaranteed capacity"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "Input validation failed: prompt cannot be empty",
+      "remediation_steps": [
+        "1. Review API documentation for input requirements",
+        "2. Validate all required parameters are provided",
+        "3. Check for empty or malformed input",
+        "4. Use AWS SDK input validation features"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelErrorException",
+      "error_message": "The model encountered an error processing your request",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Simplify the prompt or reduce input size",
+        "3. Try a different model if available",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedModelException",
+      "error_message": "The requested operation is not supported for model anthropic.claude-v2",
+      "remediation_steps": [
+        "1. Check model capabilities in documentation",
+        "2. Use a different model that supports the operation",
+        "3. Verify you're using the correct API endpoint",
+        "4. Review model-specific requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ProvisionedThroughputExceededException",
+      "error_message": "You've exceeded your provisioned throughput capacity",
+      "remediation_steps": [
+        "1. Wait for capacity to become available",
+        "2. Request provisioned throughput increase",
+        "3. Implement request throttling in your application",
+        "4. Monitor usage with CloudWatch metrics"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ModelNotReadyException",
+      "error_message": "The custom model is still being trained",
+      "remediation_steps": [
+        "1. Check model training status: `aws bedrock get-custom-model --model-identifier custom-model-123`",
+        "2. Wait for training to complete",
+        "3. Verify training data quality if failed",
+        "4. Contact AWS Support if stuck in training"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConflictException",
+      "error_message": "Cannot create custom model because a model with that name already exists",
+      "remediation_steps": [
+        "1. Use a different model name",
+        "2. Delete existing model if unused",
+        "3. Check for duplicate automation scripts",
+        "4. Verify model isn't in use before deletion"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalServerException",
+      "error_message": "Internal server error",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Health Dashboard for service issues",
+        "3. Simplify the request if possible",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidModelArnException",
+      "error_message": "The model ARN is malformed or invalid",
+      "remediation_steps": [
+        "1. Verify ARN format matches documentation",
+        "2. Check for typos in model identifier",
+        "3. List available models to get correct ARN",
+        "4. Verify region matches model location"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelLimitExceededException",
+      "error_message": "You've reached the limit of 10 custom models",
+      "remediation_steps": [
+        "1. Delete unused custom models",
+        "2. Request limit increase via AWS Support",
+        "3. Consolidate models where possible",
+        "4. Use foundation models instead if applicable"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedRegionException",
+      "error_message": "Bedrock is not available in region us-west-3",
+      "remediation_steps": [
+        "1. Check supported regions in documentation",
+        "2. Use different region where Bedrock is available",
+        "3. Verify your account is enabled for Bedrock",
+        "4. Contact AWS Support for region availability"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/regions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientStorageException",
+      "error_message": "Not enough storage available for custom model training",
+      "remediation_steps": [
+        "1. Reduce training data size",
+        "2. Clean up unused model artifacts",
+        "3. Request storage limit increase",
+        "4. Use more efficient data formats"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TrainingDataTooLargeException",
+      "error_message": "Training data exceeds maximum size of 10GB",
+      "remediation_steps": [
+        "1. Reduce training dataset size",
+        "2. Split training into multiple jobs",
+        "3. Use data sampling techniques",
+        "4. Compress training data if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TrainingJobFailedException",
+      "error_message": "Custom model training job failed",
+      "remediation_steps": [
+        "1. Check training job logs for errors",
+        "2. Verify training data quality and format",
+        "3. Retry with smaller dataset or different parameters",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidTrainingDataException",
+      "error_message": "Training data format is invalid",
+      "remediation_steps": [
+        "1. Verify data matches required format",
+        "2. Check for malformed records",
+        "3. Validate data schema against requirements",
+        "4. Pre-process data before uploading"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EndpointLimitExceededException",
+      "error_message": "You've reached the limit of 5 model deployment endpoints",
+      "remediation_steps": [
+        "1. Delete unused endpoints",
+        "2. Request limit increase via AWS Support",
+        "3. Share endpoints between applications",
+        "4. Use direct invocation instead of endpoints"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EndpointNotReadyException",
+      "error_message": "Model endpoint is still being created",
+      "remediation_steps": [
+        "1. Check endpoint status: `aws bedrock get-model-endpoint --endpoint-identifier endpoint-123`",
+        "2. Wait for endpoint to become active",
+        "3. Verify model is ready before endpoint creation",
+        "4. Contact AWS Support if stuck"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidEndpointConfigException",
+      "error_message": "Endpoint configuration is invalid",
+      "remediation_steps": [
+        "1. Review endpoint configuration parameters",
+        "2. Check for unsupported instance types",
+        "3. Validate scaling configuration",
+        "4. Use AWS recommended configurations"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EndpointInUseException",
+      "error_message": "Cannot delete endpoint while in use",
+      "remediation_steps": [
+        "1. Check for active connections to endpoint",
+        "2. Update applications to use different endpoint",
+        "3. Wait for traffic to subside",
+        "4. Force delete if absolutely necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedContentTypeException",
+      "error_message": "Content type application/xml is not supported",
+      "remediation_steps": [
+        "1. Use supported content type (application/json)",
+        "2. Update request headers",
+        "3. Verify SDK/CLI version supports your content type",
+        "4. Check API documentation for requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RequestTooLargeException",
+      "error_message": "Request size exceeds maximum of 5MB",
+      "remediation_steps": [
+        "1. Reduce input/prompt size",
+        "2. Split large requests into multiple calls",
+        "3. Compress input if possible",
+        "4. Use streaming for large outputs"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResponseTooLargeException",
+      "error_message": "Response size exceeds maximum of 5MB",
+      "remediation_steps": [
+        "1. Reduce maxTokens parameter",
+        "2. Use streaming to handle large responses",
+        "3. Split request into smaller chunks",
+        "4. Implement pagination if supported"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedOperationException",
+      "error_message": "Operation bedrock:FineTuneModel is not supported",
+      "remediation_steps": [
+        "1. Check API documentation for supported operations",
+        "2. Use correct operation for your use case",
+        "3. Verify your permissions allow the operation",
+        "4. Contact AWS Support about feature availability"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_Operations.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelDeploymentException",
+      "error_message": "Failed to deploy model to endpoint",
+      "remediation_steps": [
+        "1. Check model compatibility with endpoint type",
+        "2. Verify sufficient capacity is available",
+        "3. Retry deployment with different parameters",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidTokenException",
+      "error_message": "The provided token is expired or invalid",
+      "remediation_steps": [
+        "1. Refresh temporary credentials",
+        "2. Check token expiration time",
+        "3. Verify AssumeRole permissions",
+        "4. Use long-term credentials if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ExpiredTokenException",
+      "error_message": "The security token included in the request is expired",
+      "remediation_steps": [
+        "1. Refresh temporary credentials",
+        "2. Use longer token duration (up to 36 hours)",
+        "3. Implement token refresh logic in your application",
+        "4. Check for clock skew between systems"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MalformedRequestException",
+      "error_message": "The request body is malformed",
+      "remediation_steps": [
+        "1. Validate JSON request body syntax",
+        "2. Check for missing required fields",
+        "3. Verify content-type header matches body",
+        "4. Use AWS SDK to generate requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedMediaTypeException",
+      "error_message": "The media type is not supported",
+      "remediation_steps": [
+        "1. Use supported media type (application/json)",
+        "2. Update request headers",
+        "3. Verify SDK/CLI version supports your media type",
+        "4. Check API documentation for requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelInvocationTimeoutException",
+      "error_message": "Model invocation timed out after 60 seconds",
+      "remediation_steps": [
+        "1. Reduce input/prompt size",
+        "2. Implement retry logic with backoff",
+        "3. Check for model performance issues",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelColdStartException",
+      "error_message": "Model is warming up, please try again",
+      "remediation_steps": [
+        "1. Wait a few seconds and retry",
+        "2. Implement retry logic in your application",
+        "3. Use Provisioned Throughput for consistent performance",
+        "4. Keep endpoint warm with periodic requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidFoundationModelException",
+      "error_message": "Foundation model anthropic.claude-v99 does not exist",
+      "remediation_steps": [
+        "1. Verify model name spelling",
+        "2. List available models: `aws bedrock list-foundation-models`",
+        "3. Check model availability in your region",
+        "4. Use correct model identifier"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CustomModelNotSupportedException",
+      "error_message": "Operation not supported for custom models",
+      "remediation_steps": [
+        "1. Check operation compatibility with custom models",
+        "2. Use foundation model if operation is required",
+        "3. Verify custom model training parameters",
+        "4. Contact AWS Support about feature requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TrainingDataS3AccessDeniedException",
+      "error_message": "Access denied to training data in S3",
+      "remediation_steps": [
+        "1. Verify S3 bucket permissions",
+        "2. Check KMS key permissions if encrypted",
+        "3. Update IAM role to allow S3 access",
+        "4. Verify bucket policy allows Bedrock service access"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidTrainingDataSourceException",
+      "error_message": "Training data source is invalid",
+      "remediation_steps": [
+        "1. Verify S3 URI format is correct",
+        "2. Check training data exists at specified location",
+        "3. Validate S3 bucket region matches Bedrock region",
+        "4. Ensure proper file extensions (.jsonl, etc.)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TrainingDataFormatException",
+      "error_message": "Training data must be in JSON Lines format",
+      "remediation_steps": [
+        "1. Convert data to JSON Lines (.jsonl) format",
+        "2. Validate each line is proper JSON",
+        "3. Check for empty lines or malformed records",
+        "4. Pre-process data before uploading"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelEvaluationFailedException",
+      "error_message": "Custom model evaluation failed",
+      "remediation_steps": [
+        "1. Check evaluation data quality",
+        "2. Verify evaluation dataset format",
+        "3. Retry with smaller evaluation dataset",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelExportFailedException",
+      "error_message": "Failed to export custom model",
+      "remediation_steps": [
+        "1. Verify destination S3 permissions",
+        "2. Check available storage space",
+        "3. Retry export with different destination",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ModelImportFailedException",
+      "error_message": "Failed to import custom model",
+      "remediation_steps": [
+        "1. Verify source model artifact format",
+        "2. Check S3 permissions for import",
+        "3. Validate model compatibility with Bedrock",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EndpointUpdateFailedException",
+      "error_message": "Failed to update model endpoint",
+      "remediation_steps": [
+        "1. Verify new model version is ready",
+        "2. Check endpoint configuration parameters",
+        "3. Retry update with different parameters",
+        "4. Contact AWS Support if persistent"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-endpoints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ProvisionedThroughputInUseException",
+      "error_message": "Cannot delete provisioned throughput while in use",
+      "remediation_steps": [
+        "1. Check which models/endpoints are using the throughput",
+        "2. Update models/endpoints to use different throughput",
+        "3. Wait for traffic to subside",
+        "4. Force delete if absolutely necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
+      "severity": "Medium"
     }
   ]
 }

@@ -104,7 +104,10 @@ ALL_AWS_SERVICES = {
 APPROVED_SERVICES = {k: v for k, v in ALL_AWS_SERVICES.items() if k in [
     "IAM", "EC2", "S3", "Lambda", "RDS", "Aurora", 
     "EKS", "DynamoDB", "Redshift", "SNS", "SQS",
-    "EventBridge", "BedRock", "Tagging",
+    "EventBridge", "BedRock", "Tagging", 
+    "Glue", "Athena", "Sagemaker", "WAF", "Elastic Load Balancing",
+    "ElastiCache", "Keyspaces", "MQ", "OpenSearch", "ECS", "ECR",
+    "KMS"
 ]}
 
 def is_service_approved(service_name: str) -> bool:

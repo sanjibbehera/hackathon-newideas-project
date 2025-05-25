@@ -1,0 +1,378 @@
+{
+  "ElastiCacheErrors": [
+    {
+      "error_code": "CacheClusterNotFound",
+      "error_message": "The requested cache cluster ID does not refer to an existing cache cluster",
+      "remediation_steps": [
+        "1. Verify the cluster exists:",
+        "   ```bash",
+        "   aws elasticache describe-cache-clusters --cache-cluster-id my-cluster",
+        "   ```",
+        "2. Check for typos in the cluster identifier",
+        "3. Ensure you're checking the correct region",
+        "4. Create a new cluster if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Troubleshooting.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidParameterValue",
+      "error_message": "The parameter CacheNodeType is not a valid cache node type",
+      "remediation_steps": [
+        "1. List available node types:",
+        "   ```bash",
+        "   aws elasticache list-allowed-node-type-modifications --cache-cluster-id my-cluster",
+        "   ```",
+        "2. Check for typos in the node type specification",
+        "3. Verify the node type is available in your region",
+        "4. Choose a supported node type from the documentation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheNodes.SupportedTypes.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CacheParameterGroupNotFound",
+      "error_message": "The requested cache parameter group name does not refer to an existing cache parameter group",
+      "remediation_steps": [
+        "1. List available parameter groups:",
+        "   ```bash",
+        "   aws elasticache describe-cache-parameter-groups",
+        "   ```",
+        "2. Check for typos in the parameter group name",
+        "3. Create the parameter group if it doesn't exist",
+        "4. Use the default parameter group if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/ParameterGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CacheSecurityGroupNotFound",
+      "error_message": "The requested cache security group name does not refer to an existing cache security group",
+      "remediation_steps": [
+        "1. List available security groups:",
+        "   ```bash",
+        "   aws elasticache describe-cache-security-groups",
+        "   ```",
+        "2. Verify the security group exists in the same region",
+        "3. Create the security group if needed",
+        "4. Check VPC settings if using VPC security groups"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/SecurityGroups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InsufficientCacheClusterCapacity",
+      "error_message": "The requested cache node type is not available in the requested Availability Zone",
+      "remediation_steps": [
+        "1. Try a different node type",
+        "2. Select a different Availability Zone",
+        "3. Check service quotas:",
+        "   ```bash",
+        "   aws service-quotas get-service-quota --service-code elasticache --quota-code L-xxxxxxxx",
+        "   ```",
+        "4. Request a limit increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheNodes.SupportedTypes.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidCacheClusterState",
+      "error_message": "The requested cache cluster is not in the correct state for the requested operation",
+      "remediation_steps": [
+        "1. Check cluster status:",
+        "   ```bash",
+        "   aws elasticache describe-cache-clusters --cache-cluster-id my-cluster",
+        "   ```",
+        "2. Wait for cluster to become available",
+        "3. Retry the operation when cluster is in correct state",
+        "4. Reboot the cluster if stuck in a state"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheCluster.Status.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NodeQuotaForClusterExceeded",
+      "error_message": "The request cannot be processed because it would exceed the allowed number of cache nodes per cluster",
+      "remediation_steps": [
+        "1. Check current node count:",
+        "   ```bash",
+        "   aws elasticache describe-cache-clusters --cache-cluster-id my-cluster",
+        "   ```",
+        "2. Reduce the number of nodes requested",
+        "3. Delete unused nodes if possible",
+        "4. Request a quota increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NodeQuotaForCustomerExceeded",
+      "error_message": "The request cannot be processed because it would exceed the allowed number of cache nodes per customer",
+      "remediation_steps": [
+        "1. List all clusters to count nodes:",
+        "   ```bash",
+        "   aws elasticache describe-cache-clusters",
+        "   ```",
+        "2. Delete unused clusters or nodes",
+        "3. Request a quota increase:",
+        "   ```bash",
+        "   aws service-quotas request-service-quota-increase --service-code elasticache --quota-code L-xxxxxxxx --desired-value XX",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CacheSubnetGroupNotFoundFault",
+      "error_message": "The requested cache subnet group name does not refer to an existing cache subnet group",
+      "remediation_steps": [
+        "1. List available subnet groups:",
+        "   ```bash",
+        "   aws elasticache describe-cache-subnet-groups",
+        "   ```",
+        "2. Verify VPC/subnet configuration",
+        "3. Create subnet group if needed:",
+        "   ```bash",
+        "   aws elasticache create-cache-subnet-group --cache-subnet-group-name my-group --cache-subnet-group-description \"My subnet group\" --subnet-ids subnet-xxxxxx",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/SubnetGroups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidVPCNetworkStateFault",
+      "error_message": "The VPC network is in an invalid state",
+      "remediation_steps": [
+        "1. Check VPC status:",
+        "   ```bash",
+        "   aws ec2 describe-vpcs --vpc-ids vpc-xxxxxx",
+        "   ```",
+        "2. Verify subnets have available IPs",
+        "3. Check route tables and NACLs",
+        "4. Ensure DNS resolution is enabled for VPC"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/VPCs.EC.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidSubnet",
+      "error_message": "The requested subnet is invalid or does not exist",
+      "remediation_steps": [
+        "1. Verify subnet exists:",
+        "   ```bash",
+        "   aws ec2 describe-subnets --subnet-ids subnet-xxxxxx",
+        "   ```",
+        "2. Check subnet is in same VPC as subnet group",
+        "3. Ensure subnet is in supported AZ",
+        "4. Create new subnet if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/SubnetGroups.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SnapshotAlreadyExistsFault",
+      "error_message": "A snapshot with the requested name already exists",
+      "remediation_steps": [
+        "1. List existing snapshots:",
+        "   ```bash",
+        "   aws elasticache describe-snapshots",
+        "   ```",
+        "2. Use a unique snapshot name",
+        "3. Delete old snapshot if no longer needed",
+        "4. Add timestamp to snapshot name for uniqueness"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SnapshotNotFoundFault",
+      "error_message": "The requested snapshot name does not refer to an existing snapshot",
+      "remediation_steps": [
+        "1. List available snapshots:",
+        "   ```bash",
+        "   aws elasticache describe-snapshots",
+        "   ```",
+        "2. Check for typos in snapshot name",
+        "3. Verify snapshot exists in same region",
+        "4. Create new snapshot if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Snapshots.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SnapshotQuotaExceededFault",
+      "error_message": "The request cannot be processed because it would exceed the maximum number of snapshots",
+      "remediation_steps": [
+        "1. List current snapshots:",
+        "   ```bash",
+        "   aws elasticache describe-snapshots",
+        "   ```",
+        "2. Delete old/unused snapshots",
+        "3. Request quota increase if needed",
+        "4. Implement snapshot lifecycle management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Quotas.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterQuotaForCustomerExceeded",
+      "error_message": "The request cannot be processed because it would exceed the allowed number of clusters per customer",
+      "remediation_steps": [
+        "1. List current clusters:",
+        "   ```bash",
+        "   aws elasticache describe-cache-clusters",
+        "   ```",
+        "2. Delete unused clusters",
+        "3. Request quota increase:",
+        "   ```bash",
+        "   aws service-quotas request-service-quota-increase --service-code elasticache --quota-code L-xxxxxxxx --desired-value XX",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ReplicationGroupNotFoundFault",
+      "error_message": "The specified replication group does not exist",
+      "remediation_steps": [
+        "1. List replication groups:",
+        "   ```bash",
+        "   aws elasticache describe-replication-groups",
+        "   ```",
+        "2. Check for typos in group identifier",
+        "3. Verify correct region is specified",
+        "4. Create new replication group if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidReplicationGroupState",
+      "error_message": "The requested replication group is not in the correct state for the requested operation",
+      "remediation_steps": [
+        "1. Check replication group status:",
+        "   ```bash",
+        "   aws elasticache describe-replication-groups --replication-group-id my-replication-group",
+        "   ```",
+        "2. Wait for group to become available",
+        "3. Retry operation when in correct state",
+        "4. Failover to another node if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CacheSecurityGroupAlreadyExists",
+      "error_message": "A cache security group with the specified name already exists",
+      "remediation_steps": [
+        "1. List security groups:",
+        "   ```bash",
+        "   aws elasticache describe-cache-security-groups",
+        "   ```",
+        "2. Use a unique name for new group",
+        "3. Modify existing group if appropriate",
+        "4. Delete old group if no longer needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/SecurityGroups.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AuthorizationNotFound",
+      "error_message": "The specified CIDR IP or Amazon EC2 security group is not authorized for this cache security group",
+      "remediation_steps": [
+        "1. List current authorizations:",
+        "   ```bash",
+        "   aws elasticache describe-cache-security-groups --cache-security-group-name my-sg",
+        "   ```",
+        "2. Verify CIDR/IP format is correct",
+        "3. Add proper authorization:",
+        "   ```bash",
+        "   aws elasticache authorize-cache-security-group-ingress --cache-security-group-name my-sg --ec2-security-group-name my-ec2-sg --ec2-security-group-owner-id 123456789012",
+        "   ```"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/SecurityGroups.Authorizing.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidARN",
+      "error_message": "The specified ARN is not valid",
+      "remediation_steps": [
+        "1. Verify ARN format is correct",
+        "2. Check for typos in resource identifiers",
+        "3. Ensure ARN matches resource type",
+        "4. Get correct ARN from describe commands"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/IAM.ARNs.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TagNotFound",
+      "error_message": "The requested tag was not found on this resource",
+      "remediation_steps": [
+        "1. List existing tags:",
+        "   ```bash",
+        "   aws elasticache list-tags-for-resource --resource-name arn:aws:elasticache:us-east-1:123456789012:cluster:my-cluster",
+        "   ```",
+        "2. Check for typos in tag key",
+        "3. Verify tag exists on resource",
+        "4. Add tag if it's missing"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TagQuotaPerResourceExceeded",
+      "error_message": "The quota of tags per resource has been exceeded",
+      "remediation_steps": [
+        "1. List current tags:",
+        "   ```bash",
+        "   aws elasticache list-tags-for-resource --resource-name arn:aws:elasticache:us-east-1:123456789012:cluster:my-cluster",
+        "   ```",
+        "2. Remove unused tags",
+        "3. Combine values in existing tags",
+        "4. Implement tag naming conventions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Tagging.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TestFailoverNotAvailableFault",
+      "error_message": "TestFailover is not available for this replication group",
+      "remediation_steps": [
+        "1. Verify cluster mode is enabled",
+        "2. Check replication group has multiple nodes",
+        "3. Ensure cluster is in available state",
+        "4. Use Multi-AZ configuration for failover capability"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/AutoFailover.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NoOperationFault",
+      "error_message": "The operation was not performed because no changes were required",
+      "remediation_steps": [
+        "1. Verify current configuration matches desired state",
+        "2. Check if modification was already applied",
+        "3. Review operation parameters",
+        "4. This may be an informational message rather than an error"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Troubleshooting.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ReplicationGroupAlreadyExistsFault",
+      "error_message": "The specified replication group already exists",
+      "remediation_steps": [
+        "1. List replication groups:",
+        "   ```bash",
+        "   aws elasticache describe-replication-groups",
+        "   ```",
+        "2. Use a unique name for new group",
+        "3. Modify existing group if appropriate",
+        "4. Delete old group if no longer needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.html",
+      "severity": "Medium"
+    }
+  ]
+}

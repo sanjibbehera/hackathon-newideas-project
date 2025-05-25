@@ -1,0 +1,364 @@
+{
+  "ECSErrors": [
+    {
+      "error_code": "ClusterNotFoundException",
+      "error_message": "The specified cluster does not exist",
+      "remediation_steps": [
+        "1. Verify cluster name or ARN is correct",
+        "2. List available clusters: `aws ecs list-clusters`",
+        "3. Check AWS region matches cluster location",
+        "4. Create cluster if needed: `aws ecs create-cluster --cluster-name my-cluster`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-cluster-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "ServiceNotFoundException",
+      "error_message": "The specified service does not exist",
+      "remediation_steps": [
+        "1. Verify service name is correct",
+        "2. List services in cluster: `aws ecs list-services --cluster my-cluster`",
+        "3. Check service was not recently deleted",
+        "4. Create service if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-service-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "TaskDefinitionNotFoundException",
+      "error_message": "The specified task definition does not exist",
+      "remediation_steps": [
+        "1. Verify task family and revision are correct",
+        "2. List task definitions: `aws ecs list-task-definitions`",
+        "3. Register new task definition if needed",
+        "4. Check for typos in task definition ARN"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-task-definition-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterException",
+      "error_message": "A specified parameter is invalid",
+      "remediation_steps": [
+        "1. Review error details for specific invalid parameter",
+        "2. Check parameter value limits and formats",
+        "3. Verify JSON syntax in task definitions",
+        "4. Consult ECS API documentation for parameter requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-parameters",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "You don't have permission to perform this action",
+      "remediation_steps": [
+        "1. Verify IAM permissions for ECS actions",
+        "2. Check resource-level permissions",
+        "3. Review service-linked roles",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "ClientException",
+      "error_message": "A client error occurred",
+      "remediation_steps": [
+        "1. Check AWS CLI/SDK version compatibility",
+        "2. Verify network connectivity to ECS endpoints",
+        "3. Review request syntax and parameters",
+        "4. Enable debug logging for more details"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-client-errors",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServerException",
+      "error_message": "An ECS service error occurred",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry with exponential backoff",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-server-errors",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "UnsupportedFeatureException",
+      "error_message": "The specified feature is not supported",
+      "remediation_steps": [
+        "1. Verify feature compatibility with launch type (EC2/Fargate)",
+        "2. Check AWS region supports the feature",
+        "3. Review ECS version requirements",
+        "4. Modify task definition to use supported features"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-features.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PlatformTaskDefinitionIncompatibilityException",
+      "error_message": "The task definition is incompatible with the launch type",
+      "remediation_steps": [
+        "1. Verify CPU/architecture compatibility",
+        "2. Check required capabilities match launch type",
+        "3. Review network mode settings",
+        "4. Modify task definition for target platform"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "PlatformUnknownException",
+      "error_message": "The specified platform version does not exist",
+      "remediation_steps": [
+        "1. List available platform versions",
+        "2. Use LATEST or valid version number",
+        "3. Check region supports specified version",
+        "4. Omit platformVersion to use default"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/platform_versions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NoUpdateAvailableException",
+      "error_message": "There is no update available for the ECS container agent",
+      "remediation_steps": [
+        "1. Verify agent is already at latest version",
+        "2. Manually update agent if needed",
+        "3. Check instance connectivity to ECS endpoints",
+        "4. Restart agent service"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "BlockedException",
+      "error_message": "The request was blocked by an ECS quota",
+      "remediation_steps": [
+        "1. Check current resource usage against quotas",
+        "2. Delete unused resources (tasks, services, clusters)",
+        "3. Request quota increase via AWS Support",
+        "4. Distribute workloads across regions/clusters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "AttributeLimitExceededException",
+      "error_message": "The maximum number of attributes per resource has been reached",
+      "remediation_steps": [
+        "1. List and remove unused attributes",
+        "2. Combine related attributes",
+        "3. Check for duplicate attributes",
+        "4. Request limit increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TargetNotConnectedException",
+      "error_message": "The ECS container instance is not connected",
+      "remediation_steps": [
+        "1. Verify instance is running and healthy",
+        "2. Check ECS agent logs for errors",
+        "3. Restart ECS agent service",
+        "4. Replace instance if connection cannot be restored"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-agent-issues",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceInUseException",
+      "error_message": "The resource is in use and cannot be deleted",
+      "remediation_steps": [
+        "1. Stop running tasks using the resource",
+        "2. Update services to use different resources",
+        "3. Wait for operations to complete",
+        "4. Force deletion if appropriate (with caution)"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-resource-in-use",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MissingVersionException",
+      "error_message": "The task definition does not have a compatible container definition",
+      "remediation_steps": [
+        "1. Verify container definitions in task definition",
+        "2. Check for required fields (name, image)",
+        "3. Register new revision with correct definitions",
+        "4. Review task definition schema"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ServiceNotActiveException",
+      "error_message": "The service is not active",
+      "remediation_steps": [
+        "1. Check service status: `aws ecs describe-services --cluster my-cluster --services my-service`",
+        "2. Update service to desired count > 0",
+        "3. Verify no dependencies are preventing activation",
+        "4. Delete and recreate service if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-service-not-active",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServiceAlreadyExistsException",
+      "error_message": "A service with the specified name already exists",
+      "remediation_steps": [
+        "1. List existing services in the cluster",
+        "2. Use unique name for new service",
+        "3. Delete existing service if no longer needed",
+        "4. Check for concurrent creation attempts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-service-already-exists",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CapacityProviderNotFoundException",
+      "error_message": "The specified capacity provider does not exist",
+      "remediation_steps": [
+        "1. Verify capacity provider name is correct",
+        "2. List available providers: `aws ecs describe-capacity-providers`",
+        "3. Create capacity provider if needed",
+        "4. Check for typos in ARN or name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-capacity-provider",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterContainsContainerInstancesException",
+      "error_message": "The cluster contains container instances and cannot be deleted",
+      "remediation_steps": [
+        "1. Drain and terminate container instances first",
+        "2. Update container instances to different cluster",
+        "3. Use force flag if appropriate: `aws ecs delete-cluster --cluster my-cluster --force`",
+        "4. Verify no services are running in the cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-cluster-delete",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterContainsServicesException",
+      "error_message": "The cluster contains active services and cannot be deleted",
+      "remediation_steps": [
+        "1. Delete or update all services to different cluster",
+        "2. Set service desired count to 0",
+        "3. Use force flag if appropriate",
+        "4. Wait for service operations to complete"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-cluster-delete",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ClusterContainsTasksException",
+      "error_message": "The cluster contains active tasks and cannot be deleted",
+      "remediation_steps": [
+        "1. Stop all running tasks in the cluster",
+        "2. Wait for tasks to stop completely",
+        "3. Use force flag if appropriate",
+        "4. Verify no services are running tasks"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-cluster-delete",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TargetNotFoundException",
+      "error_message": "The specified target was not found",
+      "remediation_steps": [
+        "1. Verify target ID or ARN is correct",
+        "2. List available targets in the cluster",
+        "3. Check target was not recently terminated",
+        "4. Register new container instance if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-target-not-found",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UpdateInProgressException",
+      "error_message": "Another update is in progress for the specified service",
+      "remediation_steps": [
+        "1. Wait for current update to complete",
+        "2. Check service events for status",
+        "3. Cancel existing update if appropriate",
+        "4. Implement retry logic in automation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-service-updates",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "The limit for the resource has been exceeded",
+      "remediation_steps": [
+        "1. Check current resource count against limits",
+        "2. Delete unused resources",
+        "3. Request limit increase via AWS Support",
+        "4. Distribute resources across multiple clusters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NoActiveServicesException",
+      "error_message": "The cluster has no active services",
+      "remediation_steps": [
+        "1. Verify intended cluster has services",
+        "2. Create new service if needed",
+        "3. Update existing service to desired count > 0",
+        "4. Check for service in different cluster"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-no-active-services",
+      "severity": "Low"
+    },
+    {
+      "error_code": "TaskSetNotFoundException",
+      "error_message": "The specified task set does not exist",
+      "remediation_steps": [
+        "1. Verify task set ID is correct",
+        "2. List task sets for the service",
+        "3. Check task set was not recently deleted",
+        "4. Create new task set if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-task-set-not-found",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ContainerInstanceNotFoundException",
+      "error_message": "The specified container instance was not found",
+      "remediation_steps": [
+        "1. Verify container instance ID is correct",
+        "2. List container instances in the cluster",
+        "3. Check instance was not recently terminated",
+        "4. Register new container instance if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-container-instance-not-found",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DependencyTimeoutException",
+      "error_message": "A dependency timed out during the request",
+      "remediation_steps": [
+        "1. Retry the operation",
+        "2. Check dependent service health (EC2, ELB, etc.)",
+        "3. Simplify operation if possible",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-dependency-timeouts",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InvalidClusterNameException",
+      "error_message": "The cluster name is invalid",
+      "remediation_steps": [
+        "1. Follow cluster naming rules (1-255 letters, numbers, hyphens)",
+        "2. Avoid special characters",
+        "3. Check for leading/trailing spaces",
+        "4. Use different unique name"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/troubleshooting.html#troubleshooting-naming",
+      "severity": "Low"
+    }
+  ]
+}

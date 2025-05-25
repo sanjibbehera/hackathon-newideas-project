@@ -1,0 +1,368 @@
+{
+  "AthenaErrors": [
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User: arn:aws:iam::123456789012:user/example is not authorized to perform: athena:StartQueryExecution on resource: arn:aws:athena:us-east-1:123456789012:workgroup/primary",
+      "remediation_steps": [
+        "1. Attach IAM policy with athena:StartQueryExecution permission:",
+        "   ```json",
+        "   {",
+        "     \"Version\": \"2012-10-17\",",
+        "     \"Statement\": [{",
+        "       \"Effect\": \"Allow\",",
+        "       \"Action\": \"athena:StartQueryExecution\",",
+        "       \"Resource\": \"arn:aws:athena:us-east-1:123456789012:workgroup/primary\"",
+        "     }]",
+        "   }",
+        "   ```",
+        "2. Check workgroup execution policies",
+        "3. Verify S3 bucket permissions for query results",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/security-iam-athena.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidRequestException",
+      "error_message": "The query execution did not complete successfully",
+      "remediation_steps": [
+        "1. Check Athena query history for detailed error",
+        "2. Validate SQL syntax",
+        "3. Verify table schema matches query",
+        "4. Check for special characters in query"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/troubleshooting-athena.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "MetadataException",
+      "error_message": "Database not found: my_database",
+      "remediation_steps": [
+        "1. List available databases:",
+        "   ```bash",
+        "   aws athena list-databases --catalog-name AwsDataCatalog",
+        "   ```",
+        "2. Check for typos in database name",
+        "3. Create database if needed:",
+        "   ```bash",
+        "   aws athena start-query-execution --query-string \"CREATE DATABASE my_database\" --work-group primary",
+        "   ```",
+        "4. Verify AWS Glue catalog permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/glue-permissions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "WorkGroup not found: my_workgroup",
+      "remediation_steps": [
+        "1. List available workgroups:",
+        "   ```bash",
+        "   aws athena list-work-groups",
+        "   ```",
+        "2. Check for typos in workgroup name",
+        "3. Create workgroup if needed:",
+        "   ```bash",
+        "   aws athena create-work-group --name my_workgroup",
+        "   ```",
+        "4. Use default 'primary' workgroup if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/workgroups-create-update-delete.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "TooManyRequestsException",
+      "error_message": "Rate exceeded for athena:StartQueryExecution",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of query executions",
+        "3. Batch queries where possible",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/service-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "S3AccessDeniedException",
+      "error_message": "Access Denied when writing query results to s3://my-bucket/query-results/",
+      "remediation_steps": [
+        "1. Verify S3 bucket policy allows Athena to write:",
+        "   ```json",
+        "   {",
+        "     \"Effect\": \"Allow\",",
+        "     \"Principal\": {\"Service\": \"athena.amazonaws.com\"},",
+        "     \"Action\": \"s3:PutObject\",",
+        "     \"Resource\": \"arn:aws:s3:::my-bucket/query-results/*\"",
+        "   }",
+        "   ```",
+        "2. Check workgroup result location configuration",
+        "3. Verify IAM permissions for S3 access",
+        "4. Test S3 access independently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/s3-permissions.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "QueryTimeoutException",
+      "error_message": "Query exhausted resources at this scale factor",
+      "remediation_steps": [
+        "1. Optimize query: add partitions, reduce scanned data",
+        "2. Increase workgroup query timeout:",
+        "   ```bash",
+        "   aws athena update-work-group --work-group primary --configuration-updates \"ResultConfigurationUpdates={OutputLocation=s3://my-bucket/query-results/},EnforceWorkGroupConfiguration=true,ExecutionRole=arn:aws:iam::123456789012:role/AthenaExecutionRole,PublishCloudWatchMetricsEnabled=true,BytesScannedCutoffPerQuery=10737418240,RequesterPaysEnabled=false,EngineVersion={SelectedEngineVersion=Athena engine version 2}\"",
+        "   ```",
+        "3. Split large queries into smaller ones",
+        "4. Consider using CTAS for large result sets"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/query-tuning.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ColumnNotExistException",
+      "error_message": "Column 'user_id' does not exist",
+      "remediation_steps": [
+        "1. Check table schema:",
+        "   ```bash",
+        "   aws glue get-table --database-name my_database --name my_table",
+        "   ```",
+        "2. Verify column name spelling and case sensitivity",
+        "3. Use DESCRIBE TABLE in Athena to view columns",
+        "4. Refresh table metadata if schema changed recently"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/querying-glue-catalog.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ConcurrentModificationException",
+      "error_message": "Unable to complete request due to concurrent modification",
+      "remediation_steps": [
+        "1. Wait a few minutes and retry",
+        "2. Check for parallel Athena operations",
+        "3. Implement optimistic concurrency control",
+        "4. Verify no automation is making conflicting changes"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/troubleshooting-athena.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InternalServerException",
+      "error_message": "Internal server error",
+      "remediation_steps": [
+        "1. Retry the request with exponential backoff",
+        "2. Check AWS Service Health Dashboard",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if error persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/troubleshooting-athena.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "InvalidNamespaceException",
+      "error_message": "Namespace not found: my_catalog",
+      "remediation_steps": [
+        "1. List available catalogs:",
+        "   ```bash",
+        "   aws athena list-data-catalogs",
+        "   ```",
+        "2. Use 'AwsDataCatalog' for Glue Data Catalog",
+        "3. Check for typos in catalog name",
+        "4. Register data source if using external catalog"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/data-sources.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "QueryExecutionCancelled",
+      "error_message": "Query was cancelled by user request",
+      "remediation_steps": [
+        "1. Check if query was manually cancelled",
+        "2. Verify workgroup query timeout settings",
+        "3. Review query for resource-intensive operations",
+        "4. Retry with optimized query"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/querying.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "ThrottlingException",
+      "error_message": "Rate exceeded for athena:GetQueryResults",
+      "remediation_steps": [
+        "1. Implement exponential backoff in your code",
+        "2. Reduce frequency of GetQueryResults calls",
+        "3. Use query execution ID from StartQueryExecution response",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/service-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedOperationException",
+      "error_message": "Operation not supported: CREATE_TABLE_AS with partitioning",
+      "remediation_steps": [
+        "1. Check Athena SQL reference for supported operations",
+        "2. Use alternative syntax or approach",
+        "3. Verify engine version compatibility",
+        "4. Consider using AWS Glue for complex ETL"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/ddl-sql-reference.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "GlueTableNotFound",
+      "error_message": "Table my_database.my_table not found",
+      "remediation_steps": [
+        "1. Verify table exists in Glue Data Catalog:",
+        "   ```bash",
+        "   aws glue get-table --database-name my_database --name my_table",
+        "   ```",
+        "2. Check for typos in database/table name",
+        "3. Create table if needed:",
+        "   ```bash",
+        "   aws glue create-table --database-name my_database --table-input file://table-definition.json",
+        "   ```",
+        "4. Refresh Athena metadata if table was recently created"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/glue-best-practices.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PartitionNotFound",
+      "error_message": "Partition not found with partition values: [2023]",
+      "remediation_steps": [
+        "1. Check table partitions:",
+        "   ```bash",
+        "   aws glue get-partitions --database-name my_database --table-name my_table",
+        "   ```",
+        "2. Verify partition values match schema",
+        "3. Add missing partition if needed:",
+        "   ```bash",
+        "   aws glue create-partition --database-name my_database --table-name my_table --partition-input file://partition-definition.json",
+        "   ```",
+        "4. Use MSCK REPAIR TABLE for Hive-style partitions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/partitions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "QueryExecutionFailed",
+      "error_message": "Query execution failed: SYNTAX_ERROR",
+      "remediation_steps": [
+        "1. Review query syntax error details",
+        "2. Validate SQL against Athena's Presto dialect",
+        "3. Test query in Athena console for detailed feedback",
+        "4. Break complex queries into smaller parts"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/querying.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResultSetTooLarge",
+      "error_message": "Query result set exceeds capacity limits",
+      "remediation_steps": [
+        "1. Use LIMIT clause to reduce result size",
+        "2. Consider CTAS to write results to S3",
+        "3. Filter data earlier in the query",
+        "4. Split query into multiple smaller queries"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/service-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SessionAlreadyExists",
+      "error_message": "Session with id my_session already exists",
+      "remediation_steps": [
+        "1. Terminate existing session:",
+        "   ```bash",
+        "   aws athena terminate-session --session-id my_session",
+        "   ```",
+        "2. Use unique session ID",
+        "3. Check for concurrent session creation",
+        "4. List active sessions if unsure"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/notebooks-sessions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SessionExpired",
+      "error_message": "Session my_session has expired",
+      "remediation_steps": [
+        "1. Create new session:",
+        "   ```bash",
+        "   aws athena start-session --work-group my_workgroup --engine-configuration file://engine-config.json",
+        "   ```",
+        "2. Increase session timeout in workgroup settings",
+        "3. Implement session renewal logic",
+        "4. Save notebook state before expiration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/notebooks-sessions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "WorkGroupNotEmpty",
+      "error_message": "Workgroup primary is not empty",
+      "remediation_steps": [
+        "1. List and delete queries in workgroup:",
+        "   ```bash",
+        "   aws athena list-query-executions --work-group primary",
+        "   aws athena batch-delete-query-execution --query-execution-ids id1 id2",
+        "   ```",
+        "2. Wait for running queries to complete",
+        "3. Delete workgroup after ensuring it's empty",
+        "4. Consider disabling workgroup first"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/workgroups-create-update-delete.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "EncryptionOptionNotSupported",
+      "error_message": "Encryption option SSE_KMS is not supported for this operation",
+      "remediation_steps": [
+        "1. Check supported encryption options for Athena",
+        "2. Use different encryption option (e.g., SSE_S3)",
+        "3. Verify KMS key permissions",
+        "4. Check workgroup encryption configuration"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/encryption.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "QueryQueueFull",
+      "error_message": "Query queue for workgroup primary is full",
+      "remediation_steps": [
+        "1. Wait for running queries to complete",
+        "2. Increase workgroup query queue size:",
+        "   ```bash",
+        "   aws athena update-work-group --work-group primary --configuration-updates \"MaxConcurrentQueries=20\"",
+        "   ```",
+        "3. Split workload across multiple workgroups",
+        "4. Request limit increase via AWS Support"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/service-limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "CalculationOverflow",
+      "error_message": "Arithmetic overflow in calculation",
+      "remediation_steps": [
+        "1. Review query for arithmetic operations",
+        "2. Use CAST to larger data types if needed",
+        "3. Add range checks in WHERE clauses",
+        "4. Consider using approximate functions for large numbers"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/data-types.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "InsufficientDataManifest",
+      "error_message": "Data manifest does not contain sufficient information",
+      "remediation_steps": [
+        "1. Verify manifest file format and content",
+        "2. Check S3 paths in manifest exist",
+        "3. Ensure manifest includes all required fields",
+        "4. Regenerate manifest using correct process"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/athena/latest/ug/querying-s3-storage-class.html",
+      "severity": "Medium"
+    }
+  ]
+}

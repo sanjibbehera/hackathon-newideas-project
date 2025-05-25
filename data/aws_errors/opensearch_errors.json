@@ -1,0 +1,352 @@
+{
+  "OpenSearchErrors": [
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "You don't have permissions to access this resource",
+      "remediation_steps": [
+        "1. Verify IAM permissions for `es:` actions",
+        "2. Check resource-based access policies",
+        "3. Review VPC/Security Group settings",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/security-iam.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "BaseException",
+      "error_message": "An unspecified error occurred",
+      "remediation_steps": [
+        "1. Check OpenSearch error logs",
+        "2. Retry the operation with exponential backoff",
+        "3. Verify cluster health status",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ConflictException",
+      "error_message": "Request conflicts with current state of the target resource",
+      "remediation_steps": [
+        "1. Verify the current state of the OpenSearch domain",
+        "2. Wait for pending operations to complete",
+        "3. Check for concurrent modifications",
+        "4. Retry the request with updated parameters"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DisabledOperationException",
+      "error_message": "The requested operation is not allowed on this resource",
+      "remediation_steps": [
+        "1. Check if the domain is in a state that allows the operation",
+        "2. Verify service-linked role permissions",
+        "3. Review AWS Service Quotas for limits",
+        "4. Contact AWS Support if this is unexpected"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InternalException",
+      "error_message": "An internal error occurred while processing the request",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry the operation with exponential backoff",
+        "3. Try the operation in a different region",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "InvalidPaginationTokenException",
+      "error_message": "The pagination token provided is invalid",
+      "remediation_steps": [
+        "1. Generate a new pagination token",
+        "2. Verify the token hasn't expired",
+        "3. Check for token corruption",
+        "4. Reduce page size if necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#network-limits",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InvalidTypeException",
+      "error_message": "An invalid or unrecognized type was specified",
+      "remediation_steps": [
+        "1. Verify the parameter types in your request",
+        "2. Check API documentation for valid types",
+        "3. Validate JSON payload formatting",
+        "4. Use AWS SDK for type-safe requests"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/configuration-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "You've exceeded the maximum allowed limits",
+      "remediation_steps": [
+        "1. Check current usage against service quotas",
+        "2. Delete unused domains or indices",
+        "3. Request service limit increases",
+        "4. Distribute workloads across multiple domains"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ResourceAlreadyExistsException",
+      "error_message": "A resource with the same name already exists",
+      "remediation_steps": [
+        "1. Use a different name for the resource",
+        "2. Delete the existing resource if unused",
+        "3. Check for concurrent creation attempts",
+        "4. Use the existing resource if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/createupdatedomains.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ResourceNotFoundException",
+      "error_message": "The specified resource was not found",
+      "remediation_steps": [
+        "1. Verify the resource name or ARN is correct",
+        "2. List available resources to confirm existence",
+        "3. Check if resource was recently deleted",
+        "4. Create the resource if it doesn't exist"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "The request contains invalid or missing parameters",
+      "remediation_steps": [
+        "1. Review the error details for specific validation failures",
+        "2. Check all required parameters are provided",
+        "3. Verify parameter value formats and ranges",
+        "4. Consult the API documentation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/configuration-api.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "SlotNotAvailableException",
+      "error_message": "No available slots for domain creation",
+      "remediation_steps": [
+        "1. Delete unused domains to free up slots",
+        "2. Request slot limit increase via AWS Support",
+        "3. Try creating domain in a different region",
+        "4. Use larger instance types to reduce slot usage"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "EncryptionAtRestOptionsConflictException",
+      "error_message": "Encryption at rest options conflict with existing settings",
+      "remediation_steps": [
+        "1. Verify current encryption settings",
+        "2. Create a new domain with desired encryption",
+        "3. Check for KMS key policy conflicts",
+        "4. Migrate data to new domain if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/encryption-at-rest.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InstanceTypeNotSupportedException",
+      "error_message": "The specified instance type is not supported",
+      "remediation_steps": [
+        "1. Verify supported instance types in your region",
+        "2. Check for typographical errors",
+        "3. Choose an instance type from the supported list",
+        "4. Consider different instance family if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "NodeGroupLimitExceededException",
+      "error_message": "You've exceeded the maximum number of node groups",
+      "remediation_steps": [
+        "1. Check current node group count against limits",
+        "2. Delete unused node groups",
+        "3. Request limit increase via AWS Support",
+        "4. Use larger instance types to reduce node count"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "NodeQuotaExceededException",
+      "error_message": "You've exceeded the maximum number of nodes",
+      "remediation_steps": [
+        "1. Check current node count against limits",
+        "2. Reduce node count in your domain configuration",
+        "3. Request quota increase via AWS Support",
+        "4. Use larger instance types to reduce node count"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "SnapshotLimitExceededException",
+      "error_message": "You've exceeded the maximum number of manual snapshots",
+      "remediation_steps": [
+        "1. Delete old or unused manual snapshots",
+        "2. Automate snapshot lifecycle management",
+        "3. Request limit increase via AWS Support",
+        "4. Store snapshots in S3 for long-term retention"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ZoneAwarenessConfigurationException",
+      "error_message": "Invalid zone awareness configuration",
+      "remediation_steps": [
+        "1. Verify AZ count matches your region's availability",
+        "2. Check for even distribution of nodes across AZs",
+        "3. Review zone awareness requirements",
+        "4. Disable zone awareness if not needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-multiaz.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "VPCOptionsValidationException",
+      "error_message": "Invalid VPC configuration for the domain",
+      "remediation_steps": [
+        "1. Verify subnets are in different AZs",
+        "2. Check security group rules allow necessary traffic",
+        "3. Validate VPC DNS settings",
+        "4. Review VPC endpoint service permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/vpc.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "CognitoOptionsConflictException",
+      "error_message": "Cognito authentication options conflict with existing settings",
+      "remediation_steps": [
+        "1. Verify current authentication configuration",
+        "2. Disable conflicting authentication methods",
+        "3. Create new domain with desired configuration",
+        "4. Migrate data if necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cognito-auth.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "DryRunOperationException",
+      "error_message": "Dry run operation failed validation",
+      "remediation_steps": [
+        "1. Review the validation errors",
+        "2. Correct the identified issues",
+        "3. Verify IAM permissions",
+        "4. Check service quotas"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/configuration-api.html#configuration-api-dryrun",
+      "severity": "Low"
+    },
+    {
+      "error_code": "InsufficientDomainCapacityException",
+      "error_message": "The domain doesn't have sufficient capacity",
+      "remediation_steps": [
+        "1. Scale up your domain instance types",
+        "2. Add more nodes to the domain",
+        "3. Optimize your data and queries",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/sizing-domains.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "MasterNodeTimeoutException",
+      "error_message": "Operation timed out while waiting for master node response",
+      "remediation_steps": [
+        "1. Check master node health and connectivity",
+        "2. Increase timeout settings in your client",
+        "3. Retry the operation",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html#master-node-issues",
+      "severity": "High"
+    },
+    {
+      "error_code": "ClusterBlockException",
+      "error_message": "Cluster is blocked due to critical issues",
+      "remediation_steps": [
+        "1. Check cluster health and error logs",
+        "2. Resolve disk space or memory issues",
+        "3. Restart the cluster if necessary",
+        "4. Contact AWS Support for assistance"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html#cluster-block",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "IndexReadOnlyException",
+      "error_message": "Index is read-only due to disk space issues",
+      "remediation_steps": [
+        "1. Increase disk space or scale storage",
+        "2. Delete unused indices or data",
+        "3. Change index settings to allow writes",
+        "4. Optimize your data storage"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html#index-read-only",
+      "severity": "High"
+    },
+    {
+      "error_code": "CircuitBreakingException",
+      "error_message": "Circuit breaker triggered to prevent out of memory errors",
+      "remediation_steps": [
+        "1. Optimize memory-intensive queries",
+        "2. Scale up your instance types",
+        "3. Add more data nodes",
+        "4. Adjust circuit breaker settings"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/troubleshooting.html#circuit-breaker",
+      "severity": "High"
+    },
+    {
+      "error_code": "ShardLimitExceededException",
+      "error_message": "You've exceeded the maximum number of shards",
+      "remediation_steps": [
+        "1. Reduce shard count per index",
+        "2. Delete unused indices",
+        "3. Request limit increase via AWS Support",
+        "4. Use larger instance types"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#shard-limits",
+      "severity": "High"
+    },
+    {
+      "error_code": "ColdStorageOptionsException",
+      "error_message": "Invalid cold storage configuration",
+      "remediation_steps": [
+        "1. Verify cold storage is supported for your instance type",
+        "2. Check cold storage limits",
+        "3. Review cold storage pricing",
+        "4. Contact AWS Support if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/cold-storage.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AutoTuneOptionsConflictException",
+      "error_message": "Auto-Tune options conflict with existing settings",
+      "remediation_steps": [
+        "1. Verify current Auto-Tune configuration",
+        "2. Disable conflicting settings",
+        "3. Create new domain with desired Auto-Tune options",
+        "4. Migrate data if necessary"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/auto-tune.html",
+      "severity": "Medium"
+    }
+  ]
+}

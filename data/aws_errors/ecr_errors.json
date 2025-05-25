@@ -1,0 +1,340 @@
+{
+  "ECRErrors": [
+    {
+      "error_code": "RepositoryNotFoundException",
+      "error_message": "The specified repository does not exist in the specified registry",
+      "remediation_steps": [
+        "1. Verify repository name and region are correct",
+        "2. List available repositories: `aws ecr describe-repositories`",
+        "3. Check for typos in repository name",
+        "4. Create repository if needed: `aws ecr create-repository --repository-name my-repo`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#repository-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "ImageNotFoundException",
+      "error_message": "The specified image does not exist within the specified repository",
+      "remediation_steps": [
+        "1. Verify image tag or digest is correct",
+        "2. List images in repository: `aws ecr list-images --repository-name my-repo`",
+        "3. Check image was not recently deleted",
+        "4. Push image to repository if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#image-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "RepositoryAlreadyExistsException",
+      "error_message": "A repository with the specified name already exists",
+      "remediation_steps": [
+        "1. Use different repository name",
+        "2. Delete existing repository if unused: `aws ecr delete-repository --repository-name my-repo --force`",
+        "3. Check for concurrent creation attempts",
+        "4. Use existing repository if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#repository-already-exists",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LayerAlreadyExistsException",
+      "error_message": "The image layer already exists in the specified repository",
+      "remediation_steps": [
+        "1. Use different image tag if pushing same content",
+        "2. Delete existing image if unused",
+        "3. Check for duplicate push operations",
+        "4. Use existing layer if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#layer-already-exists",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LimitExceededException",
+      "error_message": "The operation exceeds the resource limit for your account",
+      "remediation_steps": [
+        "1. Check current resource count against limits",
+        "2. Delete unused repositories or images",
+        "3. Request limit increase via AWS Support",
+        "4. Distribute resources across multiple regions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/service-quotas.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidParameterException",
+      "error_message": "An invalid parameter was specified for the request",
+      "remediation_steps": [
+        "1. Review error details for specific invalid parameter",
+        "2. Check parameter value limits and formats",
+        "3. Verify JSON syntax in policies",
+        "4. Consult ECR API documentation for parameter requirements"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#invalid-parameter",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "AccessDeniedException",
+      "error_message": "You don't have permission to perform this action",
+      "remediation_steps": [
+        "1. Verify IAM permissions for ECR actions",
+        "2. Check repository policy for access restrictions",
+        "3. Review service-linked roles",
+        "4. Use Policy Simulator to test permissions"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/security-iam.html",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "EmptyUploadException",
+      "error_message": "The specified layer upload is empty",
+      "remediation_steps": [
+        "1. Verify Docker image was built correctly",
+        "2. Check for network issues during push",
+        "3. Retry image push operation",
+        "4. Validate image layers with `docker inspect`"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#empty-upload",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ImageTagAlreadyExistsException",
+      "error_message": "The specified image is tagged with a tag that already exists",
+      "remediation_steps": [
+        "1. Use different image tag",
+        "2. Delete existing tagged image if unused",
+        "3. Use image digest instead of tag",
+        "4. Enable immutable tags in repository"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#image-tag-exists",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "KmsException",
+      "error_message": "An error occurred when using the KMS key for encryption",
+      "remediation_steps": [
+        "1. Verify KMS key exists and is enabled",
+        "2. Check IAM permissions for KMS key usage",
+        "3. Validate key policy allows ECR to use the key",
+        "4. Try different KMS key if available"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/encryption-at-rest.html",
+      "severity": "High"
+    },
+    {
+      "error_code": "ReferencedImagesNotFoundException",
+      "error_message": "The manifest references images that do not exist",
+      "remediation_steps": [
+        "1. Verify all referenced images exist in repository",
+        "2. Push missing images to repository",
+        "3. Check for image deletion between manifest creation and push",
+        "4. Rebuild and push complete image"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#referenced-images-not-found",
+      "severity": "High"
+    },
+    {
+      "error_code": "ScanNotFoundException",
+      "error_message": "The specified image scan does not exist",
+      "remediation_steps": [
+        "1. Verify scan was initiated successfully",
+        "2. Wait for scan to complete before checking results",
+        "3. Start new image scan if needed",
+        "4. Check IAM permissions for image scanning"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ServerException",
+      "error_message": "An ECR service error occurred",
+      "remediation_steps": [
+        "1. Check AWS Service Health Dashboard",
+        "2. Retry with exponential backoff",
+        "3. Try alternative AWS region if applicable",
+        "4. Contact AWS Support if issue persists"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#server-error",
+      "severity": "Critical"
+    },
+    {
+      "error_code": "TooManyTagsException",
+      "error_message": "The maximum number of tags for the resource has been exceeded",
+      "remediation_steps": [
+        "1. Remove unused tags from resource",
+        "2. Combine related tags",
+        "3. Check for duplicate tags",
+        "4. Request limit increase if needed"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/ecr-tagging.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UnsupportedCommandException",
+      "error_message": "The action is not supported in this region",
+      "remediation_steps": [
+        "1. Verify feature availability in your region",
+        "2. Use supported region if possible",
+        "3. Check for typos in API command",
+        "4. Review ECR regional capabilities"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/general/latest/gr/ecr.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "UploadNotFoundException",
+      "error_message": "The specified upload does not exist",
+      "remediation_steps": [
+        "1. Verify upload ID is correct",
+        "2. Check upload was not expired or aborted",
+        "3. Initiate new upload session",
+        "4. Retry image push operation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#upload-not-found",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ValidationException",
+      "error_message": "There was a validation error for your request",
+      "remediation_steps": [
+        "1. Review error details for specific validation failure",
+        "2. Check resource naming conventions",
+        "3. Verify policy document syntax",
+        "4. Validate all required parameters are provided"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#validation-error",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LifecyclePolicyNotFoundException",
+      "error_message": "The specified lifecycle policy does not exist",
+      "remediation_steps": [
+        "1. Verify repository has lifecycle policy configured",
+        "2. Check policy name is correct",
+        "3. Create lifecycle policy if needed",
+        "4. Verify IAM permissions for lifecycle policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/lifecycle-policies.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LifecyclePolicyPreviewInProgressException",
+      "error_message": "A lifecycle policy preview is already in progress",
+      "remediation_steps": [
+        "1. Wait for current preview to complete",
+        "2. Check preview status",
+        "3. Avoid concurrent preview requests",
+        "4. Implement retry logic in automation"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp-console.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "LifecyclePolicyPreviewNotFoundException",
+      "error_message": "There is no existing lifecycle policy preview for the specified repository",
+      "remediation_steps": [
+        "1. Initiate new lifecycle policy preview",
+        "2. Verify repository has images to evaluate",
+        "3. Check IAM permissions for preview operations",
+        "4. Wait a few minutes before checking status"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp-console.html",
+      "severity": "Low"
+    },
+    {
+      "error_code": "RegistryPolicyNotFoundException",
+      "error_message": "The specified registry policy does not exist",
+      "remediation_steps": [
+        "1. Verify registry policy is configured",
+        "2. Check policy name is correct",
+        "3. Create registry policy if needed",
+        "4. Verify IAM permissions for registry policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry-permissions.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PullThroughCacheRuleAlreadyExistsException",
+      "error_message": "A pull through cache rule already exists for the specified upstream registry",
+      "remediation_steps": [
+        "1. Use different upstream registry URL",
+        "2. Delete existing rule if unused",
+        "3. Check for concurrent creation attempts",
+        "4. Use existing rule if appropriate"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "PullThroughCacheRuleNotFoundException",
+      "error_message": "The specified pull through cache rule was not found",
+      "remediation_steps": [
+        "1. Verify rule name is correct",
+        "2. List existing pull through cache rules",
+        "3. Create new rule if needed",
+        "4. Check IAM permissions for rule management"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ReplicationConfigurationNotFoundException",
+      "error_message": "The specified replication configuration does not exist",
+      "remediation_steps": [
+        "1. Verify replication is configured for the registry",
+        "2. Create replication configuration if needed",
+        "3. Check IAM permissions for replication",
+        "4. Verify cross-region replication is enabled"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/replication.html",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "ImageDigestDoesNotMatchException",
+      "error_message": "The specified image digest does not match the manifest",
+      "remediation_steps": [
+        "1. Verify correct image digest is used",
+        "2. Pull fresh image manifest from repository",
+        "3. Check for image corruption during transfer",
+        "4. Retry operation with correct digest"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#digest-mismatch",
+      "severity": "High"
+    },
+    {
+      "error_code": "InvalidLayerPartException",
+      "error_message": "The layer part size is invalid",
+      "remediation_steps": [
+        "1. Verify Docker client version is current",
+        "2. Check for network issues during upload",
+        "3. Retry image push operation",
+        "4. Reduce layer size if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#invalid-layer-part",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "LayerPartTooSmallException",
+      "error_message": "The layer part is too small",
+      "remediation_steps": [
+        "1. Verify Docker client version is current",
+        "2. Check for interrupted uploads",
+        "3. Retry image push operation",
+        "4. Increase layer part size if possible"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/common-errors.html#layer-part-too-small",
+      "severity": "Medium"
+    },
+    {
+      "error_code": "RegistryScanningConfigurationNotFoundException",
+      "error_message": "The specified registry scanning configuration does not exist",
+      "remediation_steps": [
+        "1. Verify scanning configuration is set up",
+        "2. Create scanning configuration if needed",
+        "3. Check IAM permissions for scanning",
+        "4. Enable enhanced scanning if required"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+      "severity": "Medium"
+    }
+  ]
+}

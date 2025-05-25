@@ -70,9 +70,81 @@ class AWSErrorService:
             )
 
     def search_errors(self, query: str, service_filter: str = None, n_results: int = 5):
-        filters = {"service": service_filter} if service_filter else None
-        return self.collection.query(
-            query_texts=[query],
-            n_results=n_results,
-            where=filters
-        )
+
+        try:
+            # Normalize inputs
+            query = query.lower().strip()
+            service_filter = service_filter.upper() if service_filter else None
+
+            # Load all errors for pattern matching
+            all_errors = self._load_all_errors()
+            matched_errors = []
+        
+            # First try exact error code match
+            for error in all_errors:
+                # Check service filter if provided
+                if service_filter and error['service'] != service_filter:
+                    continue
+
+                # Check if error code matches
+                if error['error_code'].lower() in query:
+                    # return self._format_error_response([error])
+                    matched_errors.append(error)
+                
+                # Check error patterns if no direct match
+                patterns = error.get('patterns', [])
+                if any(pattern.lower() in query for pattern in patterns):
+                    matched_errors.append(error)
+            
+            # If we found matches in JSON files, return them
+            if matched_errors:
+                return self._format_error_response(matched_errors[:n_results])
+
+            # Fallback to semantic search in ChromaDB
+            chroma_results = self.collection.query(
+                query_texts=[query],
+                n_results=n_results,
+                where={"service": service_filter} if service_filter else None
+            )
+
+            # Ensure we always return a properly formatted response
+            if not chroma_results['documents']:
+                return {'documents': [], 'metadatas': [], 'ids': []}
+                
+            return chroma_results
+        
+        except Exception as e:
+            print(f"Error in search_errors: {str(e)}")
+            return {'documents': [], 'metadatas': [], 'ids': []}
+
+
+        
+    
+    def _format_error_response(self, errors: List[Dict]) -> Dict:
+        """Convert error objects to ChromaDB-compatible format"""
+        documents = []
+        metadatas = []
+        ids = []
+        
+        for error in errors:
+            doc = f"""
+            [Service: {error['service']}]
+            Error: {error['error_code']}
+            Message: {error['error_message']}
+            Fixes: {'; '.join(error.get('remediation_steps', []))}
+            """
+            documents.append(doc)
+            metadatas.append({
+                "service": error["service"],
+                "severity": error.get("severity", "Medium"),
+                "doc_link": error.get("aws_doc_link", ""),
+                "error_code": error["error_code"],
+                "remediation_steps": error.get("remediation_steps", [])
+            })
+            ids.append(f"{error['service']}_{error['error_code']}")
+        
+        return {
+            "documents": [documents],
+            "metadatas": [metadatas],
+            "ids": [ids]
+        }

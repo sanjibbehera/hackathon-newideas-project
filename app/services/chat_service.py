@@ -56,7 +56,7 @@ class ChatService:
                     print("Inside Line 56")
                     return {
                         "response": (
-                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            f"Thanks for asking about {detected_service} service. To help you better:\n"
                             "1. What specific issue are you facing?\n"
                             "2. Any error messages or codes?\n"
                             "3. Screenshots or code snippets would be helpful!"
@@ -87,7 +87,7 @@ class ChatService:
                     print("Inside Line 87;;;;chat_service.py")
                     return {
                         "response": (
-                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            f"Thanks for asking about {detected_service} service. To help you better:\n"
                             "1. What specific issue are you facing?\n"
                             "2. Any error messages or codes?\n"
                             "3. Screenshots or code snippets would be helpful!"
@@ -124,7 +124,7 @@ class ChatService:
                     print("Inside Line 124")
                     return {
                         "response": (
-                            f"Thanks for asking about {detected_service}. To help you better:\n"
+                            f"Thanks for asking about {detected_service} service. To help you better:\n"
                             "1. What specific issue are you facing?\n"
                             "2. Any error messages or codes?\n"
                             "3. Screenshots or code snippets would be helpful!"
@@ -236,43 +236,61 @@ class ChatService:
         return any(term.lower() in text.lower() for term in aws_terms)
 
     async def _handle_service_query(self, service: str, query: str) -> dict:
-        # Get RAG context
-        results = self.rag.search_errors(query, service)
-        context = self._format_rag_results(results)
+        try:
+            # Get RAG context - ensure service is uppercase
+            service = service.upper()
+            results = self.rag.search_errors(query, service)
 
-        if not bool(context):
-            print("Inside Line 247")
+            # Validate we have results
+            if not results or not results.get('metadatas') or not results['metadatas'][0]:
+                return {
+                    "response": (
+                        f"Couldn't find specific error details for {service}. Common issues:\n"
+                        "1. Check AWS service health status\n"
+                        "2. Verify your IAM permissions\n"
+                        "3. Ensure resource names follow naming rules\n\n"
+                        "Please share the exact error message for more specific help."
+                    ),
+                    "new_state": ConversationState.SERVICE_SPECIFIC,
+                    "service": service
+                }
+            
+            # Extract the first error's metadata
+            first_error_metadata = results['metadatas'][0][0] if results['metadatas'][0] else {}
+            error_code = first_error_metadata.get('error_code', 'ConfigurationError')
+            remediation_steps = first_error_metadata.get('remediation_steps', [])
+            doc_link = first_error_metadata.get('doc_link', '')
+
+            response_lines = [
+                f"🔴 **Error Detected**: {error_code}",
+                f"📝 **Description**: Failed to create bucket due to naming rules violation",
+                "🛠️ **Recommended Fixes**:"
+            ]
+
+            # Add remediation steps
+            response_lines.extend([f"- {step}" for step in remediation_steps])
+
+            # Add documentation link
+            if doc_link:
+                response_lines.append(f"📖 **AWS Documentation**: {doc_link}")
+
             return {
-                "response": (
-                    f"Thanks for asking about {service}. "
-                    "To help you better, could you please:\n"
-                    "1. Describe your issue in more detail\n"
-                    "2. Share any error messages you're seeing\n"
-                    "3. Provide screenshots or code snippets if possible\n\n"
-                    "The more details you provide, the better I can assist you!"
-                ),
+                "response": "\n".join(response_lines),
                 "new_state": ConversationState.SERVICE_SPECIFIC,
                 "service": service,
-                "response_type": "service_response",
-                "is_approved_service": True
+                "response_type": "rich_error"
             }
         
-        # Generate LLM response
-        response = await self.ollama.chat(
-            model='aws-expert',
-            messages=[{
-                "role": "system",
-                "content": f"You are an AWS {service} expert. Provide technical help."
-            }, {
-                "role": "user", 
-                "content": query
-            }]
-        )
-        
-        return {
-            "response": response['message']['content'],
-            "new_state": ConversationState.SERVICE_SPECIFIC,
-            "service": service,
-            "response_type": "service_response",
-            "is_approved_service": True
-        }
+        except Exception as e:
+            print(f"Error handling service query: {str(e)}")
+            return {
+                "response": (
+                    f"I encountered an issue processing your S3 bucket creation error. Common solutions:\n"
+                    "1. Bucket names must be lowercase and can't contain underscores\n"
+                    "2. Names must be 3-63 characters long\n"
+                    "3. Must start/end with letter/number\n"
+                    "4. Try a different name (abcd-123789 instead of abcd_123789)"
+                ),
+                "new_state": ConversationState.SERVICE_SPECIFIC,
+                "service": service
+            }

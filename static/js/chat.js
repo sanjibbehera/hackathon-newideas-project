@@ -197,6 +197,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         messagesContainer.appendChild(messageBubble);
 
+        // Parse rich content
+        if (typeof content === 'string' && content.includes('**')) {
+            const formattedContent = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\📝(.*?)\n/g, '<div class="error-detail">$1</div>')
+                .replace(/\🛠️(.*?)(\n|$)/g, '<div class="fix-header">$1</div>')
+                .replace(/\- (.*?)(\n|$)/g, '<li>$1</li>')
+                .replace(/\📖(.*?)(\n|$)/g, '<a href="$1" class="doc-link">View AWS Documentation</a>')
+                .replace(/\n/g, '<br>');
+            
+            messageGroup.innerHTML = formattedContent;
+        } else {
+            // Regular message handling
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = content;
+            messageGroup.appendChild(messageText);
+        }
+
 
         // Add timestamp
         const timestamp = document.createElement('div');
