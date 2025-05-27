@@ -130,5 +130,4 @@ def get_approved_services_list() -> list:
         format: 'list' returns list of strings, 
                 'str' returns single formatted string
     """
-    services = [f"{k} ({v})" for k, v in APPROVED_SERVICES.items()]
-    return "\n".join(services) if format == "str" else services
+    return [f"{k} - {v}" for k, v in APPROVED_SERVICES.items()]

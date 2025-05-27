@@ -25,6 +25,13 @@ class ChatService:
         APPROVAL_LINK = "https://your-company.com/aws-service-approval"
         # print("=====>>>>>>>>>>", unapproved_service)
 
+        # Check for multiple services first
+        detected_services = self._detect_multiple_services(user_input)
+        if len(detected_services) > 1:
+            multiple_services_response = self._handle_multiple_services(detected_services, user_input)
+            if multiple_services_response:
+                return multiple_services_response
+
         if unapproved_service and not is_service_approved(unapproved_service):
             return {
                 "response": (
@@ -40,11 +47,30 @@ class ChatService:
 
         # Check for greetings
         if is_first_interaction and self._is_greeting(user_input):
-            return {
-                "response": "Hello! I'm your AWS support assistant.",
-                "new_state": ConversationState.INITIAL_GREETING,
-                "response_type": "normal"
-            }
+            if detected_services:
+                # User greeted and mentioned services in first message
+                if len(detected_services) == 1:
+                    service = detected_services[0]
+                    if is_service_approved(service):
+                        return {
+                            "response": (
+                                f"Hello! Thanks for asking about {service}. "
+                                "To help you better:\n"
+                                "1. What specific issue are you facing?\n"
+                                "2. Any error messages?\n"
+                                "3. Screenshots would be helpful!"
+                            ),
+                            "new_state": ConversationState.SERVICE_SPECIFIC,
+                            "service": service,
+                            "response_type": "service_response"
+                        }
+            else:
+                # Simple greeting
+                return {
+                    "response": "Hello! I'm your AWS support assistant.",
+                    "new_state": ConversationState.INITIAL_GREETING,
+                    "response_type": "normal"
+                }
         
         # Check for AWS service mentions
         detected_service = self._detect_service(user_input)
@@ -229,6 +255,60 @@ class ChatService:
             "\"EC2: Can't launch instances\"\n\n"
             f"I specialize in: {', '.join(self.approved_services)}"
         )
+    
+    # Add these new methods to ChatService class
+    def _detect_multiple_services(self, text: str) -> List[str]:
+        """Detect multiple AWS services mentioned in text"""
+        detected_services = []
+        text_lower = text.lower()
+        
+        for service in self.approved_services:
+            if service.lower() in text_lower:
+                detected_services.append(service)
+        
+        return detected_services
+    
+    def _handle_multiple_services(self, services: List[str], user_input: str) -> dict:
+        """Handle case where user mentions multiple services"""
+        iam_mentioned = any(s.upper() == "IAM" for s in services)
+        other_services = [s for s in services if s.upper() != "IAM"]
+        
+        if iam_mentioned and other_services:
+            # User mentioned IAM and other services
+            return {
+                "response": (
+                    "I see you have mentioned both IAM and other AWS services. "
+                    "Let me help you with each one separately:"
+                ),
+                "services_info": [
+                    {
+                        "message": (
+                            f"For {other_services[0]}, could you please provide:\n"
+                            "1. The specific issue you're facing\n"
+                            "2. Any error messages\n"
+                            "3. Relevant details or screenshots"
+                        ),
+                        "services": None
+                    },
+                    {
+                        "message": "For IAM, please describe your issue:",
+                        "services": None
+                    }
+                ],
+                "response_type": "multiple_services",
+                "new_state": ConversationState.SERVICE_SPECIFIC
+            }
+        elif len(services) > 1:
+            # Multiple non-IAM services mentioned
+            return {
+                "response": "I see you have mentioned multiple AWS services. Please tell me which AWS service, you'd like to focus on first:",
+                "services": [f"{s} - {self.approved_services[s]}" for s in services],
+                "response_type": "approved_services",
+                "new_state": ConversationState.AWS_HELP
+            }
+        else:
+            # Fallback to single service handling
+            return None
     
     # Add these helper methods:
     def _is_aws_related(self, text: str) -> bool:
