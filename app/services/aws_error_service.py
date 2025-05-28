@@ -73,7 +73,20 @@ class AWSErrorService:
 
         try:
             # Normalize inputs
-            query = query.lower().strip()
+            query_lower = query.lower().strip()
+            
+            # Special handling for AccessDenied errors
+            if 'accessdenied' in query_lower or 'not authorized' in query_lower:
+                # Try to find specific AccessDenied patterns
+                denied_errors = []
+                for error in self._load_all_errors():
+                    if error['error_code'].lower() == 'accessdenied':
+                        if not service_filter or error['service'] == service_filter.upper():
+                            denied_errors.append(error)
+                
+                if denied_errors:
+                    return self._format_error_response(denied_errors[:n_results])
+                
             service_filter = service_filter.upper() if service_filter else None
 
             # Load all errors for pattern matching
@@ -116,8 +129,6 @@ class AWSErrorService:
         except Exception as e:
             print(f"Error in search_errors: {str(e)}")
             return {'documents': [], 'metadatas': [], 'ids': []}
-
-
         
     
     def _format_error_response(self, errors: List[Dict]) -> Dict:

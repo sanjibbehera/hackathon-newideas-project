@@ -123,6 +123,10 @@ def get_unapproved_service(message: str) -> Optional[str]:
             return next((k for k in ALL_AWS_SERVICES if k.upper() == service.upper()), None)
     return None
 
+def get_unapproved_services_list() -> list:
+    """Return formatted list of unapproved services"""
+    return [f"{k} - {v}" for k, v in ALL_AWS_SERVICES.items() if k not in APPROVED_SERVICES]
+
 def get_approved_services_list() -> list:
     """Return formatted list of approved services
     

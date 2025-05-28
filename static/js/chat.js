@@ -44,17 +44,39 @@ document.addEventListener('DOMContentLoaded', function() {
         title.textContent = 'I can help you with the below AWS services:';
         messageContent.appendChild(title);
         
-        const list = document.createElement('ul');
-        list.className = 'services-ul';
+        // Approved services list
+        const approvedList = document.createElement('ul');
+        // const list = document.createElement('ul');
+        approvedList.className = 'services-ul';
         
         services.forEach(service => {
             const item = document.createElement('li');
-            item.className = 'service-item';
+            item.className = 'service-item approved-service';
             item.textContent = service;
-            list.appendChild(item);
+            approvedList.appendChild(item);
         });
         
-        messageContent.appendChild(list);
+        messageContent.appendChild(approvedList);
+
+        // Add unapproved services section if any
+        if (unapprovedServices && unapprovedServices.length > 0) {
+            const unapprovedTitle = document.createElement('div');
+            unapprovedTitle.className = 'message-text';
+            unapprovedTitle.textContent = '\nI cannot help with these unapproved services:';
+            messageContent.appendChild(unapprovedTitle);
+            
+            const unapprovedList = document.createElement('ul');
+            unapprovedList.className = 'services-ul unapproved-services';
+            
+            unapprovedServices.forEach(service => {
+                const item = document.createElement('li');
+                item.className = 'service-item unapproved-service';
+                item.textContent = service;
+                unapprovedList.appendChild(item);
+            });
+            
+            messageContent.appendChild(unapprovedList);
+        }
         messageBubble.appendChild(messageContent);
         messagesContainer.appendChild(messageBubble);
         messageGroup.appendChild(messagesContainer);
@@ -117,7 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.response_type === 'approved_services') {
                 if (data.approval_link) {
                     addMessage(`${data.response}`, 'bot');
-                    displayApprovedServices(data.services);
+                    // displayApprovedServices(data.services);
+                    displayApprovedServices(data.services, data.unapproved_services || []);
                     addMessage(
                         'So let me know, how I can help you with AWS IAM.',
                         'bot'
@@ -136,6 +159,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 }
+            } else if (data.response_type === 'service_confirmation') {
+                addMessage(data.response, 'bot');
+            } else if (data.response_type === 'service_response') {
+                let formattedResponse = data.response;
+                
+                // Add additional guidance for IAM issues
+                if (data.service === 'IAM' || data.service === 'iam') {
+                    formattedResponse += '\n\nFor IAM issues, please include:';
+                    formattedResponse += '\n- The exact error message';
+                    formattedResponse += '\n- The service(s) involved';
+                    formattedResponse += '\n- What action you were trying to perform';
+                }
+                
+                addMessage(formattedResponse, 'bot');
             } else {
                 console.log("SANJIB SAYDSSSSS inside else:::::", data);
                 console.log("STATES SAYDSSSSS inside else WAATTTTA STATE:::::", STATE);
@@ -183,44 +220,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
+        messageContent.style.fontFamily = 'Segoe UI, sans-serif';
+        messageContent.style.fontSize = '14px';
+        messageContent.style.lineHeight = '1.5';
 
-        // Handle rich content formatting
-        let formattedContent = content;
-        if (typeof content === 'string' && content.includes('**')) {
-            formattedContent = content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\📝(.*?)\n/g, '<div class="error-detail">$1</div>')
-                .replace(/\🛠️(.*?)(\n|$)/g, '<div class="fix-header">$1</div>')
-                .replace(/\- (.*?)(\n|$)/g, '<li>$1</li>')
-                .replace(/\📖(.*?)(\n|$)/g, '<a href="$1" class="doc-link">View AWS Documentation</a>')
-                .replace(/\n/g, '<br>');
+        // Add class for long messages only if needed
+        if (type === 'user') {
+            const words = content.split(' ');
+            let currentLine = '';
+            let formattedContent = '';
+
+            words.forEach(word => {
+                if ((currentLine + word).length > 120 && currentLine.length > 0) {
+                    formattedContent += currentLine + '<br>';
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+
+            // Add the last line
+            formattedContent += currentLine;
+            messageContent.innerHTML = formattedContent;
+        } else {
+            // For bot messages, handle normally
+            let formattedContent = content;
+            if (typeof content === 'string' && content.includes('**')) {
+                formattedContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\📝(.*?)\n/g, '<div class="error-detail">$1</div>')
+                    .replace(/\🛠️(.*?)(\n|$)/g, '<div class="fix-header">$1</div>')
+                    .replace(/\- (.*?)(\n|$)/g, '<li>$1</li>')
+                    .replace(/\📖(.*?)(\n|$)/g, '<a href="$1" class="doc-link">View AWS Documentation</a>')
+                    .replace(/\n/g, '<br>');
+            }
+            messageContent.innerHTML = formattedContent;
         }
 
         // Add formatted content
-        messageContent.innerHTML = formattedContent;
         messageBubble.appendChild(messageContent);
         messagesContainer.appendChild(messageBubble);
-
-        // messagesContainer.appendChild(messageBubble);
-
-        // Parse rich content
-        // if (typeof content === 'string' && content.includes('**')) {
-        //     const formattedContent = content
-        //         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        //         .replace(/\📝(.*?)\n/g, '<div class="error-detail">$1</div>')
-        //         .replace(/\🛠️(.*?)(\n|$)/g, '<div class="fix-header">$1</div>')
-        //         .replace(/\- (.*?)(\n|$)/g, '<li>$1</li>')
-        //         .replace(/\📖(.*?)(\n|$)/g, '<a href="$1" class="doc-link">View AWS Documentation</a>')
-        //         .replace(/\n/g, '<br>');
-            
-        //     messageGroup.innerHTML = formattedContent;
-        // } else {
-        //     // Regular message handling
-        //     const messageText = document.createElement('div');
-        //     messageText.className = 'message-text';
-        //     messageText.textContent = content;
-        //     messageGroup.appendChild(messageText);
-        // }
 
 
         // Add timestamp

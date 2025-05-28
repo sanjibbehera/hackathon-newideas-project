@@ -675,6 +675,18 @@
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Events.html",
       "severity": "Low"
+    },
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User is not authorized to perform rds:CreateDBInstance",
+      "remediation_steps": [
+        "Verify the IAM policy attached to your role includes rds:CreateDBInstance permission",
+        "Check if the policy has the correct resource ARN (arn:aws:rds:region:account-id:*)",
+        "Ensure your role has the correct trust relationship with RDS service",
+        "Verify there are no explicit deny statements in your policies"
+      ],
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/security-iam.html",
+      "severity": "High"
     }
   ]
 }

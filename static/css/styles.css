@@ -1,5 +1,17 @@
+:root {
+    --font-family-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 
+                         'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
+                         'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-size-base: 14px;
+    --font-size-small: 12px;
+    --font-size-large: 16px;
+    --line-height-base: 1.5;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
     background-color: #f8f9fa;
     margin: 0;
     padding: 0;
@@ -9,9 +21,15 @@ body {
     align-items: center;
 }
 
+body, input, button, textarea, select {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
 .chat-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     height: 90vh;
     background-color: white;
     border-radius: 10px;
@@ -33,11 +51,14 @@ body {
     position: relative;
 }
 
-.chat-header h4 {
+.chat-header h3 {
     margin: 0;
     color: #333;
+    font-family: var(--font-family-primary);
     font-weight: 600;
     font-size: 1.25rem; /* Slightly larger font */
+    letter-spacing: 0.5px;
+    margin: 0;
     padding: 0 20px;
 }
 
@@ -67,9 +88,11 @@ body {
 
 /* Avatar styling */
 .avatar {
+    flex-shrink: 0; /* Prevent avatar from shrinking */
     width: 40px;
     height: 40px;
     margin: 0 10px;
+    margin-right: 10px;
     border-radius: 50%;
 }
 
@@ -134,23 +157,24 @@ body {
 }
 
 /* User message bubble */
-/* .dynamic-message.user-message-group .message-content {
-    background-color: #007bff;
-    color: white;
-    border-top-right-radius: 4px;
-} */
-
-/* User message bubble */
 .message-group.dynamic-message.user-message-group .message-content {
     background-color: #007bff !important;
     color: white !important;
-    max-width: 80%; /* Limit width */
     margin-left: auto !important; /* Push to right */
     margin-right: 0 !important;
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 15px !important;
     border-top-left-radius: 15px !important;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    max-width: 80% !important;
     /* word-break: break-word; Ensure long words break */
+}
+
+.user-message .message-content br {
+    content: " ";
+    display: block;
+    margin-bottom: 0.5em;
 }
 
 .message {
@@ -164,6 +188,8 @@ body {
 /* Message Containers */
 .messages-container {
     display: flex;
+    flex: 1; /* Take remaining space */
+    min-width: 0; /* Allow text wrapping */
     flex-direction: column;
     max-width: 85%;
     min-width: fit-content; /* Expand to fit content when possible */
@@ -217,26 +243,40 @@ body {
     flex-direction: row-reverse;
 }
 
-.user-message .avatar {
-    margin-right: 0;
-    margin-left: 15px;
-}
-
 .user-message .message-content {
     background-color: #007bff !important;
     color: white !important;
     text-align: left; /* Keep text left-aligned in bubble */
     margin-left: 0 !important;
-    margin-right: 10px !important; /* Space between bubble and avatar */
+    margin-right: 5px !important; /* Space between bubble and avatar */
     border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 10px !important;
-    border-top-left-radius: 10px !important;
+    border-bottom-right-radius: 5px !important;
+    border-top-left-radius: 5px !important;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 120ch; /* Soft limit of 120 characters per line */
+    overflow-wrap: break-word;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-content .list-item {
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+/* Keep the user message on one line */
+.user-message-content {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
 }
 
 .message-content {
-    /* padding: 10px 12px;
-    border-radius: 12px; */
     max-width: 90%;
+    line-height: 1.4;
     white-space: normal; /* Allow natural wrapping between sentences */
     word-break: keep-all; /* Try to keep words together */
     overflow-wrap: normal; /* Prefer breaking at spaces between words */
@@ -245,16 +285,26 @@ body {
 /* Specifically for the services list title */
 .message-group .message-content .message-text {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis if text overflows */
     display: inline-block; /* Keep the title on one line */
     max-width: 100%; /* Allow it to take full width if needed */
+}
+
+/* Override for longer messages that need wrapping */
+.message-content .message-text.long-message {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
 }
 
 /* Timestamp styling */
 .message-time {
     color: #777;
     margin-top: 2px;
-    font-size: 12px !important; /* Force readable size */
+    /* font-size: 12px !important; Force readable size */
     font-family: monospace; /* For consistent width */
+    font-size: var(--font-size-small) !important;
     align-self: flex-end;
 }
 
@@ -299,9 +349,9 @@ body {
 }
 
 .message-text, .service-item {
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 1.4;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
     white-space: nowrap; /* Prevent wrapping within the same sentence */
     overflow: visible; /* Allow text to overflow if needed */
     text-overflow: clip; /* Don't show ellipsis */
@@ -320,6 +370,8 @@ body {
 
 #userInput {
     flex: 1; /* Ensures input takes available space */
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
 }
 
 #sendButton {
@@ -361,6 +413,23 @@ body {
     gap: 8px;
 }
 
+.message-group:first-child .message-content {
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* Allow wrapping for longer messages */
+.message-group:first-child .message-content.long-message {
+    white-space: normal;
+    display: block;
+}
+
+/* Adjust the initial greeting container */
+.message-group:first-child .messages-container {
+    max-width: 95%;
+}
+
 /* Speech bubble styling */
 .message.bot-message  .message-content {
     position: relative;
@@ -370,6 +439,12 @@ body {
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     border: 1px solid #e9ecef;
     margin-left: 10px;
+}
+
+/* For initial greeting specifically */
+.message-group:first-child .message-text {
+    white-space: nowrap;
+    display: inline;
 }
 
 .message.bot-message:first-child {
@@ -491,6 +566,21 @@ body {
     margin-bottom: 4px;
 }
 
+.service-item.approved-service {
+    color: #28a745; /* Green for approved */
+}
+
+.service-item.unapproved-service {
+    color: #dc3545; /* Red for unapproved */
+    text-decoration: line-through;
+}
+
+.unapproved-services {
+    margin-top: 10px;
+    border-top: 1px dashed #ccc;
+    padding-top: 10px;
+}
+
 /* Media query for smaller screens */
 @media (max-width: 768px) {
     /* On small screens, we may need to allow wrapping */
@@ -500,5 +590,9 @@ body {
     
     .messages-container {
         max-width: 75%; /* Slightly smaller on mobile */
+    }
+
+    .user-message .message-content {
+        max-width: 80vw;
     }
 }

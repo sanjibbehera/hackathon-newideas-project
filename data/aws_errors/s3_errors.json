@@ -354,6 +354,59 @@
       ],
       "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html",
       "severity": "High"
+    },
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User arn:aws:iam::123456789012:user/example-user is not authorized to perform: s3:GetObject on resource: arn:aws:s3:::example-bucket/example-key",
+      "patterns": [
+        "not authorized to perform: s3:GetObject",
+        "AccessDenied when calling the GetObject operation"
+      ],
+      "remediation_steps": [
+        "Verify the IAM policy attached to the user/role includes s3:GetObject permission",
+        "Ensure the resource ARN in the policy matches the bucket and object key",
+        "Check for any explicit deny statements in the IAM policy",
+        "Validate the policy syntax using IAM Policy Simulator"
+      ],
+      "severity": "High",
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies.html"
+    },
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User arn:aws:iam::123456789012:user/example-user is not authorized to perform: s3:GetObject on resource: arn:aws:s3:::example-bucket/example-key, due to explicit deny from the resource policy",
+      "patterns": [
+        "resource policy explicitly denies",
+        "resource policy is blocking access",
+        "AccessDenied due to resource policy"
+      ],
+      "remediation_steps": [
+        "Review the bucket policy for explicit deny statements",
+        "Check if the bucket policy requires specific conditions (like VPC endpoint, MFA, or IP restrictions)",
+        "Verify the Principal in the bucket policy matches the requesting entity",
+        "Use S3 Bucket Policy validator to check for conflicts",
+        "Temporarily add a test policy with full access to isolate the issue"
+      ],
+      "severity": "High",
+      "aws_doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies.html"
+    },
+    {
+      "error_code": "AccessDenied",
+      "error_message": "User arn:aws:iam::123456789012:user/example-user is not authorized to perform: s3:GetObject on resource: arn:aws:s3:::example-bucket/example-key, due to the request was denied by Service Control Policy (SCP)",
+      "patterns": [
+        "denied by Service Control Policy",
+        "SCP is blocking access",
+        "AccessDenied due to organization policy"
+      ],
+      "remediation_steps": [
+        "Check the AWS Organizations SCPs applied to the account",
+        "Look for explicit deny statements in SCPs for S3 actions",
+        "Verify if the SCP restricts access to specific regions or resource ARNs",
+        "Contact your AWS Organization administrator to review SCPs",
+        "Test with a different account not restricted by the same SCPs",
+        "Check AWS CloudTrail logs for 'ServiceControlPolicy' deny events"
+      ],
+      "severity": "High",
+      "aws_doc_link": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
     }
   ]
 }
